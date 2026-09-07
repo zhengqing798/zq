@@ -32,6 +32,7 @@ OUT_DIR = ROOT / "data" / "raw"
 PROFILE = ROOT / ".zhaopin_profile"
 PORT = 9527
 CSV_FILE = OUT_DIR / "zhaopin_jobs.csv"
+ALT_FILE = OUT_DIR / "zhaopin_jobs_live.csv"     # 主文件被占用时的备用输出
 STATE_FILE = OUT_DIR / "zhaopin_state.json"
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
@@ -111,9 +112,11 @@ def blocked(drv):
 
 def load_ids():
     ids = set()
-    if CSV_FILE.exists():
+    for p in (CSV_FILE, ALT_FILE):
+        if not p.exists():
+            continue
         try:
-            with CSV_FILE.open(encoding="utf-8-sig") as f:
+            with p.open(encoding="utf-8-sig") as f:
                 for r in csv.DictReader(f):
                     if r.get("job_key"):
                         ids.add(r["job_key"])
@@ -129,19 +132,22 @@ def _flush_pending():
     global _pending
     if not _pending:
         return
-    try:
-        is_new = not CSV_FILE.exists()
-        with CSV_FILE.open("a", encoding="utf-8-sig", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=list(_pending[0].keys()))
-            if is_new or f.tell() == 0:
-                w.writeheader()
-            for r in _pending:
-                w.writerow(r)
-        _pending = []
-    except PermissionError:
-        pass          # CSV 被 Excel 占用 → 保留缓冲, 稍后再写
-    except Exception:
-        pass
+    for path in (CSV_FILE, ALT_FILE):
+        try:
+            is_new = not path.exists()
+            with path.open("a", encoding="utf-8-sig", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=list(_pending[0].keys()))
+                if is_new or f.tell() == 0:
+                    w.writeheader()
+                for r in _pending:
+                    w.writerow(r)
+            _pending = []
+            return
+        except PermissionError:
+            continue            # 主文件被 Excel 占用 → 试备用文件
+        except Exception:
+            continue
+    # 全部被占用 → 保留缓冲, 稍后再写
 
 
 def write_row(r):
@@ -359,9 +365,11 @@ def main():
         # 汇总
         flush_pending()
         dist = Counter()
-        if CSV_FILE.exists():
+        for p in (CSV_FILE, ALT_FILE):
+            if not p.exists():
+                continue
             try:
-                with CSV_FILE.open(encoding="utf-8-sig") as f:
+                with p.open(encoding="utf-8-sig") as f:
                     for rr in csv.DictReader(f):
                         dist[rr.get("城市(实测)") or "?"] += 1
             except Exception:
