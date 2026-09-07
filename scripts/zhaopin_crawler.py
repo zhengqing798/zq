@@ -155,8 +155,8 @@ def write_row(r):
     global _pending
     _pending.append(r)
     _flush_pending()
-    if len(_pending) % 200 == 0:
-        log("  [提示] CSV 可能正被 Excel 打开, 数据在内存缓冲中(请关闭Excel)")
+    if len(_pending) % 300 == 0:
+        log(f"  [提示] CSV 正被占用, {len(_pending)} 条在内存缓冲(请关闭Excel/WPS)")
 
 
 def flush_pending():
@@ -328,7 +328,12 @@ def main():
                     log(f"== {name} × {kw} 当前{len(ids)} ==")
                     url = f"https://www.zhaopin.com/jobs?jl={code}&kw={quote(kw)}&kt=3"
                     if not open_list(drv, url):
-                        log("  首屏失败(可能验证/无结果), 留待下轮")
+                        if blocked(drv):
+                            log("  验证中... 该组合留待下轮")
+                        else:
+                            log("  该组合无岗位, 标记完成(避免反复重试)")
+                            state["combo_done"].append(combo)
+                            save_state(state)
                         continue
                     # 滚动加载并收新行
                     added = 0
