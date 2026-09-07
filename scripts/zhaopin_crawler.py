@@ -56,6 +56,14 @@ def log(m):
     print(f"[{datetime.now():%H:%M:%S}] {m}", flush=True)
 
 
+# Windows 控制台中文/emoji 兼容
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+
 def ensure_chrome():
     s = socket.socket()
     try:
