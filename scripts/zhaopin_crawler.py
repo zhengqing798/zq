@@ -257,9 +257,12 @@ def scroll_batch(drv, url):
     cards = drv.find_elements("css selector", ".job-card")
     rows = []
     for c in cards:
-        r = parse_card(drv, c)
-        if r:
-            rows.append(r)
+        try:
+            r = parse_card(drv, c)
+            if r:
+                rows.append(r)
+        except Exception:
+            continue            # 单卡片异常不影响整体
     return rows, after_h <= before_h
 
 
@@ -414,4 +417,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    _dl = datetime.strptime("2026-09-08 07:00:00", "%Y-%m-%d %H:%M:%S")
+    while datetime.now() < _dl:
+        try:
+            main()
+            log("本次运行正常结束")
+            break
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            log(f"[自动重启] 异常({type(e).__name__}: {str(e)[:120]}), 30秒后自动续跑")
+            time.sleep(30)
