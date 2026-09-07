@@ -48,9 +48,17 @@ CITIES = {
     "武汉": 736, "成都": 801, "西安": 854, "南京": 635, "苏州": 639,
     "济南": 702, "青岛": 703, "郑州": 719, "合肥": 664, "昆明": 831,
 }
-TARGET = 10000
+TARGET = 10_000
 MAX_SCROLLS = 200      # 单组合最大滚动批次数
 STABLE_STOP = 3        # 连续N次滚动无新增 → 该组合结束
+# 抓取顺序: 福建省内优先(厦门→漳州→泉州→宁德→龙岩→三明→南平→莆田, 福州已基本完成放最后), 再周边
+FUJIAN_ORDER = ["厦门", "漳州", "泉州", "宁德", "龙岩", "三明", "南平", "莆田", "福州"]
+
+
+def city_order(active):
+    """按福建省内优先排序可抓城市。"""
+    others = [k for k in active if k not in FUJIAN_ORDER]
+    return FUJIAN_ORDER + others
 
 
 def log(m):
@@ -266,7 +274,7 @@ def main():
     ensure_chrome()
     drv = attach()
     ids = load_ids()
-    log(f"历史 {len(ids)} 条; 目标 {TARGET}; 截止 {deadline}")
+    log(f"历史 {len(ids)} 条(无自停上限); 截止 {deadline}")
 
     try:
         if args.dry:
@@ -315,18 +323,27 @@ def main():
         kw_list = list(KEYWORDS)
         added_extra = False
         for pass_no in range(1, 6):
-            if len(ids) >= TARGET or datetime.now() >= deadline:
+            if datetime.now() >= deadline:
                 break
             if pass_no >= 3 and not added_extra:
                 kw_list = list(KEYWORDS) + list(EXTRA_KEYWORDS)
                 added_extra = True
                 log("追加扩容关键词")
             log(f"---- 第{pass_no}轮(当前 {len(ids)}) ----")
-            for name, code in active.items():
-                if len(ids) >= TARGET or datetime.now() >= deadline:
+            city_seq = [c for c in city_order(active) if c in active]
+            # 第三轮起若已无未做组合 → 提前结束(避免空转长歇)
+            if pass_no >= 3:
+                undone = any(f"{c}_{kw}" not in state["combo_done"]
+                             for c in city_seq for kw in kw_list)
+                if not undone:
+                    log("所有组合已穷尽, 提前结束")
+                    break
+            for name in city_seq:
+                code = active[name]
+                if datetime.now() >= deadline:
                     break
                 for kw in kw_list:
-                    if len(ids) >= TARGET or datetime.now() >= deadline:
+                    if datetime.now() >= deadline:
                         break
                     combo = f"{name}_{kw}"
                     if combo in state["combo_done"]:
@@ -345,7 +362,7 @@ def main():
                     added = 0
                     stable = 0
                     for _ in range(MAX_SCROLLS):
-                        if len(ids) >= TARGET or datetime.now() >= deadline:
+                        if datetime.now() >= deadline:
                             break
                         rows, no_grow = scroll_batch(drv, url)
                         new = [r for r in rows if r["job_key"] not in ids]
@@ -366,8 +383,8 @@ def main():
                     save_state(state)
                     flush_pending()
                     time.sleep(random.uniform(5, 9))
-            if len(ids) < TARGET and datetime.now() < deadline:
-                log(f"本轮后 {len(ids)}, 长歇10分钟")
+            if datetime.now() < deadline:
+                log(f"本轮后 {len(ids)}, 长歇10分钟后继续(自动穷尽组合/至截止)")
                 time.sleep(10 * 60)
             save_state(state)
 
@@ -383,7 +400,7 @@ def main():
                         dist[rr.get("城市(实测)") or "?"] += 1
             except Exception:
                 pass
-        log(f"== 结束: {len(ids)} 条 / 目标 {TARGET} ==")
+        log(f"== 结束: 共抓 {len(ids)} 条(无1万自停, 因截止时间或组合穷尽停止) ==")
         log("城市分布Top15: " + json.dumps(dist.most_common(15), ensure_ascii=False))
         try:
             (OUT_DIR / "zhaopin_summary.txt").write_text(
@@ -391,7 +408,7 @@ def main():
                 encoding="utf-8")
         except Exception:
             pass
-        log("达标" if len(ids) >= TARGET else "未达标(续跑: python scripts/zhaopin_crawler.py)")
+        log("如需继续, 可稍后重跑: python scripts/zhaopin_crawler.py (自动去重续抓)")
     finally:
         drv.quit()
 
