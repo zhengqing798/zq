@@ -227,16 +227,16 @@ def parse_card(drv, card):
 def open_list(drv, url):
     """打开 /jobs SPA 页并等首屏; 验证时退避。"""
     drv.get(url)
-    time.sleep(random.uniform(3, 5))
-    for _ in range(6):
+    time.sleep(random.uniform(2.5, 3.5))
+    for _ in range(4):
         if blocked(drv):
             log("  [验证] 退避 90s 后重试")
             time.sleep(90)
             drv.get(url)
-            time.sleep(4)
+            time.sleep(3)
         if drv.find_elements("css selector", ".job-card"):
             return True
-        time.sleep(3)
+        time.sleep(2.5)
     return bool(drv.find_elements("css selector", ".job-card"))
 
 
@@ -244,7 +244,7 @@ def scroll_batch(drv, url):
     """滚到底触发加载, 返回当前页 job-card 解析行(去重交由调用方)。"""
     before_h = drv.execute_script("return document.body.scrollHeight")
     drv.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-    time.sleep(random.uniform(2, 4))
+    time.sleep(random.uniform(1.6, 2.6))
     after_h = drv.execute_script("return document.body.scrollHeight")
     cards = drv.find_elements("css selector", ".job-card")
     rows = []
@@ -252,7 +252,6 @@ def scroll_batch(drv, url):
         r = parse_card(drv, c)
         if r:
             rows.append(r)
-    # 无新内容(高度未变)信号
     return rows, after_h <= before_h
 
 
@@ -350,13 +349,12 @@ def main():
                             stable += 1
                         if no_grow and stable >= STABLE_STOP:
                             break
-                        time.sleep(random.uniform(2, 4))
                     log(f"  {name}/{kw} 本组合新增 {added}, 累计 {len(ids)}")
                     if added > 0 or not blocked(drv):
                         state["combo_done"].append(combo)
                     save_state(state)
                     flush_pending()
-                    time.sleep(random.uniform(8, 15))
+                    time.sleep(random.uniform(5, 9))
             if len(ids) < TARGET and datetime.now() < deadline:
                 log(f"本轮后 {len(ids)}, 长歇10分钟")
                 time.sleep(10 * 60)
