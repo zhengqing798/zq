@@ -1,0 +1,10 @@
+# 任务12 docker-compose 多容器编排
+# TODO(2026-09-22)：编排 app（FastAPI）+ 向量库等，示例结构如下，正式实现时补全
+# services:
+#   api:
+#     build: ..
+#     ports: ["8000:8000"]
+#     env_file: .env
+#   chroma:
+#     image: chromadb/chroma
+#     ports: ["8001:8000"]

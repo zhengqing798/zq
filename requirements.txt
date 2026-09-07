@@ -1,0 +1,48 @@
+# ============================================================
+# 岗位-简历人岗匹配推荐系统 —— Python 依赖（按教学阶段分组）
+# 安装：pip install -r requirements.txt
+# 建议：python -m venv .venv 后安装
+# ============================================================
+
+# ---------- 第1周：任务2 数据采集 ----------
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=4.9
+fake-useragent>=1.4          # 随机 UA 反爬
+retrying>=1.3                # 失败重试（或用 tenacity）
+# selenium>=4.18             # 动态页备用（需额外装浏览器驱动）
+# playwright>=1.42           # 动态页备用（需 python -m playwright install）
+
+# ---------- 第1周：任务3 数据清洗与特征工程 ----------
+pandas>=2.2
+numpy>=1.26
+jieba>=0.42                  # 中文分词
+openpyxl>=3.1                # Excel 读写
+
+# ---------- 第1周：任务4/5 可视化分析与评分模型 ----------
+matplotlib>=3.8
+seaborn>=0.13
+scikit-learn>=1.4            # Logistic/SVM/RandomForest + TF-IDF + KMeans + PCA
+xgboost>=2.0                 # 评分模型候选
+
+# ---------- 第2周：任务10 RAG 向量库 ----------
+chromadb>=0.5                # 轻量向量库（可选 FAISS/Milvus）
+sentence-transformers>=2.5   # 中文 Embedding（bge-small-zh 等）
+
+# ---------- 第2周：任务10 大模型 Agent ----------
+openai>=1.30                 # 兼容 OpenAI 协议的 SDK
+# dashscope>=1.20            # 阿里云通义千问（如用 qwen 系列）
+# zhipuai                    # 智谱 GLM（如用 glm 系列）
+
+# ---------- 第3周：任务11 前后端集成 ----------
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+streamlit>=1.33              # 快速演示前端
+python-multipart>=0.0.9      # 上传简历文件用
+pdfplumber>=0.11             # 简历 PDF 文本提取
+# pymupdf                    # PDF 解析备选
+
+# ---------- 第3周：任务12 测试 ----------
+pytest>=8.0
+httpx>=0.27                  # FastAPI TestClient 依赖
