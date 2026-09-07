@@ -155,7 +155,7 @@ def write_row(r):
     global _pending
     _pending.append(r)
     _flush_pending()
-    if len(_pending) % 300 == 0:
+    if _pending and len(_pending) % 300 == 0:
         log(f"  [提示] CSV 正被占用, {len(_pending)} 条在内存缓冲(请关闭Excel/WPS)")
 
 
@@ -287,23 +287,29 @@ def main():
             return
 
         state = load_state()
-        # 城市可用性验证(厦门做代表即可; 后续逐城执行时按行内城市判断)
-        active = {}
-        log("== 城市可用性探测(每城1次Java) ==")
-        for name, code in list(CITIES.items()):
-            u = f"https://www.zhaopin.com/jobs?jl={code}&kw=Java&kt=3"
-            if open_list(drv, u):
-                cards = drv.find_elements("css selector", ".job-card")
-                sample = next((parse_card(drv, c) for c in cards
-                               if parse_card(drv, c)), None)
-                active[name] = code
-                log(f"  ✅ {name}({code}) 卡片{len(cards)}")
-                time.sleep(random.uniform(4, 7))
-            else:
-                log(f"  ⏭ {name}({code}) 无数据")
-        if not active:
-            log("无可用城市, 停止")
-            return
+        # 城市可用性: 优先用缓存(避免每次重启重扫约5分钟)
+        if state.get("active_cities"):
+            active = {k: int(v) for k, v in state["active_cities"].items()}
+            log(f"使用缓存城市 {len(active)} 个")
+        else:
+            active = {}
+            log("== 城市可用性探测(每城1次Java) ==")
+            for name, code in list(CITIES.items()):
+                u = f"https://www.zhaopin.com/jobs?jl={code}&kw=Java&kt=3"
+                if open_list(drv, u):
+                    cards = drv.find_elements("css selector", ".job-card")
+                    sample = next((parse_card(drv, c) for c in cards
+                                   if parse_card(drv, c)), None)
+                    active[name] = code
+                    log(f"  ✅ {name}({code}) 卡片{len(cards)}")
+                    time.sleep(random.uniform(3, 5))
+                else:
+                    log(f"  ⏭ {name}({code}) 无数据")
+            if not active:
+                log("无可用城市, 停止")
+                return
+            state["active_cities"] = {k: str(v) for k, v in active.items()}
+            save_state(state)
         log(f"可用城市 {len(active)} 个")
 
         kw_list = list(KEYWORDS)
