@@ -1,26 +1,28 @@
 # -*- coding: utf-8 -*-
-"""智联招聘(zhaopin) 计算机岗位采集 —— 福建+周边, ≥1万, 低频率整夜跑
+"""智联招聘(zhaopin) 计算机岗位采集 —— SPA 滚动模式 (福建+周边 ≥1万)
 
-运行: python scripts/zhaopin_crawler.py            (默认跑到 07:00 或 1万条)
-      python scripts/zhaopin_crawler.py --dry 1    (快速验证: 单城单关键词1页)
-      python scripts/zhaopin_crawler.py --deadline "2026-09-08 07:00:00"
+路线说明(2026-09-07 实测):
+  智联 /sou SSR 分页在登录态/晚间会重定向到 /jobs SPA；
+  /jobs SPA 在登录后能正常渲染岗位(div.job-card), 通过滚动自动加载更多。
+  本脚本采用: 打开 /jobs?jl=<城>&kw=<词> → 滚动加载 → 解析 job-card → CSV 去重。
 
-要点
-----
-- 接管 9527 真实 Chrome(配置 .zhaopin_profile, 自动启动)
-- 请求/翻页全部低频率(随机 4-8s/页), 空页自动退避重试, 绝不硬闯验证
-- 城市运行时验证(关键词页有本城岗位才算可用), 逐 城x关键词 抓取去重
-- 断点续传: 已入库 job_id 自动跳过
-输出: data/raw/zhaopin_jobs.csv
+字段: 岗位名称/薪资/地区/学历/经验/技能标签/公司/地区/抓取时间/来源关键词
+反爬: 随机延时(2-5s/滚动)、验证出现自动退避、失败不硬闯、断点续传、无卡死。
+
+运行: python scripts/zhaopin_crawler.py [--dry 1] [--deadline ...]
+输出: data/raw/zhaopin_jobs.csv + data/raw/zhaopin_summary.txt
 """
 import argparse
 import csv
+import hashlib
 import json
 import random
 import re
+import socket
 import subprocess
 import sys
 import time
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -31,31 +33,23 @@ PROFILE = ROOT / ".zhaopin_profile"
 PORT = 9527
 CSV_FILE = OUT_DIR / "zhaopin_jobs.csv"
 STATE_FILE = OUT_DIR / "zhaopin_state.json"
-
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
-# 计算机相关关键词(主批) + 扩容批(前两轮不达标时追加)
 KEYWORDS = ["Java", "Python", "前端", "后端", "测试", "算法", "运维", "数据分析",
             "C++", "嵌入式", "Android", "iOS", "网络安全", "数据库", "架构师"]
 EXTRA_KEYWORDS = ["爬虫", "Go", "PHP", ".NET", "C#", "鸿蒙", "小程序", "游戏开发",
                   "机器学习", "大数据", "云计算", "DevOps", "自动化测试", "前端开发"]
 
-# 城市: 名称->候选代码(运行时以关键词首页验证取用)
 CITIES = {
-    # 福建
-    "福州": [681], "厦门": [682], "泉州": [685], "漳州": [687],
-    "莆田": [683, 690], "宁德": [690, 683], "龙岩": [689, 690],
-    "三明": [684, 689], "南平": [688, 684],
-    # 周边
-    "温州": [655, 682], "宁波": [654, 655], "杭州": [653, 654],
-    "南昌": [691, 653], "长沙": [749, 691], "武汉": [736, 749],
-    "成都": [801, 736], "西安": [854, 801], "南京": [635, 854],
-    "苏州": [639, 635], "济南": [702, 639], "青岛": [703, 702],
-    "郑州": [719, 703], "合肥": [664, 719], "昆明": [831, 664],
+    "福州": 681, "厦门": 682, "泉州": 685, "漳州": 687,
+    "莆田": 683, "宁德": 690, "龙岩": 689, "三明": 684, "南平": 688,
+    "温州": 655, "杭州": 653, "宁波": 654, "南昌": 691, "长沙": 749,
+    "武汉": 736, "成都": 801, "西安": 854, "南京": 635, "苏州": 639,
+    "济南": 702, "青岛": 703, "郑州": 719, "合肥": 664, "昆明": 831,
 }
 TARGET = 10000
-SEL_ITEM = ".joblist-box__item"
-MAX_PAGE = 400      # 单组合页数上限
+MAX_SCROLLS = 200      # 单组合最大滚动批次数
+STABLE_STOP = 3        # 连续N次滚动无新增 → 该组合结束
 
 
 def log(m):
@@ -63,9 +57,9 @@ def log(m):
 
 
 def ensure_chrome():
-    import socket
     s = socket.socket()
     try:
+        s.settimeout(1.2)
         s.connect(("127.0.0.1", PORT))
         s.close()
         return
@@ -78,6 +72,7 @@ def ensure_chrome():
         time.sleep(1)
         try:
             s2 = socket.socket()
+            s2.settimeout(1.2)
             s2.connect(("127.0.0.1", PORT))
             s2.close()
             return
@@ -101,21 +96,35 @@ def body_text(drv):
         return ""
 
 
+def blocked(drv):
+    b = body_text(drv)
+    return any(k in b for k in ("访问验证", "验证中心", "拖动滑块", "请完成验证"))
+
+
 def load_ids():
     ids = set()
     if CSV_FILE.exists():
         try:
             with CSV_FILE.open(encoding="utf-8-sig") as f:
                 for r in csv.DictReader(f):
-                    if r.get("job_id"):
-                        ids.add(r["job_id"])
+                    if r.get("job_key"):
+                        ids.add(r["job_key"])
         except Exception:
             pass
     return ids
 
 
-def save_state(state):
-    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
+def write_row(r):
+    new_file = not CSV_FILE.exists()
+    with CSV_FILE.open("a", encoding="utf-8-sig", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(r.keys()))
+        if new_file:
+            w.writeheader()
+        w.writerow(r)
+
+
+def save_state(st):
+    STATE_FILE.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
 
 
 def load_state():
@@ -127,244 +136,199 @@ def load_state():
     return {"combo_done": []}
 
 
-def write_row(r):
-    with CSV_FILE.open("a", encoding="utf-8-sig", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(r.keys()))
-        if f.tell() == 0:
-            w.writeheader()
-        w.writerow(r)
+# -----------------------------------------------------------------解析
+def guess_edu(ts):
+    for t in ts:
+        if re.search(r"学历不限|中专|大专|本科|硕士|博士|MBA|初中", t):
+            return t
+    return ""
 
 
-def parse_page(drv):
-    """解析 sou 搜索页 .joblist-box__item 岗位行。"""
-    from selenium.webdriver.common.by import By
-    rows = []
-    for it in drv.find_elements(By.CSS_SELECTOR, SEL_ITEM):
+def guess_exp(ts):
+    for t in ts:
+        if re.search(r"经验不限|应届|1年以下|1-3年|3-5年|5-10年|10年以上|\d+年以上", t):
+            return t
+    return ""
+
+
+def parse_card(drv, card):
+    def txt(sel):
         try:
-            a = it.find_element(By.CSS_SELECTOR, "a.jobinfo__name")
+            return card.find_element("css selector", sel).text.strip()
         except Exception:
-            continue
-        href = (a.get_attribute("href") or "").split("?")[0]
-        m = re.search(r"/jobdetail/([A-Z0-9]+)\.htm", href or "")
-        jid = m.group(1) if m else ""
-        def pick(sel):
-            try:
-                return it.find_element(By.CSS_SELECTOR, sel).text.strip()
-            except Exception:
-                return ""
-        salary = pick(".jobinfo__salary")
-        loc = pick(".jobinfo__other-info .jobinfo__other-info-item")
-        tags = []
-        try:
-            for t in it.find_elements(By.CSS_SELECTOR, ".jobinfo__tag .joblist-box__item-tag"):
-                tags.append(t.text.strip())
-        except Exception:
-            pass
-        comp = pick(".companyinfo__name")
-        ctags = []
-        try:
-            for t in it.find_elements(By.CSS_SELECTOR,
-                                      ".companyinfo__tag .joblist-box__item-tag"):
-                ctags.append(t.text.strip())
-        except Exception:
-            pass
-        rows.append({
-            "job_id": jid,
-            "岗位名称": a.text.strip(),
-            "岗位薪资": salary,
-            "岗位地区": loc,
-            "岗位标签": "|".join(tags),
-            "公司名字": comp,
-            "公司信息": "|".join(ctags),
-            "来源关键词": "",
-            "抓取时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        })
-    return rows
+            return ""
+    title = txt(".job-card__title-main")
+    salary = txt(".job-card__salary")
+    tags = [x.text.strip() for x in
+            card.find_elements("css selector", ".job-card__skill-tag")]
+    company = txt(".job-card__company")
+    loc = txt(".job-card__location")
+    if not title:
+        return None
+    key = hashlib.md5((title + "|" + company + "|" + loc).encode()).hexdigest()[:16]
+    return {
+        "job_key": key,
+        "岗位名称": title,
+        "岗位薪资": salary,
+        "岗位地区": loc,
+        "学历要求": guess_edu(tags),
+        "经验要求": guess_exp(tags),
+        "技能标签": "|".join(t for t in tags if t not in
+                          (guess_edu(tags), guess_exp(tags))),
+        "公司名字": company,
+        "来源关键词": "",
+        "城市(实测)": loc.split()[0] if loc else "",
+        "抓取时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
 
 
-def canonical_page(drv, url):
-    """访问查询URL并返回其规范化分页基址(含kw编码路径), 例如 .../sou/jl682/kwXXX/p1?kt=3"""
+def open_list(drv, url):
+    """打开 /jobs SPA 页并等首屏; 验证时退避。"""
     drv.get(url)
-    time.sleep(4)
-    cur = drv.current_url
-    m = re.search(r"(.+?)/p(\d+)(\?.*)?$", cur)
-    if m:
-        return cur
-    return cur  # 兜底直接返回
-
-
-def city_of(row):
-    loc = row.get("岗位地区") or ""
-    return loc.split("·")[0].split(" ")[0].strip()
-
-
-def combo_url(city_code, kw):
-    return (f"https://www.zhaopin.com/sou/jl{city_code}"
-            f"?kw={quote(kw)}&kt=3")
-
-
-def fetch_list(drv, url):
-    """抓取一页(轮询等待列表项); 验证时自动退避; 返回 (rows, ok)
-    ok=False 表示疑似被风控/验证未通过(该组合暂不标记完成)。"""
-    from selenium.webdriver.common.by import By
-    drv.get(url)
-
-    def wait_items(timeout=15):
-        t0 = time.time()
-        while time.time() - t0 < timeout:
-            time.sleep(1.5)
-            it = drv.find_elements(By.CSS_SELECTOR, SEL_ITEM)
-            if it:
-                return it
-        return []
-
-    def blocked_now():
-        b = body_text(drv)
-        return any(k in b for k in ("访问验证", "验证中心", "拖动滑块", "请完成验证"))
-
-    items = wait_items()
-    if not items:
-        for attempt in range(3):
-            if blocked_now():
-                log(f"  [验证] 页面要求验证, 退避 {60 * (attempt + 1)}s 后自动继续")
-                time.sleep(60 * (attempt + 1))
-                drv.get(url)
-                items = wait_items()
-                if items:
-                    break
-                continue
-            time.sleep(30 * (attempt + 1))
+    time.sleep(random.uniform(3, 5))
+    for _ in range(6):
+        if blocked(drv):
+            log("  [验证] 退避 90s 后重试")
+            time.sleep(90)
             drv.get(url)
-            items = wait_items()
-            if items:
-                break
-        if not items:
-            if blocked_now():
-                return [], False
-            return [], True            # 无验证且无岗位 → 真实空结果
-    return parse_page(drv), True
+            time.sleep(4)
+        if drv.find_elements("css selector", ".job-card"):
+            return True
+        time.sleep(3)
+    return bool(drv.find_elements("css selector", ".job-card"))
+
+
+def scroll_batch(drv, url):
+    """滚到底触发加载, 返回当前页 job-card 解析行(去重交由调用方)。"""
+    before_h = drv.execute_script("return document.body.scrollHeight")
+    drv.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+    time.sleep(random.uniform(2, 4))
+    after_h = drv.execute_script("return document.body.scrollHeight")
+    cards = drv.find_elements("css selector", ".job-card")
+    rows = []
+    for c in cards:
+        r = parse_card(drv, c)
+        if r:
+            rows.append(r)
+    # 无新内容(高度未变)信号
+    return rows, after_h <= before_h
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--deadline", default="2026-09-08 07:00:00")
-    ap.add_argument("--dry", type=int, default=0, help="仅验证: 厦门xJava 1页")
+    ap.add_argument("--dry", type=int, default=0, help="快速验证: 厦门xJava 滚动3批")
     args = ap.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     deadline = datetime.strptime(args.deadline, "%Y-%m-%d %H:%M:%S")
-
     ensure_chrome()
     drv = attach()
     ids = load_ids()
-    log(f"已载入历史 {len(ids)} 条; 目标 {TARGET}; 截止 {deadline}")
+    log(f"历史 {len(ids)} 条; 目标 {TARGET}; 截止 {deadline}")
 
     try:
         if args.dry:
-            url = combo_url(682, "Java")
-            drv.get(url)
+            drv.get(f"https://www.zhaopin.com/jobs?jl=682&kw=Java&kt=3")
             time.sleep(5)
-            log("dry URL: " + drv.current_url[:120])
-            rows, _ = parse_page(drv), True
-            log(f"dry 行数: {len(rows)}")
-            if rows:
-                log("样例: " + json.dumps(rows[0], ensure_ascii=False)[:300])
+            log("dry url: " + drv.current_url[:90])
+            if not open_list(drv, drv.current_url):
+                log("dry: 首屏无岗位")
+                return
+            seen = set()
+            for _ in range(4):
+                rows, _ = scroll_batch(drv, drv.current_url)
+                for r in rows:
+                    seen.add(r["job_key"])
+                log(f"dry 滚动后累计卡片: {len(drv.find_elements('css selector', '.job-card'))}, "
+                    f"去重键 {len(seen)}")
+            log("样例: " + json.dumps(rows[0], ensure_ascii=False)[:400] if rows else "无")
             return
 
         state = load_state()
-        # 先验证并挑选可用城市代码(用Java关键词首页)
+        # 城市可用性验证(厦门做代表即可; 后续逐城执行时按行内城市判断)
         active = {}
-        log("== 城市代码验证 ==")
-        for name, codes in CITIES.items():
-            for code in codes:
-                u = combo_url(code, "Java")
-                rows, _ = fetch_list(drv, u)
-                city = ""
-                for r in rows:
-                    c = city_of(r)
-                    if c:
-                        city = c
-                        break
-                if rows and (name in city or city in name):
-                    active[name] = code
-                    log(f"  ✅ {name} = jl{code} (样例区:{city})")
-                    break
-                time.sleep(random.uniform(2, 4))
+        log("== 城市可用性探测(每城1次Java) ==")
+        for name, code in list(CITIES.items()):
+            u = f"https://www.zhaopin.com/jobs?jl={code}&kw=Java&kt=3"
+            if open_list(drv, u):
+                cards = drv.find_elements("css selector", ".job-card")
+                sample = next((parse_card(drv, c) for c in cards
+                               if parse_card(drv, c)), None)
+                active[name] = code
+                log(f"  ✅ {name}({code}) 卡片{len(cards)}")
+                time.sleep(random.uniform(4, 7))
+            else:
+                log(f"  ⏭ {name}({code}) 无数据")
         if not active:
-            log("没有可用城市, 停止")
+            log("无可用城市, 停止")
             return
-        log(f"可用城市: {list(active.items())}")
+        log(f"可用城市 {len(active)} 个")
 
-        # 逐 城市x关键词 抓取(多轮直到达标/截止); 前两轮不足时自动追加扩容关键词
         kw_list = list(KEYWORDS)
-        pass_no = 0
-        while pass_no < 4:
-            pass_no += 1
+        added_extra = False
+        for pass_no in range(1, 6):
             if len(ids) >= TARGET or datetime.now() >= deadline:
                 break
-            if pass_no >= 3 and len(kw_list) < len(KEYWORDS) + len(EXTRA_KEYWORDS):
+            if pass_no >= 3 and not added_extra:
                 kw_list = list(KEYWORDS) + list(EXTRA_KEYWORDS)
-                log("  追加扩容关键词(总量仍不足)")
-            log(f"---- 第 {pass_no} 轮开始(当前 {len(ids)}, 关键词数 {len(kw_list)}) ----")
-            for name, code in list(active.items()):
+                added_extra = True
+                log("追加扩容关键词")
+            log(f"---- 第{pass_no}轮(当前 {len(ids)}) ----")
+            for name, code in active.items():
                 if len(ids) >= TARGET or datetime.now() >= deadline:
                     break
                 for kw in kw_list:
                     if len(ids) >= TARGET or datetime.now() >= deadline:
                         break
-                    combo = f"{name}_{code}_{kw}"
+                    combo = f"{name}_{kw}"
                     if combo in state["combo_done"]:
                         continue
-                    log(f"== {name}({code}) × {kw} 当前{len(ids)} ==")
-                    # 规范基址(含kw编码路径)
-                    drv.get(combo_url(code, kw))
-                    time.sleep(4)
-                    cur = drv.current_url
-                    base = re.sub(r"/p\d+(\?|$)", "/p{page}\\1", cur)
-                    if "{page}" not in base:
-                        base = cur.rstrip("/") + "/p{page}"
-                    got_any = False
-                    first_page_done = False
-                    for page in range(1, MAX_PAGE + 1):
+                    log(f"== {name} × {kw} 当前{len(ids)} ==")
+                    url = f"https://www.zhaopin.com/jobs?jl={code}&kw={quote(kw)}&kt=3"
+                    if not open_list(drv, url):
+                        log("  首屏失败(可能验证/无结果), 留待下轮")
+                        continue
+                    # 滚动加载并收新行
+                    added = 0
+                    stable = 0
+                    for _ in range(MAX_SCROLLS):
                         if len(ids) >= TARGET or datetime.now() >= deadline:
                             break
-                        url = base.format(page=page)
-                        rows, ok = fetch_list(drv, url)
-                        if page == 1:
-                            first_page_done = bool(ok)     # 首页能正常出(空)才算该组合真完成过
-                        new = [r for r in rows if r.get("job_id") and r["job_id"] not in ids]
+                        rows, no_grow = scroll_batch(drv, url)
+                        new = [r for r in rows if r["job_key"] not in ids]
                         for r in new:
                             r["来源关键词"] = kw
-                            r["城市(实测)"] = city_of(r) or name
-                            ids.add(r["job_id"])
+                            ids.add(r["job_key"])
                             write_row(r)
+                            added += 1
                         if new:
-                            got_any = True
-                        log(f"  {name}/{kw} p{page}: +{len(new)} 条 → 累计{len(ids)}")
-                        if not rows:
-                            break                      # 空页即该组合(当前)结束
-                        time.sleep(random.uniform(4, 8))
-                    # 首页正常渲染过(有数据或真无结果)才标记完成, 否则视为风控留待下轮
-                    if first_page_done:
+                            stable = 0
+                        else:
+                            stable += 1
+                        if no_grow and stable >= STABLE_STOP:
+                            break
+                        time.sleep(random.uniform(2, 4))
+                    log(f"  {name}/{kw} 本组合新增 {added}, 累计 {len(ids)}")
+                    if added > 0 or not blocked(drv):
                         state["combo_done"].append(combo)
                     save_state(state)
-                    time.sleep(random.uniform(5, 10))
+                    time.sleep(random.uniform(8, 15))
             if len(ids) < TARGET and datetime.now() < deadline:
-                log(f"本轮后 {len(ids)}, 长歇 20 分钟后继续")
-                time.sleep(20 * 60)
+                log(f"本轮后 {len(ids)}, 长歇10分钟")
+                time.sleep(10 * 60)
             save_state(state)
 
-        # 收尾汇总
-        from collections import Counter
+        # 汇总
         dist = Counter()
         if CSV_FILE.exists():
             try:
                 with CSV_FILE.open(encoding="utf-8-sig") as f:
                     for rr in csv.DictReader(f):
-                        dist[(rr.get("城市(实测)") or "?")] += 1
+                        dist[rr.get("城市(实测)") or "?"] += 1
             except Exception:
                 pass
-        log(f"== 结束: 共 {len(ids)} 条 (目标 {TARGET}) ==")
+        log(f"== 结束: {len(ids)} 条 / 目标 {TARGET} ==")
         log("城市分布Top15: " + json.dumps(dist.most_common(15), ensure_ascii=False))
         try:
             (OUT_DIR / "zhaopin_summary.txt").write_text(
@@ -372,7 +336,7 @@ def main():
                 encoding="utf-8")
         except Exception:
             pass
-        log("达标" if len(ids) >= TARGET else "未达标(可在配额/时间允许时重跑续传)")
+        log("达标" if len(ids) >= TARGET else "未达标(续跑: python scripts/zhaopin_crawler.py)")
     finally:
         drv.quit()
 
