@@ -325,10 +325,10 @@ def main():
         for pass_no in range(1, 6):
             if datetime.now() >= deadline:
                 break
-            if pass_no >= 3 and not added_extra:
+            if not added_extra:
                 kw_list = list(KEYWORDS) + list(EXTRA_KEYWORDS)
                 added_extra = True
-                log("追加扩容关键词")
+                log("关键词: 主批+扩容全部启用(优先福建全量组合)")
             log(f"---- 第{pass_no}轮(当前 {len(ids)}) ----")
             city_seq = [c for c in city_order(active) if c in active]
             # 第三轮起若已无未做组合 → 提前结束(避免空转长歇)
