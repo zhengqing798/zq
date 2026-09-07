@@ -122,13 +122,41 @@ def load_ids():
     return ids
 
 
+_pending: list = []
+
+
+def _flush_pending():
+    global _pending
+    if not _pending:
+        return
+    try:
+        is_new = not CSV_FILE.exists()
+        with CSV_FILE.open("a", encoding="utf-8-sig", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(_pending[0].keys()))
+            if is_new or f.tell() == 0:
+                w.writeheader()
+            for r in _pending:
+                w.writerow(r)
+        _pending = []
+    except PermissionError:
+        pass          # CSV 被 Excel 占用 → 保留缓冲, 稍后再写
+    except Exception:
+        pass
+
+
 def write_row(r):
-    new_file = not CSV_FILE.exists()
-    with CSV_FILE.open("a", encoding="utf-8-sig", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(r.keys()))
-        if new_file:
-            w.writeheader()
-        w.writerow(r)
+    """追加行; CSV 被占用时缓冲(内存)重试, 绝不因文件锁崩溃或丢数据。"""
+    global _pending
+    _pending.append(r)
+    _flush_pending()
+    if len(_pending) % 200 == 0:
+        log("  [提示] CSV 可能正被 Excel 打开, 数据在内存缓冲中(请关闭Excel)")
+
+
+def flush_pending():
+    _flush_pending()
+    if _pending:
+        log(f"  [提示] 仍有 {len(_pending)} 条缓冲未落盘(CSV被占用?)")
 
 
 def save_state(st):
@@ -321,6 +349,7 @@ def main():
                     if added > 0 or not blocked(drv):
                         state["combo_done"].append(combo)
                     save_state(state)
+                    flush_pending()
                     time.sleep(random.uniform(8, 15))
             if len(ids) < TARGET and datetime.now() < deadline:
                 log(f"本轮后 {len(ids)}, 长歇10分钟")
@@ -328,6 +357,7 @@ def main():
             save_state(state)
 
         # 汇总
+        flush_pending()
         dist = Counter()
         if CSV_FILE.exists():
             try:
