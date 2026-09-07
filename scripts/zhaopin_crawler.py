@@ -34,9 +34,11 @@ STATE_FILE = OUT_DIR / "zhaopin_state.json"
 
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
-# 计算机相关关键词
+# 计算机相关关键词(主批) + 扩容批(前两轮不达标时追加)
 KEYWORDS = ["Java", "Python", "前端", "后端", "测试", "算法", "运维", "数据分析",
             "C++", "嵌入式", "Android", "iOS", "网络安全", "数据库", "架构师"]
+EXTRA_KEYWORDS = ["爬虫", "Go", "PHP", ".NET", "C#", "鸿蒙", "小程序", "游戏开发",
+                  "机器学习", "大数据", "云计算", "DevOps", "自动化测试", "前端开发"]
 
 # 城市: 名称->候选代码(运行时以关键词首页验证取用)
 CITIES = {
@@ -202,24 +204,45 @@ def combo_url(city_code, kw):
 
 
 def fetch_list(drv, url):
-    """抓取一页; 空页/验证时退避重试。返回(rows, ok)"""
-    drv.get(url)
-    time.sleep(random.uniform(4, 6))
+    """抓取一页(轮询等待列表项); 验证时自动退避; 返回 (rows, ok)
+    ok=False 表示疑似被风控/验证未通过(该组合暂不标记完成)。"""
     from selenium.webdriver.common.by import By
-    for attempt in range(3):
-        body = body_text(drv)
-        if any(k in body for k in ("访问验证", "验证中心", "拖动滑块")):
-            log(f"  [验证] 页面要求验证, 退避 {60*(attempt+1)}s 后自动继续")
-            time.sleep(60 * (attempt + 1))
-            drv.get(url)
-            time.sleep(4)
-            continue
-        items = drv.find_elements(By.CSS_SELECTOR, SEL_ITEM)
-        if items:
-            return parse_page(drv), True
-        if attempt < 2:
+    drv.get(url)
+
+    def wait_items(timeout=15):
+        t0 = time.time()
+        while time.time() - t0 < timeout:
+            time.sleep(1.5)
+            it = drv.find_elements(By.CSS_SELECTOR, SEL_ITEM)
+            if it:
+                return it
+        return []
+
+    def blocked_now():
+        b = body_text(drv)
+        return any(k in b for k in ("访问验证", "验证中心", "拖动滑块", "请完成验证"))
+
+    items = wait_items()
+    if not items:
+        for attempt in range(3):
+            if blocked_now():
+                log(f"  [验证] 页面要求验证, 退避 {60 * (attempt + 1)}s 后自动继续")
+                time.sleep(60 * (attempt + 1))
+                drv.get(url)
+                items = wait_items()
+                if items:
+                    break
+                continue
             time.sleep(30 * (attempt + 1))
-    return [], False
+            drv.get(url)
+            items = wait_items()
+            if items:
+                break
+        if not items:
+            if blocked_now():
+                return [], False
+            return [], True            # 无验证且无岗位 → 真实空结果
+    return parse_page(drv), True
 
 
 def main():
@@ -249,17 +272,13 @@ def main():
             return
 
         state = load_state()
-        # 先验证并挑选可用城市代码
+        # 先验证并挑选可用城市代码(用Java关键词首页)
         active = {}
         log("== 城市代码验证 ==")
         for name, codes in CITIES.items():
             for code in codes:
-                if len(ids) >= TARGET:
-                    break
                 u = combo_url(code, "Java")
-                drv.get(u)
-                time.sleep(random.uniform(3, 5))
-                rows, _ = parse_page(drv), True
+                rows, _ = fetch_list(drv, u)
                 city = ""
                 for r in rows:
                     c = city_of(r)
@@ -276,17 +295,21 @@ def main():
             return
         log(f"可用城市: {list(active.items())}")
 
-        # 逐 城市x关键词 抓取(多轮直到达标/截止)
+        # 逐 城市x关键词 抓取(多轮直到达标/截止); 前两轮不足时自动追加扩容关键词
+        kw_list = list(KEYWORDS)
         pass_no = 0
         while pass_no < 4:
             pass_no += 1
             if len(ids) >= TARGET or datetime.now() >= deadline:
                 break
-            log(f"---- 第 {pass_no} 轮开始(当前 {len(ids)}) ----")
+            if pass_no >= 3 and len(kw_list) < len(KEYWORDS) + len(EXTRA_KEYWORDS):
+                kw_list = list(KEYWORDS) + list(EXTRA_KEYWORDS)
+                log("  追加扩容关键词(总量仍不足)")
+            log(f"---- 第 {pass_no} 轮开始(当前 {len(ids)}, 关键词数 {len(kw_list)}) ----")
             for name, code in list(active.items()):
                 if len(ids) >= TARGET or datetime.now() >= deadline:
                     break
-                for kw in KEYWORDS:
+                for kw in kw_list:
                     if len(ids) >= TARGET or datetime.now() >= deadline:
                         break
                     combo = f"{name}_{code}_{kw}"
@@ -331,7 +354,25 @@ def main():
                 time.sleep(20 * 60)
             save_state(state)
 
+        # 收尾汇总
+        from collections import Counter
+        dist = Counter()
+        if CSV_FILE.exists():
+            try:
+                with CSV_FILE.open(encoding="utf-8-sig") as f:
+                    for rr in csv.DictReader(f):
+                        dist[(rr.get("城市(实测)") or "?")] += 1
+            except Exception:
+                pass
         log(f"== 结束: 共 {len(ids)} 条 (目标 {TARGET}) ==")
+        log("城市分布Top15: " + json.dumps(dist.most_common(15), ensure_ascii=False))
+        try:
+            (OUT_DIR / "zhaopin_summary.txt").write_text(
+                json.dumps(dict(dist.most_common()), ensure_ascii=False, indent=1),
+                encoding="utf-8")
+        except Exception:
+            pass
+        log("达标" if len(ids) >= TARGET else "未达标(可在配额/时间允许时重跑续传)")
     finally:
         drv.quit()
 
