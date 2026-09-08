@@ -10,26 +10,6 @@ venv/
 env/
 *.so
 
-# ============ 数据：大文件不入库（关键！） ============
-# 爬取/处理数据量≥1万条，体积大，禁止提交到 Git，仅保留目录结构与说明
-data/raw/*
-data/processed/*
-data/external/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/external/.gitkeep
-*.csv
-*.xlsx
-*.db
-*.sqlite3
-*.parquet
-*.feather
-!data/**/*.md
-
-# ============ 图表输出（可按需放开） ============
-reports/figures/*
-!reports/figures/.gitkeep
-
 # ============ 浏览器登录配置（含个人凭据，严禁入库） ============
 .zhaopin_profile/
 .chrome51/
@@ -42,7 +22,7 @@ config/secrets.*
 *.pem
 *.key
 
-# ============ 大模型 API Key / 个人文件 ============
+# ============ 日志 ============
 *.log
 logs/
 
