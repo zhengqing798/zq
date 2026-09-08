@@ -229,6 +229,8 @@ def parse_card(drv, card):
         "来源关键词": "",
         "城市(实测)": loc.split()[0] if loc else "",
         "抓取时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "岗位链接": "",
+        "职位描述": "",
     }
 
 
