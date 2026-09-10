@@ -32,9 +32,29 @@ EXPERIENCE_ORDER = ["不限/应届", "1-3年", "3-5年", "5-10年", "10年以上
 EXP_COLORS = ["#91d5c1", "#5b8ff9", "#f6bd16", "#ff9845", "#e8684a", "#c2c8d5"]
 SALARY_BAR_COLOR = "#3182bd"
 
-# 词云需要剔除的词（福利类词不是技能，会让"技能需求热度"失真）
-# 规则：技能标签中只要包含下列任一关键词就整条剔除，例如 五险一金 / 五险 / 缴纳五险 / 有五险 / 五险齐全 等
-SKILL_EXCLUDE_KEYWORDS = ["五险"]
+# 词云需要剔除的词：技能标签字段里混入了福利待遇、行业/企业/平台等非技能标签，
+# 会让"技能需求热度"失真，因此统一剔除，只保留技能与专业能力词。
+# 规则：① 子串命中 SKILL_EXCLUDE_SUBSTR 即整条剔除；② 与 SKILL_EXCLUDE_EXACT 完全相等时剔除。
+SKILL_EXCLUDE_SUBSTR = [
+    # —— 福利待遇类 ——
+    "五险", "六险", "一金", "二金", "双休", "年假", "奖金", "补助", "补贴", "津贴",
+    "公积金", "社保", "保险", "体检", "旅游", "团建", "生日", "零食", "下午茶", "全勤",
+    "班车", "期权", "加班", "包吃", "包住", "福利", "节日", "带薪",
+    # —— 行业 / 企业 / 平台 / 产品品类类 ——
+    "行业", "体系", "制造", "批发", "零售", "贸易", "平台", "银行", "化工", "环保",
+    "新能源", "物流", "服装", "纺织", "皮革", "橡胶", "塑料", "金属制品", "化学原料",
+    "计算机软件", "计算机硬件", "软件/it", "电气机械", "电力/水利", "产业互联网",
+    "机械设备", "电气设备", "机电设备", "自动化设备", "专用设备", "通用设备",
+    "电子设备", "仪器仪表", "医疗设备", "工业自动化", "食品", "饮料", "酒水", "烟酒",
+    "拼多多", "淘宝", "天猫", "抖音", "面销", "陌拜",
+]
+SKILL_EXCLUDE_EXACT = {
+    "企业客户", "渠道销售", "生物/制药", "机器人", "动力电池",
+    "财务/审计/税务", "研发", "技能培训", "3c数码", "投融资",
+    # 行业/品类标签（这些词单独出现时是行业标签；带具体技能动作的词如"芯片测试/图像识别"仍保留）
+    "半导体/芯片", "电子/半导体", "电子/半导体/集成电路", "半导体", "电子半导体",
+    "通信/网络设备", "互联网电商", "图像识别产品",
+}
 
 # ---------------------------------------------------------------- 数据读取
 
@@ -108,6 +128,14 @@ def median(xs):
 
 def split_tags(text):
     return [t.strip() for t in re.split(r"[|、，,\s]+", text or "") if t.strip()]
+
+
+def is_non_skill_tag(tag):
+    """判断技能标签是否为"非技能词"（福利待遇 / 行业企业平台等），用于词云清洗"""
+    tl = tag.lower()
+    if tag in SKILL_EXCLUDE_EXACT or tl in SKILL_EXCLUDE_EXACT:
+        return True
+    return any(kw in tl for kw in SKILL_EXCLUDE_SUBSTR)
 
 
 # ---------------------------------------------------------------- 输出工具
@@ -397,23 +425,30 @@ def chart3_skill_wordcloud(rows, top_n=150):
     excluded = Counter()
     for r in rows:
         for t in split_tags(r.get("技能标签")):
-            if any(kw in t for kw in SKILL_EXCLUDE_KEYWORDS):
-                excluded[t] += 1          # 福利类词（含"五险"等）不计入技能热度
+            if is_non_skill_tag(t):
+                excluded[t] += 1          # 福利待遇 / 行业企业平台等非技能词，不计入技能热度
                 continue
             cnt[t] += 1
     top = cnt.most_common(top_n)
-    print("  词云剔除福利类词 %d 个，共 %d 次：%s" % (
-        len(excluded), sum(excluded.values()),
-        "、".join("%s(%d)" % (k, v) for k, v in excluded.most_common(6))))
+    print("  词云剔除非技能词 %d 种、共 %d 次；剔除后技能词 %d 种" % (
+        len(excluded), sum(excluded.values()), len(cnt)))
+    print("    剔除样例：%s" % "、".join("%s(%d)" % (k, v) for k, v in excluded.most_common(8)))
     write_csv("03_核心技能需求热度_词云.csv",
               ["技能关键词", "出现岗位数", "占全部岗位比例(%)"],
               [[w, n, round(n / len(rows) * 100, 2)] for w, n in top])
+    write_csv("03_核心技能需求热度_词云_已剔除的非技能词.csv",
+              ["被剔除的词", "出现岗位数", "剔除原因"],
+              [[k, v, ("福利待遇类" if any(kw in k.lower() for kw in
+                        ["五险", "六险", "一金", "二金", "双休", "年假", "奖金", "补助", "补贴",
+                         "津贴", "公积金", "社保", "保险", "体检", "旅游", "团建", "生日", "零食",
+                         "下午茶", "全勤", "班车", "期权", "加班", "包吃", "包住", "福利", "节日",
+                         "带薪"]) else "行业/企业/平台等非技能标签")] for k, v in excluded.most_common()])
     data = [{"name": w, "value": n} for w, n in top]
     option = """
   {
     title: {
       text: '核心技能需求热度词云',
-      subtext: '数据源：处理后数据 __TOTAL__ 条岗位的"技能标签"字段（共出现 __KINDS__ 个技能词，图中展示 Top__TOPN__）｜已剔除福利类词（含"五险"的词共 __EXCLK__ 种）｜字越大表示需求该技能的岗位越多',
+      subtext: '数据源：处理后数据 __TOTAL__ 条岗位的"技能标签"字段｜已剔除福利待遇与行业/企业/平台等非技能标签 __EXCLK__ 种（明细见同名 CSV）｜图中展示技能词 Top__TOPN__，字越大表示需求该技能的岗位越多',
       left: 'center', top: 10,
       textStyle: {fontSize: 22, fontWeight: 'bold'},
       subtextStyle: {fontSize: 12, color: '#777'}
