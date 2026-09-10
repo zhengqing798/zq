@@ -68,7 +68,7 @@ def build_md(df, train, valid, test, dropped, dropped_pool):
     n = len(df)
     L = []
     L.append("# 数据集划分说明（任务5 · 评分模型）\n")
-    L.append("> 全量样本：`data/processed/匹配特征_训练集.csv` —— **该文件是 153,872 条全量标注样本**（含 12 个特征 + 标签），")
+    L.append("> 全量样本：`data/processed/匹配特征_全量样本.csv` —— **该文件是 153,872 条全量标注样本**（含 12 个特征 + 标签），")
     L.append("> 文件名是早期命名，容易误解成“只有训练集”；实际的三份划分如下（由 `src/models/scoring/split_dataset.py` 生成）。\n")
     L.append("---\n")
     L.append("## 一、三个划分文件\n")

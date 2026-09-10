@@ -3,7 +3,7 @@
 任务5 · 评分模型第二步：构造特征矩阵
 
 输入：data/processed/匹配样本_标签数据.csv（153,872 条配对样本）
-输出：data/processed/匹配特征_训练集.csv（样本ID + 标签 + 特征 + 参考列）
+输出：data/processed/匹配特征_全量样本.csv（样本ID + 标签 + 特征 + 参考列）
       data/processed/匹配特征_说明.md（特征字典 + 单特征统计）
 
 特征清单（按用户给定口径实现）：
@@ -32,7 +32,7 @@ PAIRS_CSV = os.path.join(ROOT, "data", "processed", "匹配样本_标签数据.c
 JOB_CSV = os.path.join(ROOT, "data", "processed", "zhaopin_jobs_cleaned.csv")
 JOB_SEG_CSV = os.path.join(ROOT, "data", "processed", "zhaopin_jobs_cleaned_seg.csv")
 RESUME_CSV = os.path.join(ROOT, "data", "processed", "简历数据_cleaned.csv")
-OUT_CSV = os.path.join(ROOT, "data", "processed", "匹配特征_训练集.csv")
+OUT_CSV = os.path.join(ROOT, "data", "processed", "匹配特征_全量样本.csv")
 OUT_MD = os.path.join(ROOT, "data", "processed", "匹配特征_说明.md")
 
 # 证书 → 岗位描述中的识别关键词（用于判断岗位是否要求该证书）
@@ -262,7 +262,7 @@ def build_report(rows, X, y, FEATS, v_exp, v_intent, job_cert, res_cert):
     L = []
     L.append("# 匹配特征说明与单特征分析（任务5 · 评分模型）\n")
     L.append("> 数据来源：`data/processed/匹配样本_标签数据.csv`（%d 条配对样本，正 %d / 负 %d，比例 1:%.2f）" % (n, n1, n0, n0 / n1))
-    L.append("> 特征矩阵：`data/processed/匹配特征_训练集.csv`\n")
+    L.append("> 特征矩阵（全量标注样本）：`data/processed/匹配特征_全量样本.csv`\n")
     L.append("---\n")
     L.append("## 一、特征字典\n")
     L.append("| 特征类别 | 特征 | 计算方式 |")
@@ -331,7 +331,7 @@ def build_report(rows, X, y, FEATS, v_exp, v_intent, job_cert, res_cert):
     L.append("## 五、输出文件\n")
     L.append("| 文件 | 说明 |")
     L.append("|---|---|")
-    L.append("| `data/processed/匹配特征_训练集.csv` | 特征矩阵（%d 行 × %d 列 = 样本ID + 标签 + %d 个特征 + %d 个参考列） |" %
+    L.append("| `data/processed/匹配特征_全量样本.csv` | **全量标注特征矩阵**（%d 行 × %d 列 = 样本ID + 标签 + %d 个特征 + %d 个参考列；训练/验证/测试集的切分见 `数据集划分_*.csv`） |" %
              (n, len(rows[0]), len(FEATS), len(rows[0]) - 2 - len(FEATS)))
     L.append("| `data/processed/匹配特征_说明.md` | 本说明 |")
     L.append("| `src/models/scoring/build_features.py` | 特征构造脚本 |")

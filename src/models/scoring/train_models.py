@@ -6,7 +6,7 @@
 对比：SVM（线性核）、随机森林
 上线：XGBoost（梯度提升树，最终模型）
 
-数据：data/processed/匹配特征_训练集.csv（153,872 条配对样本 × 12 个特征）
+数据：data/processed/匹配特征_全量样本.csv（153,872 条配对样本 × 12 个特征；内部按严格规则切分）
 
 两种划分（都用 GroupShuffleSplit，随机种子 42）：
   ① 严格划分（主口径）：简历与岗位**都不重叠** —— 训练集取"训练简历 × 训练岗位"的配对，
@@ -34,7 +34,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-DATA = os.path.join(ROOT, "data", "processed", "匹配特征_训练集.csv")
+DATA = os.path.join(ROOT, "data", "processed", "匹配特征_全量样本.csv")
 FIG_DIR = os.path.join(ROOT, "reports", "figures")
 MODEL_DIR = os.path.join(ROOT, "models")
 OUT_DIR = os.path.join(ROOT, "data", "processed")
@@ -526,7 +526,7 @@ def build_report(res_strict, res_ref, rows_strict, imp_df, meta, n_all, dropped,
                  has_xgb_eval, has_xgb_full, hard_df=None, threshold_info=None):
     L = []
     L.append("# 评分模型训练与评估报告（任务5 · 评分模型搭建）\n")
-    L.append("> 数据：`data/processed/匹配特征_训练集.csv`（%d 条配对样本 × 12 个特征）" % n_all)
+    L.append("> 数据：`data/processed/匹配特征_全量样本.csv`（%d 条配对样本 × 12 个特征）" % n_all)
     L.append("> 代码：`src/models/scoring/train_models.py`（固定随机种子 %d，可复现）" % SEED)
     L.append("> 模型：**Logistic 回归（精度基线）** → SVM（线性核）/ 随机森林（对比） → **XGBoost（最终上线模型）**\n")
     L.append("---\n")
