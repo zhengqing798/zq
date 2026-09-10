@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>03_核心技能需求热度_词云.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1400px;height:900px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '核心技能需求热度词云',
+      subtext: '数据源：处理后数据 8836 条岗位的"技能标签"字段（共出现 4761 个技能词，图中展示 Top150）｜字越大表示需求该技能的岗位越多',
+      left: 'center', top: 10,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {
+      show: true,
+      formatter: function(p) { return p.name + '：' + p.value + ' 个岗位'; }
+    },
+    series: [{
+      type: 'wordCloud',
+      shape: 'circle',
+      left: 20, top: 110, width: 1360, height: 750,
+      sizeRange: [14, 72],
+      rotationRange: [-45, 45],
+      rotationStep: 45,
+      gridSize: 8,
+      drawOutOfBound: false,
+      textStyle: {
+        fontFamily: '"Microsoft YaHei", sans-serif',
+        fontWeight: 'bold',
+        color: function() {
+          var cs = ['#3182bd','#6baed6','#9ecae1','#4292c6','#08519c','#f6bd16',
+                    '#ff9845','#e8684a','#5b8ff9','#5ad8a6','#945fb9','#269a99'];
+          return cs[Math.floor(Math.random() * cs.length)];
+        }
+      },
+      emphasis: {textStyle: {shadowBlur: 10, shadowColor: '#999'}},
+      data: [{"name": "QE", "value": 390}, {"name": "Python", "value": 349}, {"name": "QC", "value": 327}, {"name": "Java", "value": 318}, {"name": "QA", "value": 280}, {"name": "C++", "value": 270}, {"name": "汽车行业质量管理体系", "value": 263}, {"name": "半导体/芯片", "value": 255}, {"name": "MySQL", "value": 228}, {"name": "Spring", "value": 224}, {"name": "五险一金", "value": 213}, {"name": "JavaScript", "value": 212}, {"name": "软件/IT服务", "value": 173}, {"name": "全面质量管理体系", "value": 170}, {"name": "系统运维", "value": 164}, {"name": "人工智能", "value": 160}, {"name": "C#", "value": 155}, {"name": "C语言", "value": 138}, {"name": "功能测试", "value": 137}, {"name": "工业自动化/机器人", "value": 129}, {"name": "电气机械/电力设备", "value": 124}, {"name": "计算机软件", "value": 115}, {"name": "测试", "value": 108}, {"name": "后端开发", "value": 102}, {"name": "性能测试", "value": 101}, {"name": "网络运维", "value": 98}, {"name": "来料检验（IQC）", "value": 98}, {"name": "银行", "value": 95}, {"name": "化工", "value": 93}, {"name": "Vue", "value": 91}, {"name": "SQL", "value": 90}, {"name": "制程检验（IPQC）", "value": 79}, {"name": "设计", "value": 78}, {"name": "通信/网络设备", "value": 72}, {"name": "环保", "value": 72}, {"name": "互联网电商", "value": 71}, {"name": "Oracle", "value": 68}, {"name": "服务器运维", "value": 68}, {"name": "新能源", "value": 68}, {"name": "Mybatis", "value": 65}, {"name": "机器学习", "value": 65}, {"name": "自动化测试", "value": 64}, {"name": "ERP", "value": 62}, {"name": "前端开发", "value": 61}, {"name": "软件测试", "value": 60}, {"name": "大模型算法", "value": 59}, {"name": "金属制品/机加工", "value": 59}, {"name": "安装/调试", "value": 59}, {"name": "数据统计", "value": 59}, {"name": "系统测试", "value": 58}, {"name": "云计算", "value": 57}, {"name": "专用设备制造", "value": 57}, {"name": "新能源/燃油车零部件", "value": 57}, {"name": "绩效奖金", "value": 55}, {"name": "硬件测试", "value": 55}, {"name": "CSS", "value": 54}, {"name": "通用设备制造", "value": 54}, {"name": "电气设备", "value": 54}, {"name": "计算机硬件", "value": 53}, {"name": "图像算法", "value": 53}, {"name": "自动化设备", "value": 53}, {"name": "生产物料管理", "value": 53}, {"name": "深度学习", "value": 52}, {"name": "仪器仪表", "value": 52}, {"name": "化学原料/化学制品", "value": 51}, {"name": "信息安全", "value": 50}, {"name": "数据分析", "value": 50}, {"name": "食品/饮料/酒水批发/零售/贸易", "value": 50}, {"name": "机械设备", "value": 50}, {"name": "生产计划管理", "value": 49}, {"name": "食品安全管理体系", "value": 47}, {"name": "C", "value": 46}, {"name": "英语", "value": 46}, {"name": "橡胶/塑料制品", "value": 46}, {"name": "财务/审计/税务", "value": 46}, {"name": "研发", "value": 46}, {"name": "销售数据分析", "value": 44}, {"name": "桌面运维", "value": 43}, {"name": "32位单片机", "value": 43}, {"name": "图像识别产品", "value": 43}, {"name": "MES", "value": 41}, {"name": "IDC/机房运维", "value": 41}, {"name": "机电设备", "value": 41}, {"name": "PMC管理", "value": 41}, {"name": "成本管理", "value": 40}, {"name": "电子设备制造", "value": 40}, {"name": "企业客户", "value": 39}, {"name": "电力/水利/热力/燃气", "value": 39}, {"name": "新能源/燃油整车研发制造", "value": 39}, {"name": "产业互联网平台", "value": 38}, {"name": "Windows", "value": 38}, {"name": "五险", "value": 38}, {"name": "硬件/设备运维", "value": 37}, {"name": "Linux", "value": 36}, {"name": "物联网", "value": 36}, {"name": "维修/保养", "value": 36}, {"name": "财务分析", "value": 36}, {"name": "OpenCV", "value": 35}, {"name": "抖音", "value": 35}, {"name": ".NET", "value": 34}, {"name": "PyTorch", "value": 34}, {"name": "带薪年假", "value": 33}, {"name": "Redis", "value": 32}, {"name": "渠道销售", "value": 32}, {"name": "设备运维", "value": 32}, {"name": "货运物流", "value": 31}, {"name": "保险", "value": 31}, {"name": "CQE", "value": 31}, {"name": "新能源汽车", "value": 31}, {"name": "成品检验（FQC）", "value": 31}, {"name": "周末双休", "value": 31}, {"name": "软件实施", "value": 30}, {"name": "数据库运维", "value": 30}, {"name": "数据仓库", "value": 30}, {"name": "机器视觉", "value": 30}, {"name": "工艺设计", "value": 30}, {"name": "动力电池", "value": 30}, {"name": "电力运维", "value": 30}, {"name": "React", "value": 29}, {"name": "MES系统", "value": 29}, {"name": "C/C++", "value": 29}, {"name": "架构开发", "value": 29}, {"name": "Sql", "value": 29}, {"name": "数据治理", "value": 29}, {"name": "短视频平台", "value": 29}, {"name": "餐补", "value": 28}, {"name": "六险一金", "value": 28}, {"name": "机器人", "value": 28}, {"name": "ARM处理器", "value": 28}, {"name": "质量管理", "value": 28}, {"name": "淘宝/天猫", "value": 28}, {"name": "现场管理", "value": 28}, {"name": "数据挖掘", "value": 27}, {"name": "机器人算法", "value": 27}, {"name": "库存管理", "value": 27}, {"name": "服装/纺织/皮革制造", "value": 27}, {"name": "ERP系统", "value": 26}, {"name": "运动控制算法", "value": 26}, {"name": "医疗设备/器械/耗材", "value": 26}, {"name": "软件运维", "value": 26}, {"name": "面销/陌拜", "value": 26}, {"name": "WMS", "value": 26}, {"name": "嵌入式软件开发", "value": 25}, {"name": "Server", "value": 25}, {"name": "Shell", "value": 25}, {"name": "客户支持", "value": 25}, {"name": "食品/饮品/烟酒制造", "value": 25}, {"name": "技能培训", "value": 25}, {"name": "订单管理", "value": 25}, {"name": "拼多多", "value": 25}]
+    }]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>

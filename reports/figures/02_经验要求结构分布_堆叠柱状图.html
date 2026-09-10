@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>02_经验要求结构分布_堆叠柱状图.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1400px;height:820px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '经验要求结构分布（全部岗位）',
+      subtext: '数据源：处理后数据 8836 条岗位中，经验要求与学历要求均有效的 6654 条｜按经验等级统计其学历构成（100% 堆叠）',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {
+      trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var s = ps[0].name.replace('\n', ' ');
+        var out = s + '<br/>';
+        for (var i = 0; i < ps.length; i++) {
+          out += ps[i].marker + ps[i].seriesName + '：' + ps[i].value + '%（'
+               + [[3, 1185, 1579, 909, 80], [4, 1001, 930, 407, 35], [0, 67, 106, 38, 2], [1, 103, 49, 17, 0], [0, 82, 42, 9, 0], [0, 3, 2, 0, 0]][ps[i].seriesIndex][ps[i].dataIndex] + ' 条）<br/>';
+        }
+        return out;
+      }
+    },
+    legend: {top: 96, itemWidth: 16, itemHeight: 11, textStyle: {fontSize: 13}},
+    grid: {left: 80, right: 50, top: 150, bottom: 80},
+    xAxis: {type: 'category', data: ["不限/应届\n(8条)", "1-3年\n(2441条)", "3-5年\n(2708条)", "5-10年\n(1380条)", "10年以上\n(117条)"],
+            axisLabel: {fontSize: 13, interval: 0, lineHeight: 18},
+            name: '经验要求', nameLocation: 'middle', nameGap: 62, nameTextStyle: {fontSize: 12}},
+    yAxis: {type: 'value', max: 100, name: '占比(%)', nameTextStyle: {fontSize: 12},
+            axisLabel: {fontSize: 12, formatter: '{value}%'},
+            splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+    series: [{"name": "本科", "type": "bar", "stack": "总量", "barMaxWidth": 110, "data": [37.5, 48.55, 58.31, 65.87, 68.38], "cnt": [3, 1185, 1579, 909, 80], "itemStyle": {"color": "#91d5c1"}, "emphasis": {"focus": "series"}, "label": {"show": true, "fontSize": 12, "color": "#fff", "formatter": "{c}%"}}, {"name": "大专", "type": "bar", "stack": "总量", "barMaxWidth": 110, "data": [50.0, 41.01, 34.34, 29.49, 29.91], "cnt": [4, 1001, 930, 407, 35], "itemStyle": {"color": "#5b8ff9"}, "emphasis": {"focus": "series"}, "label": {"show": true, "fontSize": 12, "color": "#fff", "formatter": "{c}%"}}, {"name": "硕士", "type": "bar", "stack": "总量", "barMaxWidth": 110, "data": [0.0, 2.74, 3.91, 2.75, 1.71], "cnt": [0, 67, 106, 38, 2], "itemStyle": {"color": "#f6bd16"}, "emphasis": {"focus": "series"}, "label": {"show": true, "fontSize": 12, "color": "#fff", "formatter": "{c}%"}}, {"name": "中专/中技", "type": "bar", "stack": "总量", "barMaxWidth": 110, "data": [12.5, 4.22, 1.81, 1.23, 0.0], "cnt": [1, 103, 49, 17, 0], "itemStyle": {"color": "#ff9845"}, "emphasis": {"focus": "series"}, "label": {"show": true, "fontSize": 12, "color": "#fff", "formatter": "{c}%"}}, {"name": "高中", "type": "bar", "stack": "总量", "barMaxWidth": 110, "data": [0.0, 3.36, 1.55, 0.65, 0.0], "cnt": [0, 82, 42, 9, 0], "itemStyle": {"color": "#e8684a"}, "emphasis": {"focus": "series"}, "label": {"show": true, "fontSize": 12, "color": "#fff", "formatter": "{c}%"}}, {"name": "博士", "type": "bar", "stack": "总量", "barMaxWidth": 110, "data": [0.0, 0.12, 0.07, 0.0, 0.0], "cnt": [0, 3, 2, 0, 0], "itemStyle": {"color": "#c2c8d5"}, "emphasis": {"focus": "series"}, "label": {"show": true, "fontSize": 12, "color": "#fff", "formatter": "{c}%"}}]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>福建省地图可视化</title>
+    <!-- 引用ECharts在线CDN（无需本地echarts.min.js文件，适配实验环境） -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        html,body,#main{
+            padding: 0px;
+            margin: 0px;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div id="main"></div>
+<script type="text/javascript">
+    // 加载福建省地图JSON数据（使用实验相关接口）
+    $.get("https://geo.datav.aliyun.com/areas_v3/bound/350000_full.json", function(map) {
+        var myChart = echarts.init(document.getElementById('main'));
+        // 注册福建省地图，地图名称设为"fujian"
+        echarts.registerMap("fujian", map);
+        
+        var option = {
+            // 地图标题（明确展示福建省地图主题）
+            title: {
+                text: '福建省地图可视化',
+                left: 'center',
+                textStyle: { 
+                    fontSize: 20,
+                    fontWeight: 'bold'
+                }
+            },
+            // 鼠标悬浮提示（仅显示地区名称，无人口数据）
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    return params.name; // 仅展示市/区名称
+                }
+            },
+            series: [
+                {
+                    map: "fujian", // 关联已注册的福建省地图
+                    type: "map",
+                    aspectScale: 1.2, // 调整地图宽高比例，适配显示
+                    selectedMode: 'single', // 支持单击选中单个区域
+                    hoverable: true, // 启用鼠标悬浮高亮效果
+                    roam: true, // 支持鼠标滚轮缩放、拖拽平移
+                    label: {
+                        show: true, // 显示地区名称标签
+                        textStyle: { 
+                            fontSize: 14, 
+                            color: '#333333' // 标签文字颜色
+                        }
+                    },
+                    itemStyle: {
+                        // 区域默认样式
+                        normal: {
+                            borderWidth: 1,
+                            borderColor: '#ffffff', // 区域边框颜色（白色，区分相邻区域）
+                            areaColor: '#FFDAB9' // 区域默认背景色（浅橙色，统一视觉）
+                        },
+                        // 鼠标悬浮/选中时的高亮样式
+                        emphasis: {
+                            borderWidth: 2,
+                            borderColor: '#ff6600', // 高亮边框颜色（橙色，突出焦点）
+                            areaColor: '#fffacd' // 高亮背景色（浅黄色，增强对比）
+                        }
+                    }
+                }
+            ]
+        };
+
+        // 应用配置项，渲染地图
+        myChart.setOption(option);
+        // 监听窗口大小变化，实现地图自适应
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    });
+</script>
+</body>
+</html>

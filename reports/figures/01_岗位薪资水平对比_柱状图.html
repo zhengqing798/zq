@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>01_岗位薪资水平对比_柱状图.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1400px;height:820px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '岗位薪资水平对比（全部岗位薪资分布）',
+      subtext: '数据源：处理后数据 8836 条岗位（薪资可解析 8833 条）｜按折算月薪分档（区间取中值，日薪/时薪已折算）｜平均 8392 元/月，中位数 7671 元/月',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {
+      trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var i = ps[0].dataIndex;
+        return '月薪 ' + ps[0].name + '<br/>岗位数：' + ps[0].value + ' 条<br/>占比：' + [1.0, 7.47, 42.81, 19.43, 24.1, 3.28, 1.91][i] + '%';
+      }
+    },
+    grid: {left: 90, right: 50, top: 120, bottom: 80},
+    xAxis: {
+      type: 'category', data: ["3千以下", "3-5千", "5-8千", "8-10千", "10-15千", "15-20千", "20千以上"],
+      name: '月薪区间', nameLocation: 'middle', nameGap: 40, nameTextStyle: {fontSize: 12},
+      axisLabel: {fontSize: 13, interval: 0},
+      axisTick: {alignWithLabel: true}
+    },
+    yAxis: {
+      type: 'value', name: '岗位数(条)', nameTextStyle: {fontSize: 12},
+      axisLabel: {fontSize: 12},
+      splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}
+    },
+    series: [{
+      name: '岗位数', type: 'bar', barMaxWidth: 80,
+      data: [88, 660, 3781, 1716, 2129, 290, 169],
+      itemStyle: {
+        borderRadius: [4, 4, 0, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          {offset: 0, color: '#9ecae1'}, {offset: 1, color: '#3182bd'}])
+      },
+      label: {show: true, position: 'top', fontSize: 12,
+              formatter: function(p) { return p.value + ' 条\n' + [1.0, 7.47, 42.81, 19.43, 24.1, 3.28, 1.91][p.dataIndex] + '%'; }}
+    }]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>

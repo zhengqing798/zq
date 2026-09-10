@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国地图数据可视化</title>
+    <!-- 引入 ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #map-container {
+            width: 90%;
+            height: 85%;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+    <h2>中国各省份数据可视化</h2>
+    <div id="map-container"></div>
+
+    <script>
+        // 初始化图表
+        const myChart = echarts.init(document.getElementById('map-container'));
+
+        // 示例数据：可自行修改省份名称和数值
+        const mapData = [
+            { name: '北京市', value: 1200 },
+            { name: '天津市', value: 680 },
+            { name: '上海市', value: 1500 },
+            { name: '重庆市', value: 890 },
+            { name: '河北省', value: 750 },
+            { name: '山西省', value: 420 },
+            { name: '辽宁省', value: 580 },
+            { name: '吉林省', value: 310 },
+            { name: '黑龙江省', value: 380 },
+            { name: '江苏省', value: 1450 },
+            { name: '浙江省', value: 1380 },
+            { name: '安徽省', value: 620 },
+            { name: '福建省', value: 780 },
+            { name: '江西省', value: 450 },
+            { name: '山东省', value: 1100 },
+            { name: '河南省', value: 860 },
+            { name: '湖北省', value: 720 },
+            { name: '湖南省', value: 690 },
+            { name: '广东省', value: 1900 },
+            { name: '海南省', value: 210 },
+            { name: '四川省', value: 920 },
+            { name: '贵州省', value: 340 },
+            { name: '云南省', value: 410 },
+            { name: '陕西省', value: 560 },
+            { name: '甘肃省', value: 230 },
+            { name: '青海省', value: 120 },
+            { name: '台湾省', value: 680 },
+            { name: '内蒙古自治区', value: 290 },
+            { name: '广西壮族自治区', value: 390 },
+            { name: '西藏自治区', value: 80 },
+            { name: '宁夏回族自治区', value: 150 },
+            { name: '新疆维吾尔自治区', value: 320 },
+            { name: '香港特别行政区', value: 760 },
+            { name: '澳门特别行政区', value: 190 }
+        ];
+
+        // 加载中国地图 GeoJSON 数据
+        fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+            .then(response => response.json())
+            .then(chinaJson => {
+                // 注册地图
+                echarts.registerMap('china', chinaJson);
+
+                const option = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            return `${params.name}<br/>数值：${params.value || 0}`;
+                        }
+                    },
+                    visualMap: {
+                        min: 0,
+                        max: 2000,
+                        left: 'left',
+                        top: 'bottom',
+                        text: ['高', '低'],
+                        calculable: true,
+                        inRange: {
+                            color: ['#e0f3f8', '#abd9e9', '#74add1', '#4575b4', '#313695']
+                        }
+                    },
+                    series: [
+                        {
+                            name: '省份数据',
+                            type: 'map',
+                            map: 'china',
+                            roam: true, // 开启缩放和拖拽
+                            label: {
+                                show: true,
+                                fontSize: 10,
+                                color: '#333'
+                            },
+                            emphasis: {
+                                label: {
+                                    color: '#fff',
+                                    fontSize: 12
+                                },
+                                itemStyle: {
+                                    areaColor: '#f46d43'
+                                }
+                            },
+                            data: mapData
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
+            });
+
+        // 自适应窗口大小
+        window.addEventListener('resize', () => {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>04_学历要求门槛分析_饼状图.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1200px;height:800px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '学历要求门槛分析',
+      subtext: '数据源：处理后数据 8836 条岗位的"学历要求"字段｜已剔除未标注（原本为非学历值、已被清空）412 条，占比按有效 8424 条计算',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {trigger: 'item', formatter: '{b}<br/>岗位数：{c}<br/>占比：{d}%'},
+    legend: {orient: 'vertical', left: 60, top: 'middle', itemWidth: 14, itemHeight: 12,
+             textStyle: {fontSize: 13}},
+    color: ['#3182bd', '#6baed6', '#9ecae1', '#5ad8a6', '#f6bd16', '#ff9845'],
+    series: [{
+      name: '学历要求', type: 'pie',
+      radius: ['34%', '62%'], center: ['62%', '56%'],
+      avoidLabelOverlap: true,
+      itemStyle: {borderColor: '#fff', borderWidth: 2},
+      label: {fontSize: 13, formatter: '{b}\n{c} 条（{d}%）'},
+      labelLine: {length: 16, length2: 16},
+      emphasis: {label: {fontSize: 15, fontWeight: 'bold'},
+                 itemStyle: {shadowBlur: 12, shadowColor: 'rgba(0,0,0,.25)'}},
+      data: [{"name": "本科", "value": 4696}, {"name": "大专", "value": 2885}, {"name": "硕士", "value": 360}, {"name": "中专/中技", "value": 247}, {"name": "高中", "value": 186}, {"name": "博士", "value": 50}]
+    }]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>

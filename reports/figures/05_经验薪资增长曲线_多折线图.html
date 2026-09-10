@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>05_经验薪资增长曲线_多折线图.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1400px;height:860px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '经验-薪资增长曲线（多折线 · 主要城市）',
+      subtext: '数据源：处理后数据 8836 条岗位｜取岗位数最多的 6 个城市：苏州、福州、厦门、宁波、嘉兴、湖州｜按"经验要求"等级的平均月薪（元/月），样本 <10 条的组合不显示；黑色虚线为全部城市平均',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(ps) {
+        var out = ps[0].axisValue + '<br/>';
+        for (var i = 0; i < ps.length; i++) {
+          if (ps[i].value === null || ps[i].value === undefined) continue;
+          var n = [[1, 569, 671, 307, 19], [1, 366, 346, 171, 15], [1, 288, 361, 203, 24], [0, 283, 286, 180, 10], [3, 222, 293, 119, 8], [0, 169, 204, 107, 16], [8, 2440, 2708, 1379, 117]][ps[i].seriesIndex][ps[i].dataIndex];
+          out += ps[i].marker + ps[i].seriesName + '：' + ps[i].value + ' 元/月（' + n + ' 条）<br/>';
+        }
+        return out;
+      }
+    },
+    legend: {top: 92, left: 'center', itemWidth: 18, itemHeight: 10,
+             itemGap: 18, textStyle: {fontSize: 13}},
+    grid: {left: 90, right: 70, top: 165, bottom: 80},
+    xAxis: {type: 'category', boundaryGap: false, data: ["不限/应届", "1-3年", "3-5年", "5-10年", "10年以上"],
+            axisLabel: {fontSize: 13}, name: '经验要求', nameLocation: 'middle', nameGap: 36,
+            nameTextStyle: {fontSize: 12}},
+    yAxis: {type: 'value', name: '平均月薪(元)', nameTextStyle: {fontSize: 12},
+            min: function(v) { return Math.max(0, Math.floor(v.min / 1000) * 1000 - 1000); },
+            axisLabel: {fontSize: 12, formatter: function(v){ return (v/1000) + 'k'; }},
+            splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+    series: [{"name": "苏州", "type": "line", "smooth": true, "symbolSize": 6, "connectNulls": false, "data": [null, 8304.0, 9767.0, 10570.0, 15705.0], "n": [1, 569, 671, 307, 19], "itemStyle": {"color": "#3182bd"}, "lineStyle": {"width": 2}, "emphasis": {"focus": "series", "lineStyle": {"width": 5}}}, {"name": "福州", "type": "line", "smooth": true, "symbolSize": 6, "connectNulls": false, "data": [null, 7558.0, 8228.0, 9441.0, 11436.0], "n": [1, 366, 346, 171, 15], "itemStyle": {"color": "#5ad8a6"}, "lineStyle": {"width": 2}, "emphasis": {"focus": "series", "lineStyle": {"width": 5}}}, {"name": "厦门", "type": "line", "smooth": true, "symbolSize": 6, "connectNulls": false, "data": [null, 7969.0, 8344.0, 9389.0, 12586.0], "n": [1, 288, 361, 203, 24], "itemStyle": {"color": "#f6bd16"}, "lineStyle": {"width": 2}, "emphasis": {"focus": "series", "lineStyle": {"width": 5}}}, {"name": "宁波", "type": "line", "smooth": true, "symbolSize": 6, "connectNulls": false, "data": [null, 7875.0, 8847.0, 10264.0, 12768.0], "n": [0, 283, 286, 180, 10], "itemStyle": {"color": "#945fb9"}, "lineStyle": {"width": 2}, "emphasis": {"focus": "series", "lineStyle": {"width": 5}}}, {"name": "嘉兴", "type": "line", "smooth": true, "symbolSize": 6, "connectNulls": false, "data": [null, 7977.0, 8928.0, 10253.0, null], "n": [3, 222, 293, 119, 8], "itemStyle": {"color": "#ff9845"}, "lineStyle": {"width": 2}, "emphasis": {"focus": "series", "lineStyle": {"width": 5}}}, {"name": "湖州", "type": "line", "smooth": true, "symbolSize": 6, "connectNulls": false, "data": [null, 8088.0, 9000.0, 10098.0, 13065.0], "n": [0, 169, 204, 107, 16], "itemStyle": {"color": "#1e9493"}, "lineStyle": {"width": 2}, "emphasis": {"focus": "series", "lineStyle": {"width": 5}}}, {"name": "全部城市平均", "type": "line", "smooth": true, "symbolSize": 10, "data": [5463.0, 7752.0, 8834.0, 9941.0, 12579.0], "lineStyle": {"width": 4, "type": "dashed"}, "itemStyle": {"color": "#333333"}, "z": 10, "n": [8, 2440, 2708, 1379, 117]}]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>

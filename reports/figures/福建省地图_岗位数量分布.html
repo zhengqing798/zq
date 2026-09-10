@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>福建省各市岗位数量分布</title>
+    <!-- 引用ECharts在线CDN（无需本地echarts.min.js文件，适配实验环境） -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        html,body,#main{ padding: 0px; margin: 0px; height: 100%; overflow: hidden; }
+        #tip {
+            position: absolute; left: 20px; top: 12px; color: #666;
+            font-size: 13px; font-family: "Microsoft YaHei", sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div id="main"></div>
+<div id="tip">数据来源：data/processed/zhaopin_jobs_cleaned.csv（清洗后 8836 条岗位，其中福建省 3553 条）｜ 颜色越深岗位数越多，无数据城市记为 0</div>
+<script type="text/javascript">
+    // 各市岗位数量（按"岗位地区"字段汇总，无数据为 0）
+    var mapData = [
+        { name: '福州市', value: 1173 },
+            { name: '厦门市', value: 1169 },
+            { name: '莆田市', value: 138 },
+            { name: '三明市', value: 58 },
+            { name: '泉州市', value: 594 },
+            { name: '漳州市', value: 235 },
+            { name: '南平市', value: 99 },
+            { name: '龙岩市', value: 87 },
+            { name: '宁德市', value: 0 }
+    ];
+
+    var maxValue = 1173;
+
+    // 加载福建省地图JSON数据（使用实验相关接口）
+    $.get("https://geo.datav.aliyun.com/areas_v3/bound/350000_full.json", function(map) {
+        var myChart = echarts.init(document.getElementById('main'));
+        echarts.registerMap("fujian", map);
+
+        var option = {
+            title: {
+                text: '福建省各市岗位数量分布',
+                left: 'center',
+                top: 12,
+                textStyle: { fontSize: 20, fontWeight: 'bold' }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    var v = (params.value === undefined || params.value === null) ? 0 : params.value;
+                    var pct = (v / 3553 * 100).toFixed(2);
+                    return params.name + '<br/>岗位数量：' + v + '<br/>占福建省比例：' + pct + '%';
+                }
+            },
+            visualMap: {
+                min: 0,
+                max: maxValue,
+                left: 'left',
+                bottom: '5%',
+                text: ['多', '少'],
+                calculable: true,
+                inRange: { color: ["#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd"] }
+            },
+            series: [
+                {
+                    name: '岗位数量',
+                    map: "fujian",
+                    type: "map",
+                    aspectScale: 1.2,
+                    selectedMode: 'single',
+                    hoverable: true,
+                    roam: true,
+                    label: {
+                        show: true,
+                        fontSize: 11,
+                        color: '#333',
+                        formatter: function(params) {
+                            var v = (params.value === undefined || params.value === null) ? 0 : params.value;
+                            return params.name + '\n' + v;
+                        }
+                    },
+                    itemStyle: {
+                        borderWidth: 1,
+                        borderColor: '#ffffff',
+                        areaColor: '#f7fbff'
+                    },
+                    emphasis: {
+                        label: { color: '#fff', fontSize: 13 },
+                        itemStyle: { areaColor: '#f46d43', borderColor: '#ff6600', borderWidth: 2 }
+                    },
+                    data: mapData
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+        window.addEventListener('resize', function() { myChart.resize(); });
+    }).fail(function() {
+        document.getElementById('main').innerHTML =
+            '<p style="padding:40px;color:#c00">地图 GeoJSON 加载失败（需要联网访问 geo.datav.aliyun.com）</p>';
+    });
+</script>
+</body>
+</html>
