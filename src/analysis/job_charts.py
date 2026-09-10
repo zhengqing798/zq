@@ -172,6 +172,7 @@ CHART_FILES = [
     "04_学历要求门槛分析_饼状图",
     "05_经验薪资增长曲线_多折线图",
     "06_招聘活跃企业TOP榜_横向柱状图",
+    "07_岗位分布_横向柱状图",
 ]
 
 EXPORT_SNIPPET = """
@@ -634,6 +635,153 @@ def chart6_top_companies(rows, top_n=20):
     html_page(os.path.join(OUT_DIR, "06_招聘活跃企业TOP榜_横向柱状图.html"), 1300, 900, option)
 
 
+# 岗位大类归并规则（按顺序匹配，先命中先归类）
+# 说明：原始岗位名称有 6000+ 种（其中 5000+ 只出现 1 次），直接画图无法阅读，
+#       因此按关键词归并为 16 个岗位大类；未命中任何规则的归入"其他"。
+JOB_CATEGORY_RULES = [
+    ("质量管理类", ["质量", "品质", "品控", "品管", "质检", "检测", "化验", "计量", "测量", "三坐标",
+                "实验室", "qc", "qa", "qe", "cqe", "sqe", "检验", "体系", "审核"]),
+    ("测试类", ["测试", "test"]),
+    ("运维与支持类", ["运维", "网络", "安全", "系统管理员", "系统工程师", "it工程师", "it专员", "it经理",
+                  "it主管", "it支持", "信息技术", "信息化", "mes", "erp", "sap", "oa",
+                  "技术支持", "实施工程", "实施顾问", "售后", "helpdesk", "dba"]),
+    ("算法与人工智能类", ["算法", "机器学习", "深度学习", "人工智能", "ai", "nlp", "计算机视觉", "视觉",
+                    "数据挖掘", "推荐", "大模型", "智能", "agent"]),
+    ("数据分析类", ["数据", "经营分析", "etl", "bi", "报表", "统计"]),
+    ("前端与移动端类", ["前端", "web", "h5", "小程序", "android", "ios", "移动端", "客户端", "ui开发"]),
+    ("软件开发类", ["开发", "软件", "程序员", "架构", "全栈", "java", "python", "c++", "c#", ".net",
+                "golang", "php", "node", "后端", "服务端", "嵌入式", "驱动", "固件", "上位机"]),
+    ("硬件与制造类", ["硬件", "电子", "电工", "电路", "pcb", "射频", "电气", "电力", "通信", "自动化", "仪表",
+                 "机械", "结构", "模具", "工艺", "设备", "制造", "生产", "工业", "材料", "焊接", "装配",
+                 "数控", "光电", "光学", "半导体", "芯片", "机电", "研发", "调试", "维修", "仿真",
+                 "可靠性", "厂务", "中试", "制冷", "轴承", "pe工程师", "技术员"]),
+    ("产品与项目类", ["产品经理", "产品专员", "项目经理", "项目管理", "项目专员", "pmo", "需求分析", "产品运营"]),
+    ("设计类", ["设计", "美工", "视觉设计", "平面", "视频剪辑", "视频制作", "剪辑师", "摄影师", "动画"]),
+    ("运营与市场类", ["运营", "市场", "推广", "seo", "sem", "新媒体", "电商", "客服", "销售", "商务",
+                 "渠道", "bd", "导购", "店长", "招商", "外贸业务"]),
+    ("金融与风控类", ["催收", "风控", "信贷", "证券", "投资", "基金", "保险", "银行", "理财", "金融", "担保"]),
+    ("财务类", ["财务", "会计", "出纳", "审计", "税务", "成本", "结算"]),
+    ("人事行政类", ["人事", "人力资源", "hr", "招聘", "薪酬", "绩效", "行政", "助理", "文员", "前台",
+                 "后勤", "秘书", "管培", "储备干部"]),
+    ("教育与培训类", ["教师", "讲师", "培训", "教育", "教练", "助教", "教研"]),
+    ("医药生物类", ["医药", "护理", "临床", "生物", "药学", "医疗", "健康"]),
+    ("供应链与物流类", ["物流", "仓储", "仓库", "采购", "供应链", "订单", "跟单", "关务", "计划员", "调度"]),
+]
+OTHER_CATEGORY = "其他"
+
+
+def job_category(title):
+    """把岗位名称归入岗位大类（未命中规则 → 其他）"""
+    t = (title or "").strip().lower()
+    for cat, kws in JOB_CATEGORY_RULES:
+        for kw in kws:
+            if kw in t:
+                return cat
+    return OTHER_CATEGORY
+
+
+def chart7_job_distribution(rows, top_titles=10):
+    """07 岗位分布图（横向柱状图）：按岗位大类 + 高频具体岗位名称"""
+    total = len(rows)
+    cat_cnt = Counter(job_category(r.get("岗位名称")) for r in rows)
+    titles_by_cat = defaultdict(Counter)
+    for r in rows:
+        t = (r.get("岗位名称") or "").strip()
+        titles_by_cat[job_category(t)][t] += 1
+
+    # 高频具体岗位名称（合并大小写差异：java开发工程师 / Java开发工程师）
+    norm_title = Counter()
+    for r in rows:
+        t = re.sub(r"\s+", "", (r.get("岗位名称") or "").strip())
+        if t:
+            norm_title[t.lower()] += 1
+    display = {}
+    for r in rows:
+        t = re.sub(r"\s+", "", (r.get("岗位名称") or "").strip())
+        display.setdefault(t.lower(), t)
+    top_t = [(display[k], v) for k, v in norm_title.most_common(top_titles)]
+
+    cats_sorted = cat_cnt.most_common()
+    write_csv("07_岗位分布_横向柱状图.csv",
+              ["岗位大类", "岗位数", "占比(%)", "该类高频岗位（Top3）"],
+              [[c, n, round(n / total * 100, 2),
+                "、".join("%s(%d)" % (t, v) for t, v in titles_by_cat[c].most_common(3))]
+               for c, n in cats_sorted])
+
+    cats = [c for c, _ in cats_sorted][::-1]            # 反向：最大值显示在最上方
+    vals = [n for _, n in cats_sorted][::-1]
+    tips = []
+    for c in cats:
+        ex = "、".join("%s（%d）" % (t, v) for t, v in titles_by_cat[c].most_common(3))
+        tips.append(ex or "—")
+    t_names = [t for t, _ in top_t][::-1]
+    t_vals = [v for _, v in top_t][::-1]
+
+    option = """
+  {
+    title: {
+      text: '岗位分布（按岗位大类 + 高频岗位）',
+      subtext: '数据源：处理后数据 __TOTAL__ 条岗位｜原始岗位名称 __KINDS__ 种（__ONCE__ 种仅出现 1 次），按关键词归并为 __NCAT__ 个岗位大类',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var i = ps[0].dataIndex;
+        if (ps[0].seriesIndex === 0) {
+          return '<b>' + ps[0].name + '</b><br/>岗位数：' + ps[0].value + '（'
+               + (ps[0].value / __TOTAL__ * 100).toFixed(2) + '%）<br/>高频岗位：' + __TIPS__[i];
+        }
+        return '<b>' + ps[0].name + '</b><br/>岗位数：' + ps[0].value + '（'
+             + (ps[0].value / __TOTAL__ * 100).toFixed(2) + '%）';
+      }
+    },
+    grid: [{left: 150, right: 90, top: 110, bottom: 60, width: '42%'},
+           {left: '58%', right: 70, top: 110, bottom: 60}],
+    xAxis: [
+      {type: 'value', gridIndex: 0, name: '岗位数', nameTextStyle: {fontSize: 11},
+       axisLabel: {fontSize: 11}, splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+      {type: 'value', gridIndex: 1, name: '岗位数', nameTextStyle: {fontSize: 11},
+       axisLabel: {fontSize: 11}, splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}}
+    ],
+    yAxis: [
+      {type: 'category', gridIndex: 0, data: __CATS__,
+       axisLabel: {fontSize: 12}, axisTick: {show: false}},
+      {type: 'category', gridIndex: 1, data: __TNAMES__,
+       axisLabel: {fontSize: 11, width: 150, overflow: 'truncate'}, axisTick: {show: false}}
+    ],
+    series: [
+      {name: '岗位大类', type: 'bar', xAxisIndex: 0, yAxisIndex: 0, barMaxWidth: 22,
+       data: __VALS__,
+       itemStyle: {borderRadius: [0, 4, 4, 0],
+         color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+           {offset: 0, color: '#9ecae1'}, {offset: 1, color: '#2171b5'}])},
+       label: {show: true, position: 'right', fontSize: 11,
+               formatter: function(p) { return p.value + '（' + (p.value / __TOTAL__ * 100).toFixed(1) + '%）'; }}},
+      {name: '高频岗位名称', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, barMaxWidth: 16,
+       data: __TVALS__,
+       itemStyle: {borderRadius: [0, 4, 4, 0],
+         color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+           {offset: 0, color: '#ffd591'}, {offset: 1, color: '#fa8c16'}])},
+       label: {show: true, position: 'right', fontSize: 11, formatter: '{c}'}}
+    ]
+  }
+"""
+    option = (option.replace("__CATS__", js(cats))
+                    .replace("__VALS__", js(vals))
+                    .replace("__TIPS__", js(tips))
+                    .replace("__TNAMES__", js(t_names))
+                    .replace("__TVALS__", js(t_vals))
+                    .replace("__TOTAL__", str(total))
+                    .replace("__KINDS__", str(len(set((r.get("岗位名称") or "").strip() for r in rows))))
+                    .replace("__ONCE__", str(sum(1 for v in Counter(
+                        (r.get("岗位名称") or "").strip() for r in rows).values() if v == 1)))
+                    .replace("__NCAT__", str(len(cats))))
+    html_page(os.path.join(OUT_DIR, "07_岗位分布_横向柱状图.html"), 1500, 900, option)
+    return cats_sorted
+
+
 def main():
     src = pick_source()
     rows = load_rows(src)
@@ -647,6 +795,9 @@ def main():
     chart4_education_pie(rows)
     chart5_experience_salary_lines(rows)
     chart6_top_companies(rows)
+    cats = chart7_job_distribution(rows)
+    print("  岗位大类分布:", ", ".join("%s %d(%.1f%%)" % (c, n, n / len(rows) * 100)
+                                       for c, n in cats))
     print("输出目录:", OUT_DIR)
 
     if "--no-png" not in sys.argv:
