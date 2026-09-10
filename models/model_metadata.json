@@ -1,0 +1,167 @@
+{
+  "model": "XGBoost (XGBClassifier)",
+  "purpose": "人岗匹配评分（二分类：匹配 / 不匹配）",
+  "features": [
+    "城市匹配度",
+    "学历匹配度",
+    "经验是否满足",
+    "经验差值",
+    "经验差值归一化",
+    "技能Jaccard",
+    "核心技能命中率",
+    "技能覆盖度",
+    "岗位-经历文本相似度",
+    "岗位-求职意向相似度",
+    "专业匹配度",
+    "证书命中数"
+  ],
+  "n_features": 12,
+  "feature_usage": "推理时按 features 顺序构造 12 维特征；predict_proba 输出匹配概率",
+  "trained_on": "全部 153872 条配对样本（最终上线模型）",
+  "eval_split_strict": {
+    "train": 82287,
+    "valid": 14458,
+    "test": 6609,
+    "dropped_cross_pairs": 50518,
+    "resume_overlap": 0,
+    "job_overlap": 0
+  },
+  "eval_split_reference": {
+    "train": 122440,
+    "test": 31432,
+    "job_overlap": 8007
+  },
+  "metrics_strict": {
+    "Logistic回归（基线）": {
+      "模型": "Logistic回归（基线）",
+      "Accuracy": 0.998,
+      "Precision": 0.9961,
+      "Recall": 1.0,
+      "F1": 0.998,
+      "ROC-AUC": 0.9983,
+      "训练耗时(s)": 0.07,
+      "预测耗时(s)": 0.004
+    },
+    "SVM（线性核）": {
+      "模型": "SVM（线性核）",
+      "Accuracy": 0.998,
+      "Precision": 0.9961,
+      "Recall": 1.0,
+      "F1": 0.998,
+      "ROC-AUC": 0.998,
+      "训练耗时(s)": 0.11,
+      "预测耗时(s)": 0.004
+    },
+    "随机森林": {
+      "模型": "随机森林",
+      "Accuracy": 1.0,
+      "Precision": 1.0,
+      "Recall": 1.0,
+      "F1": 1.0,
+      "ROC-AUC": 1.0,
+      "训练耗时(s)": 1.25,
+      "预测耗时(s)": 0.086
+    },
+    "XGBoost（上线模型）": {
+      "模型": "XGBoost（上线模型）",
+      "Accuracy": 1.0,
+      "Precision": 1.0,
+      "Recall": 1.0,
+      "F1": 1.0,
+      "ROC-AUC": 1.0,
+      "训练耗时(s)": 0.51,
+      "预测耗时(s)": 0.015,
+      "best_iteration": 249,
+      "最优参数": "depth=6, lr=0.10, n_est=300"
+    }
+  },
+  "metrics_reference": {
+    "Logistic回归（基线）": {
+      "模型": "Logistic回归（基线）",
+      "Accuracy": 0.9989,
+      "Precision": 0.9976,
+      "Recall": 1.0,
+      "F1": 0.9988,
+      "ROC-AUC": 0.9992,
+      "训练耗时(s)": 0.19,
+      "预测耗时(s)": 0.013
+    },
+    "SVM（线性核）": {
+      "模型": "SVM（线性核）",
+      "Accuracy": 0.9989,
+      "Precision": 0.9976,
+      "Recall": 1.0,
+      "F1": 0.9988,
+      "ROC-AUC": 0.999,
+      "训练耗时(s)": 0.28,
+      "预测耗时(s)": 0.011
+    },
+    "随机森林": {
+      "模型": "随机森林",
+      "Accuracy": 1.0,
+      "Precision": 1.0,
+      "Recall": 1.0,
+      "F1": 1.0,
+      "ROC-AUC": 1.0,
+      "训练耗时(s)": 2.53,
+      "预测耗时(s)": 0.364
+    },
+    "XGBoost（上线模型）": {
+      "模型": "XGBoost（上线模型）",
+      "Accuracy": 1.0,
+      "Precision": 1.0,
+      "Recall": 1.0,
+      "F1": 1.0,
+      "ROC-AUC": 1.0,
+      "训练耗时(s)": 2.21,
+      "预测耗时(s)": 0.058,
+      "best_iteration": 276
+    }
+  },
+  "xgb_params_full": {
+    "n_estimators": 600,
+    "learning_rate": 0.1,
+    "max_depth": 6,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "eval_metric": "logloss",
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "best_iteration_strict": 249,
+  "xgb_best_params": {
+    "n_estimators": 300,
+    "learning_rate": 0.1,
+    "max_depth": 6,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "eval_metric": "logloss",
+    "early_stopping_rounds": 40,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "recommended_threshold": 0.5,
+  "threshold_metrics": {
+    "推荐阈值": 0.5,
+    "阈值0.5": {
+      "Accuracy": 1.0,
+      "Precision": 1.0,
+      "Recall": 1.0,
+      "F1": 1.0
+    },
+    "调优阈值": {
+      "Accuracy": 1.0,
+      "Precision": 1.0,
+      "Recall": 1.0,
+      "F1": 1.0
+    }
+  },
+  "tuning_records": "data/processed/模型调参记录.csv",
+  "model_file": "models/xgboost_scoring_model.json"
+}
