@@ -31,7 +31,7 @@
 zq/
 ├── README.md                  # 项目总览（本文件）
 ├── requirements.txt           # Python 依赖
-├── .gitignore                 # 忽略 data/、.env、密钥等
+├── .gitignore                 # 忽略 .venv/、浏览器 profile、密钥等
 ├── docs/                      # ★ 全部课程过程文档（每次汇报核验对象）
 │   ├── 需求分析文档.md          # 任务1：选题与需求分析（已完成）
 │   ├── 数据预处理文档.md         # 任务3：清洗与特征工程
@@ -79,7 +79,7 @@ git push origin main                         # 推送
 ```
 
 - 提交信息建议带任务号：`任务2: 完成51job爬虫分页抓取`
-- `data/`、`.env`、API Key **一律不入库**（已在 .gitignore 中处理）
+- `.env`、API Key、`.venv/`、浏览器 profile（`.zhaopin_profile/` 等）**一律不入库**（已在 .gitignore 中处理）；`data/` 下的原始、清洗、特征与划分结果**均已入库**，便于答辩核验与复现
 - 每人每天至少一次 commit + push，最终答辩会核验 **Git 提交记录**
 
 ## 6. 数据合规声明
