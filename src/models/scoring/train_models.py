@@ -265,11 +265,13 @@ def main():
     best_iter = next((r.get("best_iteration", -1) for r in rows_strict
                       if r["模型"].startswith("XGBoost")), -1)
     xgb_full = None
+    full_params = None
     if use_xgb:
         from xgboost import XGBClassifier
         params = dict(best_params) if best_params else dict(XGB_PARAMS)
         params.pop("early_stopping_rounds", None)
         params["n_estimators"] = best_iter if best_iter and best_iter > 0 else 400
+        full_params = dict(params)
         print("\n===== 最终上线模型：全量 %d 条样本重训 XGBoost（%s, n_estimators=%d）=====" %
               (len(df), "depth=%s lr=%s" % (params.get("max_depth"), params.get("learning_rate")),
                params["n_estimators"]))
@@ -374,7 +376,8 @@ def main():
                            for r in rows_strict},
         "metrics_reference": {r["模型"]: {k: v for k, v in r.items() if not k.startswith("_")}
                               for r in rows_ref},
-        "xgb_params_full": {k: v for k, v in XGB_PARAMS.items() if k != "early_stopping_rounds"},
+        "xgb_params_full": full_params or {k: v for k, v in XGB_PARAMS.items()
+                                           if k != "early_stopping_rounds"},
         "best_iteration_strict": int(best_iter),
         "xgb_best_params": best_params or None,
         "recommended_threshold": (threshold_info or {}).get("推荐阈值"),
