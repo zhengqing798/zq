@@ -95,6 +95,20 @@ def split_by_resume(df):
     return df.iloc[tr], df.iloc[te]
 
 
+def split_train_valid(train_pool, valid_size=0.15):
+    """在训练池内再切出验证集：简历与岗位都与训练集不重叠（用于早停/阈值选择）"""
+    from sklearn.model_selection import GroupShuffleSplit
+    r_tr, r_va = next(GroupShuffleSplit(1, test_size=valid_size, random_state=SEED)
+                      .split(train_pool, groups=train_pool[RESUME_ID]))
+    j_tr, j_va = next(GroupShuffleSplit(1, test_size=valid_size, random_state=SEED)
+                      .split(train_pool, groups=train_pool[JOB_ID]))
+    tr_res = set(train_pool.iloc[r_tr][RESUME_ID]); va_res = set(train_pool.iloc[r_va][RESUME_ID])
+    tr_job = set(train_pool.iloc[j_tr][JOB_ID]); va_job = set(train_pool.iloc[j_va][JOB_ID])
+    train = train_pool[train_pool[RESUME_ID].isin(tr_res) & train_pool[JOB_ID].isin(tr_job)]
+    valid = train_pool[train_pool[RESUME_ID].isin(va_res) & train_pool[JOB_ID].isin(va_job)]
+    return train, valid
+
+
 def build_linear_models():
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
@@ -186,10 +200,10 @@ def main():
     print("  测试集与训练集 简历重叠 %d 个、岗位重叠 %d 个" % (
         len(set(train_s[RESUME_ID]) & set(test_s[RESUME_ID])),
         len(set(train_s[JOB_ID]) & set(test_s[JOB_ID]))))
-    gss = GroupShuffleSplit(1, test_size=0.15, random_state=SEED)
-    tr_i, va_i = next(gss.split(train_s, groups=train_s[RESUME_ID]))
-    valid_s = train_s.iloc[va_i]
-    train_s2 = train_s.iloc[tr_i]
+    train_s2, valid_s = split_train_valid(train_s)
+    print("  训练池 %d → 训练集 %d（简历 %d / 岗位 %d）｜验证集 %d（简历 %d / 岗位 %d）" % (
+        len(train_s), len(train_s2), train_s2[RESUME_ID].nunique(), train_s2[JOB_ID].nunique(),
+        len(valid_s), valid_s[RESUME_ID].nunique(), valid_s[JOB_ID].nunique()))
 
     rows_strict, fitted, scores_strict, xgb_strict, y_te = run_setting(
         "严格划分（简历+岗位均不重叠）", train_s2, test_s, use_xgb, valid_s)
@@ -241,12 +255,11 @@ def main():
 
     # ---------- ② 参考划分（仅简历不重叠） ----------
     train_r, test_r = split_by_resume(df)
-    gss_r = GroupShuffleSplit(1, test_size=0.15, random_state=SEED)
-    tr_i2, va_i2 = next(gss_r.split(train_r, groups=train_r[RESUME_ID]))
+    train_r2, valid_r = split_train_valid(train_r)
     rows_ref, _, scores_ref, _, y_te_ref = run_setting(
         "参考划分（仅简历不重叠，岗位重叠 %d 个）" %
         len(set(train_r[JOB_ID]) & set(test_r[JOB_ID])),
-        train_r.iloc[tr_i2], test_r, use_xgb, train_r.iloc[va_i2])
+        train_r2, test_r, use_xgb, valid_r)
 
     # ---------- ③ 最终上线模型：全量数据重训 ----------
     best_iter = next((r.get("best_iteration", -1) for r in rows_strict
@@ -354,7 +367,7 @@ def main():
             "resume_overlap": 0, "job_overlap": 0,
         },
         "eval_split_reference": {
-            "train": int(len(train_r)), "test": int(len(test_r)),
+            "train": int(len(train_r2)), "valid": int(len(valid_r)), "test": int(len(test_r)),
             "job_overlap": int(len(set(train_r[JOB_ID]) & set(test_r[JOB_ID]))),
         },
         "metrics_strict": {r["模型"]: {k: v for k, v in r.items() if not k.startswith("_")}
@@ -518,16 +531,19 @@ def build_report(res_strict, res_ref, rows_strict, imp_df, meta, n_all, dropped,
     L.append("> 模型：**Logistic 回归（精度基线）** → SVM（线性核）/ 随机森林（对比） → **XGBoost（最终上线模型）**\n")
     L.append("---\n")
     L.append("## 一、训练/测试集划分（重点：避免数据泄漏）\n")
-    L.append("| 口径 | 训练集 | 测试集 | 简历重叠 | 岗位重叠 | 说明 |")
-    L.append("|---|---|---|---|---|---|")
-    L.append("| **严格划分（主口径）** | %d | %d | 0 | 0 | 训练集 = 训练简历 × 训练岗位；测试集 = 测试简历 × 测试岗位；两侧交叉的 %d 条配对丢弃 |"
-             % (meta["eval_split_strict"]["train"], meta["eval_split_strict"]["test"], dropped))
-    L.append("| 参考划分 | %d | %d | 0 | %d | 只保证简历不重叠，岗位会同时出现在两侧 |"
-             % (meta["eval_split_reference"]["train"], meta["eval_split_reference"]["test"],
+    L.append("| 口径 | 训练集 | 验证集 | 测试集 | 简历重叠 | 岗位重叠 | 说明 |")
+    L.append("|---|---|---|---|---|---|---|")
+    L.append("| **严格划分（主口径）** | %d | %d | %d | 0 | 0 | 训练集 = 训练简历 × 训练岗位；测试集 = 测试简历 × 测试岗位；验证集在训练池内再切分且与训练集不重叠；两侧交叉的 %d 条配对丢弃 |"
+             % (meta["eval_split_strict"]["train"], meta["eval_split_strict"]["valid"],
+                meta["eval_split_strict"]["test"], dropped))
+    L.append("| 参考划分 | %d | %d | %d | 0 | %d | 只保证简历不重叠，岗位会同时出现在两侧 |"
+             % (meta["eval_split_reference"]["train"], meta["eval_split_reference"]["valid"],
+                meta["eval_split_reference"]["test"],
                 meta["eval_split_reference"]["job_overlap"]))
     L.append("")
     L.append("> 同一份简历会产生几十~几百条配对、同一个岗位也会出现在多条配对中，若只按行随机划分，"
-             "模型可以\"背下\"简历/岗位的个体特征，指标会虚高。严格划分把两侧都隔开，评估更可信。\n")
+             "模型可以“背下”简历/岗位的个体特征，指标会虚高。严格划分把简历与岗位**两侧都隔开**"
+             "（验证集同样与训练集不重叠，只用于早停与阈值选择），评估更可信。\n")
     L.append("## 二、模型指标对比（严格划分测试集）\n")
     cols = ["模型", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC", "训练耗时(s)", "预测耗时(s)"]
     L.append("| " + " | ".join(cols) + " |")
