@@ -2046,59 +2046,6 @@ C#
 3. 项目交付与需求落地：对接产品、业务、现场实施团队，梳理工业生产场景需求，完成需求可行性评估、技术方案输出。全程跟进工业软件项目研发、测试、上线、交付全流程，协调解决研发、联调、现场落地中的各类问题，保障项目按期、高质量交付。
 4. 技术体系优化与攻坚：跟进工业软件行业技术趋势，结合工厂数字化、智能制造、设备数据采集等业务场景，持续优化系统架构、性能与稳定性。主导复杂技术难题攻关，解决工业软件对接PLC、工业网关、生产设备数据交互、多系统集成等核心场景问题。
 5. 文档与资产管理：统筹输出技术方案、架构文档、接口规范、开发手册等资料，沉淀团队研发资产，规范工业软件研发标准，支撑产品持续迭代与项目复用。",厦门奥普拓自控科技有限公司,黄月云,人事经理 · 厦门奥普拓自控科技有限公司,在线,,今日回复5次,Java,厦门,2026-09-09 20:17
-Data Science & AI Specialist,,厦门 翔安 民安,算法开发,本科,,"算法开发
-Run What Runs the World
-At ABB, we help important industries outrun - leaner and cleaner.
-Every person here makes that happen. By rethinking, rewiring, and improving, we combine the world’s best minds and technologies to elevate performance to a whole new level.
-Because at ABB, progress is an expectation - for you, your team, and the world. As a [Data Science & AI Specialist], you’ll take on challenges that transform industries and drive innovation. We give you the market-leading expertise, technology, and opportunity, and you own the challenge to make an impact that matters.
-It won’t always be easy. Growing takes grit. Innovating takes the courage to try, fail, learn, and succeed. But at ABB, you’ll never run alone.
-Your role and responsibilities
-In this role, you will have the opportunity to deliver and implement analytics strategy in one or more functional areas. Each day, you will drive data-driven strategy and decision making for predictive analytics and optimization by leveraging Artificial Intelligence (AI) and Machine Learning (ML). You will also showcase your expertise by building and maintaining large-scale statistical models that turn billions of data points into insights and actions.
-The work model for the role is:onsite
-This role is contributing to the ELDS in China. Main stakeholders are Digital System Engineer and manager.
-You will be mainly accountable for:
-● 1. Virtual Power Plant Trading Algorithm Development
-● Design and implement aggregation control algorithms and trading optimization models for Virtual Power Plants (VPP)
-● Research multi-objective optimization algorithms for coordinating generation, grid, load, and storage systems to support electricity market trading decisions
-● Develop real-time power balance and dispatch forecasting models
-● 2. Intelligent Agent Algorithm Development
-● Develop distributed decision-making agents to support autonomous operation and management of microgrids
-● Improve the complete perception-decision-execution chain of embodied intelligent systems
-● 3. Power Distribution Equipment Asset Health Assessment
-● Build device state monitoring and health assessment algorithm models
-● Research and implement predictive maintenance algorithms
-● Perform anomaly detection and fault warning using multi-source data
-● 4. Data-Driven Application Exploration
-● Process time series data from power systems, perform feature engineering and model optimization
-● Participate in algorithm validation and implementation in real-world scenarios
-● 5. Technology Transformation and Collaboration
-● Collaborate with cloud platform teams to implement algorithm engineering
-● Write technical documentation and algorithm white papers, and summarize best practices
-Our team dynamics
-You will join a dynamic team, where you will be able to thrive.
-Qualifications for the role
-● 1. Education & Background
-● Full-time bachelor's degree or above in Electrical Engineering, Automation, Computer Science, Software Engineering, Applied Mathematics, or related fields
-● 2. Programming Skills
-● Proficiency in at least one of the following programming languages: Python, Golang, or Java
-● Strong awareness of code standards and engineering best practices
-● 3. Algorithm Foundation
-● Familiarity with common machine learning and deep learning algorithms (supervised learning, unsupervised learning, reinforcement learning, etc.)
-● 4. Data Processing
-● Proficiency with database tools such as PostgreSQL (PgSQL)
-● 5. Soft Skills
-● Strong learning ability, communication skills, and stress tolerance / ability to work under pressure
-● 6. Preferred Qualifications (Plus Points)
-● Understanding of fundamental principles of power systems or knowledge of smart grid concepts
-● Project experience with time series forecasting, anomaly detection, or related applications
-● Familiarity with energy sector application scenarios such as microgrids, virtual power plants, and demand-side response
-Why ABB?
-A global market leader redefining industries through technology and expertise.
-● Results that matter—what we run here, runs the world.
-● Autonomy & Ownership—we trust you to implement solutions.
-● Run What Runs the World—join a team that drives progress forward.
-Join us. Be part of the team where progress happens, industries transform, and your work shapes the world.
-Run What Runs the World.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,Java,厦门,2026-09-09 20:17
 Android系统工程师,1-1.5万·14薪,厦门 湖里 禾山,3-5年,本科,安卓系统开发|ANDROID BSP,"安卓系统开发
 ANDROID BSP
 该职位主要负责 Android 平台开发、BSP 集成、系统问题排查及平台优化，同时支持
@@ -2759,34 +2706,6 @@ IT技术助理2-3名
 10. 有技术团队管理经验者优先。
 请根据岗位名称点击链接投递简历
 https://hr.xmigc.com/h5/index.html",厦门市民数据服务股份有限公司,陈莉娜,,在线,,,Java,厦门,2026-09-09 20:18
-软件开发工程师,,厦门 翔安 民安,5-10年,本科,AI|CI/CD|云部署|软件工程师,"计算机软件
-产业互联网平台
-人工智能
-【岗位职责】
-1. 负责公司产品或项目的整体技术架构设计、规划和演进，确保系统架构满足业务发展需求；
-2. 制定技术规格说明书、接口规范等技术文档，为开发团队提供清晰的技术指引；
-3. 关键技术选型，评估和引入新技术、新框架、新工具，构建稳定、高效的技术栈；
-4. 指导和评审开发团队的设计与代码，确保实现与架构设计的一致性，提升代码质量；
-5. 与产品、项目、运维、测试等团队紧密协作，确保技术方案能有效支撑业务目标。
-6. 负责AI/大模型能力在业务系统中的架构设计与工程化落地；
-7. 负责AI产品整体方案设计，将产品需求转化为可工程化的技术架构；
-8. 负责AI产品核心能力设计，包括智能问答、智能审批、智能分析、辅助决策等；
-9. 负责AI推理性能与成本优化。
-
-【任职要求】
-
-1. 计算机科学、软件工程或相关专业，本科及以上学历，5年以上相关经验;
-2. 熟悉分布式、微服务等主流架构;
-3. 扎实的Java基础，熟悉JVM、多线程、集合框架等核心机制，熟练掌握Spring全家桶(Spring Boot/Spring Cloud/SpringMVC);
-4. 熟悉MySQL、Oracle、PostgreSQL、达梦等数据库，具备SQL优化能力;
-5. 熟悉Redis、 RabbitMQ/Kafka、ElasticSearch、Minio等中间件;
-6. 对前端或移动端技术有基本了解，能设计合理的前后端交互方案;
-7. 能够快速理解复杂业务，分解问题，提供技术方案;
-8、理解主流 Agent 实现思路与架构模式；具备AI Workflow / 流程编排能力及相关落地经验；了解AI 安全、合规与控制相关架构设计；
-9. 具备研发流程AI化思想或经验者优先。
-10. 有技术团队管理经验者优先。
-请根据岗位名称点击链接投递简历
-https://hr.xmigc.com/h5/index.html",ABB,陈莉娜,,在线,,,Java,厦门,2026-09-09 20:18
 Agent工程师,1-2万·15薪,厦门 湖里 禾山,1-3年,本科,AI项目|Golang|Java|Python|,"计算机软件
 产业互联网平台
 人工智能
@@ -4338,42 +4257,6 @@ PMP
 4、具备良好的团队协作精神、敬业精神，责任心强、工作积极主动；
 5、有独立担任项目经理的能力；
 6、具备良好的沟通能力、表达能力、亲和力，并能在一定压力下工作。",用友网络科技股份有限公司厦门分公司,周月玲,人事经理 · 用友网络科技股份有限公司厦门分公司,在线,,,Java,厦门,2026-09-09 20:22
-Junior Software Engineer,,厦门 翔安 民安,3-5年,本科,初级软件工程师,"初级软件工程师
-Reporting to:
-Operations Manager
-Your role and responsibilities
-We are seeking an experienced and passionate .NET Application Development Engineer. You will be responsible for designing, developing, and delivering high-quality .NET solutions to support critical business operations. Your role will ensure the robustness of system architecture, the quality of code, and the efficient management of the entire lifecycle from requirements to deployment.
-The work model for the role is: {onsite}
-This role is contributing to the {PPMV LBU Management} in {Xiamen/Beijing China}. Main stakeholders are {ELDS}.
-You will be mainly accountable for:
-● Own End-to-End Development of Core Business Systems
-Lead the software development, iterative optimization, and technical architecture upgrades for core business systems in manufacturing enterprises (including MES, SCM, QMS, IIoT, etc.). Ensure that the system architecture is deeply aligned with production and operational scenarios to support efficient business execution.
-● Participating in Business Requirements Analysis and Technical Solution Design
-Actively engage in business requirements gathering and analysis. Based on a thorough understanding of key manufacturing processes, translate complex business needs into feasible, efficient, and scalable technical solutions, and take implementation.
-● Responsible for Core Technical Implementation and Quality Assurance
-Lead the coding, unit testing, and system integration debugging of core functional modules. Address key technical challenges and performance bottlenecks during development. Take full responsibility for system stability, security, and high performance to ensure reliable operation in production environments.
-● Responsible for System Operations, Support, and Continuous Optimization
-Oversee post-deployment operational monitoring, performance tuning, and rapid response to production issues. Ensure the continuity, high availability, and exceptional user experience of mission-critical business systems.
-● Drive Innovation in Advanced Technologies and Smart Manufacturing Integration
-● Actively promote technological innovation by exploring and implementing AI technologies (such as machine learning, computer vision, and intelligent decision optimization) in smart manufacturing scenarios. Applications include intelligent quality inspection, production scheduling prediction, and equipment predictive maintenance, leveraging technology to continuously enhance production efficiency and intelligence.
-Our team dynamics
-You will join a {dynamic, talented, high performing} team, where you will be able to thrive.
-Qualifications for the role
-Basic Qualifications:
-● Bachelor's degree or higher in Computer Science, Software Engineering, or a related field.
-● Minimum of 3 years of .NET full-stack development experience (with proficiency in C#, .NET Core/.NET 5+, ASP.NET MVC/Web API).
-Core Technical Competencies:
-● Back-end & Architecture:
-Mastery of object-oriented design and common architectural patterns (e.g., MVC, Microservices), with familiarity in Entity Framework Core, dependency injection, multi-threading, and asynchronous programming
-● Front-end Technology:
-Experience with at least one mainstream front-end framework (e.g., Vue.js, Angular, React).
-● Database:
-Proficiency in SQL Server or MySQL development and performance optimization.
-● Cloud & Infrastructure:
-Hands-on experience with Microsoft Azure (or other major cloud platforms), and knowledge of containerization technologies (e.g., Docker), system deployment, monitoring, and permissions management.
-Familiarity with Agile development methodologies such as Scrum
-More about us
-ABB is a technology-based provider of power and automation products, systems, solutions and services. Building on our core strengths of technology leadership, pioneering spirit and a sustainable approach to business, ABB helps our customers to become more profitable while lowering environment impact.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,Java,厦门,2026-09-09 20:22
 实施工程师（采矿MES）,8000-15000元,厦门 海沧 海沧,3-5年,大专,卡调系统|MES系统|实施工程师|||,"卡调系统
 MES系统
 实施工程师
@@ -8329,33 +8212,6 @@ FMA整合工程师,9000-13000元·13薪,厦门 翔安 民安,汽车电子,本科
 其他要求：
 具备较强学习能力、责任感和执行力，良好的沟通协调能力
 具有良好的项目&专案管理能力",友达智慧行动系统(厦门)有限公司,朱女士,人事经理 · 友达智慧行动系统(厦门)有限公司,在线,,,Python,厦门,2026-09-09 20:32
-软件开发工程师,,厦门 翔安 民安,5-10年,本科,AI|CI/CD|云部署|软件工程师,"AI
-CI/CD
-云部署
-软件工程师
-Reporting to:
-IS Application Development Manager
-岗位目标
-作为应用开发团队的高级软件工程师，您将设计，开发并交付支撑我们中国电气事业部运营的应用系统。一方面，您将把业务需求转化为设计精良、安全且易于维护的应用软件；另一方面，帮助我们整个团队不断提升交付能力。
-岗位职责
-设计、开发和运维端到端的业务应用系统——从需求分析到生产部署到持续运维的全过程。其中多数系统为前后端分离的架构，后端以.NET为主，前端Angular/Vue/React。
-软件设计与开发
-· 设计干净、可测试、可观测、结构清晰的代码实现，持续优化团队的各种文档
-· 设计良好的接口与规范，与各种其他系统集成，比如CRM/ERP/MES/SSO等
-· 践行""安全优先设计""：处理静态分析(SAST)、接口测试(DAST)和第三方依赖包扫描(SCA)，并及时修复发现的潜在问题
-· 通过AI辅助开发工具：如Copilot / Claude Code / Codex 等提高交付质量和效率，并推动具有真实价值的AI应用用例
-DevOps与运维
-· 构建CICD流水线，管理基于Azure环境的生产部署
-· 设计并实现监控、日志记录和告警机制，管理基础设施自动化
-· 主导事件响应和根因分析，维持高可用性和性能标准
-任职要求
-· 5年以上 .NET 生产应用开发经验，加上至少1种以下前端框架经验Vue/React/Angular
-· 1年以上Docker/K8S容器化和一种云平台经验Azure/AWS/Aliyun
-· 熟悉Git版本控制、CI/CD和自动化测试
-· 了解应用安全和代码质量工具（SAST、DAST、SCA等，如SonarQube）
-· 具有多种编程语言经验加分：Python、Java、PHP、Go、Rust等
-· 具有AI辅助编码工具使用经验并对AI应用经验加分
-· 对AI和编程有热情，持续学习新知识，跟进新技术的要点并将其应用到具体实践中",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,Python,厦门,2026-09-09 20:32
 中级Java开发工程师,8000-12000元,厦门 集美 后溪,3-5年,本科,后端开发|Spark|Tomcat|Java||||||||||||,"岗位职责
 • 负责游戏服务器端模块的设计、开发和维护；
 • 参与游戏核心逻辑、数据同步、高并发处理等关键模块的开发；
@@ -9323,48 +9179,6 @@ ORCAD
 4、熟悉教学或焊接、喷漆、磨削、自动化物流系统、AGV系统等行业，有行业经验优先；
 5、良好的沟通能力，能适应出差。
 职位福利：五险一金、节日福利、包吃、交通补助、带薪年假、定期体检、全勤奖",航天思尔特,陈炀华,HRD · 航天思尔特,在线,,,后端,厦门,2026-09-09 20:38
-E Next 培训生-出口销售支持,,厦门 翔安 民安,1-3年,本科,出口销售支持|电气工程|机械工程|||||,"出口销售支持
-电气工程
-机械工程
-海外市场开发
-系统解决方案
-配电系统
-开关柜
-元器件
-公司介绍：
-ABB是全球技术领导企业，致力于推动社会与行业转型，实现更高效、可持续的未来。ABB 通过软件将智能技术集成到电气、机器人、自动化、运动控制产品及解决方案，不断拓展技术疆界，提升绩效至新高度。
-ABB 由两家拥有100 多年历史的国际性企业 —— 瑞典的阿西亚公司和瑞士的布朗勃法瑞公司在1988年合并而成，总部位于瑞士苏黎世。ABB拥有130多年的卓越历史，业务遍布全球100多个国家和地区，员工人数达10.5万。
-
-ABB配电系统业务单元-应势驭能，智联 · 守护未来电网
-ABB配电系统业务单元提供中压元器件、开关设备及系统解决方案，应用于不断演进的电网，实现配电网的保护，确保可靠且可预测的能源分配。配电设备是搭建在高压系统与中低压用户之间的桥梁，保障工业、商业和住宅用户的持续电力供应，同时帮助可再生能源并网。采用基于人工智能技术的智慧配电解决方案，持续提升电网韧性，并优化电力系统运行效率。我们支持客户与合作伙伴应对日益增长的电气化需求、技术革新及标准规则的变化，助其在能源转型的快速变革中应势驭能。
-您的收获：
--您将与敬业、有能力、有责任心的团队携手创造价值，为未来做出正确的决定
--您将有机会收获信心和多元与包容的团队
--个性化的发展计划，有针对性的培训措施将帮助您不断提高技能
-
-项目介绍：
--在项目过程中，经历轮岗，深度体验ABB配电系统业务单元的业务场景
--通过富有挑战性和影响力的任务发现您的兴趣和不同的职能/角色，深度参与团队合作
--通过培训和发展、导师和项目团队的全方位支持加速成长
--通过建立明确的绩效目标以及定期的绩效反馈发展个人优势
-
-职位描述：
-
-- 出口销售支持工作需要您与ABB国外销售团队密切协作，完成ABB配电系统产品在海外市场的拓展和销售任务，包括中压元器件、开关成套设备及系统解决方案。
-- 您需要根据公司产品策略，协同国外销售团队进行产品推广，开发销售机会。
-- 您需要了解客户需求，通过分析诊断提出最优的技术解决方案。
-- 您需要与后端团队共同努力，支持项目按如期交付。
-
-
-
-职位要求:
--1~3年工作经验，电气相关专业
--逻辑思维清晰，明确的目标导向，善于沟通，团队合作能力强
-- 强烈的主动性和自我驱动意识
-- 具有跨文化敏感度，对不同国家、地区的文化具有高度的适应性和灵活性
--优秀的英语表达能力，额外掌握其它外语者将有优势
-
-加入我们，开启您的职业生涯！",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,后端,厦门,2026-09-09 20:38
 建材销售经理/总经理（国央企业务）,2-4万,厦门 湖里 湖里,建筑材料,,超高提成|提成|销售额提成||||||||||||||,"出口销售支持
 电气工程
 机械工程
@@ -10303,10 +10117,6 @@ GMP
 1、机械、电气、质量等相关专业；
 2、具有良好的沟通能力、问题解决能力及团队协作精神；
 3、对制造业车间、加班不排斥。",厦门宏发开关设备有限公司,林女士,HRBP主管 · 厦门宏发开关设备有限公司,在线,,今日回复1次,测试,厦门,2026-09-09 20:45
-测试技术员,,厦门 湖里 殿前,1-3年,大专,电源测试,"电源测试
-1. 按生产需求进行产品最终功能测试，产品包括UPS、电能质量成套设备，预制化数据中心电力模块等,测试发现问题则负责进行维修，最后出测试报告
-2. 负责日常测试设备的维护保养和测试区域的5S
-3. 协助测试工程师完成FAT或新产品测试验证",施耐德电气（中国）有限公司,冯先生,HR · 施耐德电气（中国）有限公司,在线,,今日回复5次,测试,厦门,2026-09-09 20:45
 质量/QE工程师（社招）,7000-10000元·13薪,厦门 海沧 海沧农场,3-5年,本科,QA|CQE|七大手法|五大工具|||||||,"QA
 CQE
 七大手法
@@ -10442,34 +10252,6 @@ SQE质量管理工程师,8000-12000元,厦门 同安 洪塘,五险一金,大专,
 5、熟练使用Office办公软件，可独立完成质量数据统计、报表制作，具备基础识图能力。
 6、工作严谨细致、原则性强、质量敏感度高，具备良好的沟通对接、问题分析及跨部门整改推动能力，能适配项目交付节点，抗压性好、执行力强。
 备注：六天制",中科海锐(厦门)科技研究院有限公司,张诗玲,HR · 中科海锐(厦门)科技研究院有限公司,在线,,,测试,厦门,2026-09-09 20:46
-Quality Specialist,,厦门 翔安 民安,开关柜,本科,质量管理,"开关柜
-质量管理
-Reporting to:
-Quality Specialist
-Your role and responsibilities
-In this role, you will have the opportunity to support the deployment of the quality strategy for a local organizational unit, including quality culture, systems, tools, and competent teams with the aim to achieve and exceed customer expectations, while ensuring sustainable operations. Each day, you will assist the organization in achieving the right mix of prevention, continuous improvement, robust root cause analysis, quick response, and sustainable solutions to problems. You will also showcase your expertise by collaborating with local functions that impact the quality results to reach the targets for the organizational unit and aim for world-class performance.
-The work model for the role is: onsite
-This role is contributing to the MV AIS & GIS switchgear Quality in Xiamen. Main stakeholders are ELDS.
-You will be mainly accountable for:
-● Customer Complaint Management: Handle CCC cases timely and effectively.
-●
-Root Cause Analysis & Improvement: Analyze customer feedback to identify opportunities for product, service, and process improvement.
-●
-Quality Issue Resolution: Participate in customer feedback collection, resolution, and improvement initiatives for major quality issues.
-●
-Continuous Improvement: drive significant improvement projects, with a particular focus on recurring and repeat cases.
-You will join a dynamic team, where you will be able to thrive.
-Qualifications for the role
-● Bachelor's degree in Electrical Engineering, Mechanical Engineering, or related field
-● Minimum 1 year of professional experience in quality assurance, production, or product management
-● Strong problem-solving skills using statistical and analytical techniques
-● Excellent communication and coordination skills across internal and external teams
-● Demonstrated ability to manage conflicts constructively and reach effective resolutions
-● Fluent in English (facilitating meetings in English)
-● Familiarity with power system architecture and switchgear structure is a plus
-More about us
-ABB is a technology-based provider of power and automation products, systems, solutions and services. Building on our core strengths of technology leadership, pioneering spirit and a sustainable approach to business, ABB helps our customers to become more profitable while lowering environment impact.
-Building a cleaner, smarter future takes all kinds of minds: the curious, the courageous, and the creative. That's why we welcome people from all backgrounds and experiences.",ABB,查清,人事经理 · ABB,在线,42分钟前回复,今日回复50+次,测试,厦门,2026-09-09 20:46
 软件测试（定向培养）,5000-7000元,厦门 同安 五显,1-3年,本科,功能测试|银行|可提供住宿||,"功能测试
 银行
 1.全国项目驻场测试，主要负责功能、数据等相关测试工作；
@@ -10746,30 +10528,6 @@ PPAP
 1、本科及以上学历，，3年软件测试经验，中级测试能力；
 2、熟练功能测试流程，会接口测试工具，掌握SQL基础，能独立查询数据库核对数据；
 3、细心严谨，沟通能力良好",河北艾钉科技有限公司,侯女士,招聘经理 · 河北艾钉科技有限公司,在线,,今日回复19次,测试,厦门,2026-09-09 20:46
-电气终检工程师,,厦门 翔安 民安,电气设备,本科,电气产品,"电气设备
-电气产品
-Reporting to:
-Quality Control Manager
-Role Description – Summary
-负责MNS低压开关柜的过程巡检和最终试验，确保出厂的产品质量合格
-Main Accountabilities & Responsibilities
-● 根据检验计划、相关作业指导书和图纸完成MNS低压开关柜的检验和测试工作，负责确认产品最终质量并签发合格证
-● 准确及时地做好试验记录和报告
-● 编写质量计划和检验和试验程序
-● 配合客户完成项目工厂验收工作
-● 与生产车间一同解决生成过程中的现场质量问题
-● 收集、统计质量数据，分析质量状态并向主管报告
-● 记录并管理质量不符合产品
-Challenges – List Specifics
-● 协调解决所有产品质量问题，并签署出产品合格证
-● 持续改进检验工作的效率和准确性
-● 能够承担压力，按时完成项目检验工作
-Knowledge, Skills and Experience
-● 电气工程、自动化或相关专业，本科学历
-● 良好的问题分析和解决能力
-● 英语听说读写熟练，持有CET4或以上证书
-● 能够熟练阅读理解电气图纸
-● 有良好的人际沟通能力和团队合作精神",ABB,查清,人事经理 · ABB,在线,37分钟前回复,今日回复50+次,测试,厦门,2026-09-09 20:46
 QC工程师,6000-9000元·13薪,厦门 海沧 海沧农场,1-3年,大专,QC|七大手法|质量检测|||||||,"QC
 七大手法
 质量检测
@@ -12784,36 +12542,6 @@ pqe工程师/制程质量工程师,7000-11000元,厦门 同安 西柯,1-3年,本
 4.制程良率稳定性监控与问题点改善跟进
 5.稽核问题点改善对策跟进及水平展开
 6.工程变更管理",厦门市众惠微电子有限公司,彭佳斌,人事经理 · 厦门市众惠微电子有限公司,在线,,今日回复50+次,测试,厦门,2026-09-09 20:51
-电子工程师（质量部）,,厦门 翔安 民安,电子元器件工程师,本科,质量,"电子元器件工程师
-质量
-Reporting to:
-Quality Control Manager
-Main Accountabilities：
-Plan the quality control of Electrical and electronic component in supplier site and internal process, including reliability tests.
-Failure analysis of electrical and electronic components for product, process and incoming inspection, and push suppliers improvement.
-Assist in the failure analysis of electrical and electronic components for customer complaints, and promote the improvement of the entire manufacturing chain and design optimization.
-Statistics and analysis of quality information on incoming materials, manufacturing processes, and customer complaints of electrical and electronic components, and application of quality methodologies to promote improvements by all parties.
-Knowledge, Skills, Experience:
-Bachelor’s degree or above, major in Power electronics, Automation, Mechatronics etc.
-At least 3 years related experience in Power electronics industry.
-Proficient in power electronics theory and related power electronics topology. Can be able to understand circuit schematic diagrams and layout diagrams, EMC experience is preferred.
-Experience in project management of electronic product development is preferred.
-Strong practical ability and clear logical thinking. Proficient in using electronic analysis equipment such as multimeters, oscilloscopes, and programmable power supplies.
-Good communication and coordination skills and teamwork spirit
-Good English reading and writing, can communicate with foreigners in oral English.
-主要职责：
-策划电气电子零件在供应商端和内部的质量控制，包括可靠性试验；
-产品、过程和进料检验电气电子零件失效分析，推动供应商改善；
-协助进行客诉电气电子元件失效分析，推动整个制造链改善及设计优化；
-电气电子零件进料/制程/客诉质量信息统计和分析，运用质量方法论推动各方改善。
-知识，技能，经验：
-本科及以上学历，电力电子，自动化，机电一体化等专业；
-3年以上电力电子（制造）行业相关经验；
-精通电力电子理论及相关电力电子拓扑，能看懂电路原理图与layout图，有EMC相关经验者优先；
-有电子类产品研发项目管理或产品导入生产项目管理经验优先；
-实践动手能力强，逻辑思维清晰，熟练使用如万用表，示波器，可编程电源等电子分析设备；
-具备良好的沟通协调能力和团队内合作意识；
-英语读写良好，能与外国人进行口语沟通。",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,测试,厦门,2026-09-09 20:51
 qe质量工程师,7000-12000元,厦门 翔安 马巷,3-5年,本科,QE|汽车行业质量管理体系|ISO9001||,"QE
 汽车行业质量管理体系
 ISO9001
@@ -13371,12 +13099,6 @@ cqe客户质量工程师,9000-14000元,厦门 翔安 马巷,3-5年,大专,全面
 了解继电器 / 电源基本原理、制程与常见失效模式优先。
 沟通推动能力强，责任心强，抗压能力好，具备良好服务意识。
 熟悉 ISO9001 质量体系，有体系经验优先。",米博(厦门)集团有限公司,陈莉莉,人事经理 · 米博(厦门)集团有限公司,,,,测试,厦门,2026-09-09 20:52
-应用研发及测试岗（薪酬面议）,,厦门 思明 梧村,3-5年,本科,银行|计算机软件|系统的培训,"银行
-计算机软件
-1.负责分行软件项目的系统设计和开发实施等工作；
-2.负责研发项目需求的收集、受理、整合、评估，协助需求单位完成项目立项；
-3.负责研发项目的质量保障，按要求执行详细设计、编码测试等工作；
-4.负责新投产系统的培训、推广工作。",中信银行,卢女士,人事专员HR · 中信银行,在线,,,测试,厦门,2026-09-09 20:52
 项目质量工程师,6000-12000元,厦门 翔安 民安,1-3年,本科,船舶/航空/航天/军工,"船舶/航空/航天/军工
 岗位职责：
 1、新项目物料检验基准书编制；
@@ -13668,38 +13390,6 @@ CQE
 6. 体检：公司重视员工的身心健康，定期组织员工健康体检；
 7. 业余文体活动：定期举办文体活动、组织部门团建；
 8. 公司接收户口转入、人才档案、党组织关系、申报厦门市初级、中级、高级的职称。",厦门海辰储能科技股份有限公司,林先生,HRBP · 厦门海辰储能科技股份有限公司,在线,,今日回复13次,测试,厦门,2026-09-09 20:53
-Quality Control Specialist,,厦门 翔安 民安,质量控制,本科,质量管理体系标准|生产质量管理|,"质量控制
-质量管理体系标准
-生产质量管理
-可靠性测试
-Reporting to:
-Quality Control Manager
-Main Accountabilities：
-Plan the quality control of Electrical and electronic component in supplier site and internal process, including reliability tests.
-Failure analysis of electrical and electronic components for product, process and incoming inspection, and push suppliers improvement.
-Assist in the failure analysis of electrical and electronic components for customer complaints, and promote the improvement of the entire manufacturing chain and design optimization.
-Statistics and analysis of quality information on incoming materials, manufacturing processes, and customer complaints of electrical and electronic components, and application of quality methodologies to promote improvements by all parties.
-Knowledge, Skills, Experience:
-Bachelor’s degree or above, major in Power electronics, Automation, Mechatronics etc.
-At least 3 years related experience in Power electronics industry.
-Proficient in power electronics theory and related power electronics topology. Can be able to understand circuit schematic diagrams and layout diagrams, EMC experience is preferred.
-Experience in project management of electronic product development is preferred.
-Strong practical ability and clear logical thinking. Proficient in using electronic analysis equipment such as multimeters, oscilloscopes, and programmable power supplies.
-Good communication and coordination skills and teamwork spirit
-Good English reading and writing, can communicate with foreigners in oral English.
-主要职责：
-策划电气电子零件在供应商端和内部的质量控制，包括可靠性试验；
-产品、过程和进料检验电气电子零件失效分析，推动供应商改善；
-协助进行客诉电气电子元件失效分析，推动整个制造链改善及设计优化；
-电气电子零件进料/制程/客诉质量信息统计和分析，运用质量方法论推动各方改善。
-知识，技能，经验：
-本科及以上学历，电力电子，自动化，机电一体化等专业；
-3年以上电力电子（制造）行业相关经验；
-精通电力电子理论及相关电力电子拓扑，能看懂电路原理图与layout图，有EMC相关经验者优先；
-有电子类产品研发项目管理或产品导入生产项目管理经验优先；
-实践动手能力强，逻辑思维清晰，熟练使用如万用表，示波器，可编程电源等电子分析设备；
-具备良好的沟通协调能力和团队内合作意识；
-英语读写良好，能与外国人进行口语沟通。",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,测试,厦门,2026-09-09 20:53
 质量/品质经理,1-1.3万·13薪,厦门 集美 灌口,10年以上,大专,QC|QA|QE|||||,"QC
 QA
 QE
@@ -14002,34 +13692,6 @@ AOI（SPI） 测试工程师,5000-8000元·13薪,厦门 湖里 湖里,半导体/
 2、具有较强的组织协调能力和问题解决能力；
 3、能够独立推动质量体系运行并承担管理责任；
 4、注重细节，原则性强，具备良好的职业操守和团队合作意识。",十二夏天(厦门)生物科技有限公司,林女士,人事经理 · 十二夏天(厦门)生物科技有限公司,在线,,今日回复10次,测试,厦门,2026-09-09 20:54
-Senior Supplier Quality Engineer,,厦门 翔安 民安,SPC,本科,FMEA|PPAP,"SPC
-FMEA
-PPAP
-Reporting to:
-Quality Manager
-Your role and responsibilities (Mandatory)
-
-In this role, you will have the opportunity to lead the execution of supplier assessments, drive both corrective and preventive actions based on supplier maturity and performance levels. Each day, you will manage operational supplier quality, both on-site and off-site, ensuring the thorough execution of supplier qualification and development processes. You will also showcase your expertise by managing the supplier’s Key Performance Indicators (KPIs).
-
-
-This role is contributing to the EL Smart Power business in Xiamen, China
-
-You will be mainly accountable for:
-Supplier audit and qualification: Plan and organize supplier process audit for existing suppliers, work with sourcing & product engineering departments for the new supplier qualification and low performance supplier’s de-sourcing.
-Supplier quality performance monitoring: supplier quality data collection (ppm, SPC, audit finding, etc) and analysis to address low performance suppliers for improvement. Support PQE for critical quality issue resolution.
-Supplier quality risk control: Supplier key process and key raw material quality control to mitigate quality risk including new critical suppliers and newly localized critical components.
-Supplier quality process management: Introduce IT tools to suppliers for quality process management, 5M1E change management, Traceability, Major quality processes optimization
-Qualifications for the role
-Bachelor’s degree or above, electrical, mechanical or electronic engineering is preferred
-At least 5 years’ working experiences as supplier quality management
-Quality tools knowledge and application skills PPAP, SPC, FMEA , MSA, 5 Why
-Familiar with stamping, machining, PCBA manufacturing and assembly process, quality requirements, test specification and failure analysis
-Very good personnel communication skills, both with internal and external
-Very good logic thinking, problem-solving & collaborating skills
-Good English
-More about us
-ABB Smart Power provides energy distribution solutions for data centers, industrial and
-manufacturing plants, critical infrastructure and commercial buildings. The Division’s technical teams work closely with industry partners, delivering advanced solutions that support rapid growth, energy transition, and sustainability objectives. The Division’s portfolio includes industrial circuit breakers, low-voltage systems, motor starting applications, and safety devices like switches and relays. Its Power Protection unit supports the world’s largest data center companies with advanced energy-efficient UPS solutions. The Division’s ABB Ability™ Energy Manager provides a scalable, easy-to-use platform that helps organizations save energy and reduce CO2 emissions.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,测试,厦门,2026-09-09 20:54
 厦门测试（银行项目）,9000-15000元,厦门 思明 莲前,3-5年,本科,功能测试|银行|金融科技/数字金融,"功能测试
 银行
 金融科技/数字金融
@@ -14357,23 +14019,6 @@ QA
 所需能力
 1、具有较强的责任心，执行能力;
 2、良好的沟通能力、协调能力和学习能力。",厦门市益津鹭科技有限公司,黄女士,HR · 厦门市益津鹭科技有限公司,,,,测试,厦门,2026-09-09 20:54
-SQE Supervisor,,厦门 翔安 民安,质量管理体系标准,本科,供应商管理,"质量管理体系标准
-供应商管理
-Job responsibilities
-1.Supplier Audit and Qualification Certification: Plan and organize process audits and special audits for existing suppliers, and collaborate with the procurement and product engineering departments to carry out quality management system audits and qualification certification for new suppliers.
-2.Supplier Quality Performance and Risk Management: Collect and analyze supplier quality data (PPM, SPC, audit findings, etc.) to drive systematic quality improvements by suppliers.
-Implement quality control over key supplier processes and critical raw materials to prevent batch issues, and oversee the quality of newly introduced important suppliers or localized critical components.
-3.Supplier Quality Process Management: Promote suppliers' enhancement of quality control through automation, IT technology, and quality tools, andoptimize major quality processes such as 5M1E change management, traceability, etc.
-4.Team Management: Responsible for the daily work planning, task allocation, coaching, staff motivation, and performance evaluation of the SQE team, as well as cross-departmental collaboration to ensure the team operates efficiently.
-Job requirements
-1. Bachelor's degree or above, preferably in Electronics, Electrical, or Mechanical Engineering, familiar with stamping, machining, PCBA manufacturing, and component assembly processes, and knowledge about related quality characteristics, control plans, and common defects and analysis.
-2. Over 5 years of experience in SQE-related work, with more than 2 years of SQE team leader; experienced in coordinating teams to achieve quality objectives and leading supplier quality
-improvement projects.
-3. Familiar with and able to apply quality tools such as PPAP, SPC, FMEA, MSA, 5 Why, 8D, and Six Sigma.
-4. Possess strong logical thinking, problem-solving, and cross-department collaboration skills; clear oral and written communication skills; capable of producing high-quality audit reports, quality improvement plans, performance evaluation reports, and other documents.
-5. Good at supplier coaching, negotiation, tiered management, relationship maintenance, and interpersonal communication; able to drive suppliers in implementing quality improvement measures.
-6. Strong stress resistance, capable of rapid response and execution in urgent situations; principled, strictly adheres to quality standards, and able to balance quality, cost, and delivery efficiency.
-7. Good English.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,测试,厦门,2026-09-09 20:54
 中/高级测试工程师(J10379),1-1.5万·15薪,厦门 集美 后溪,3-5年,本科,功能测试|Linux,"功能测试
 Linux
 岗位职责:
@@ -16720,25 +16365,6 @@ ERP
 6、具备机房、服务器、办公电脑、网络及直播设备运维管理能力。
 7、有扎实的软件文档输出基本功，能够熟练运用工具快速而严谨地输出业务调研需求文档。
 沟通能力、责任心强，具有较强的业务理解能力、协作能力，业务推动能力",雅米士(厦门)航空食品有限公司,陈敏,人事经理 · 雅米士(厦门)航空食品有限公司,在线,,,运维,厦门,2026-09-09 21:00
-技术支持工程师-环网柜,,厦门 湖里 殿前,5-10年,本科,环网柜|电气机械/电力设备||,"环网柜
-电气机械/电力设备
-电力/水利/热力/燃气
-业务介绍：
-施耐德电气服务业务Services China为客户提供EcoConsult咨询服务、EcoCare运维服务和EcoFitTM适配改造服务，打造端到端全生命周期服务能力、协同服务合作伙伴，主力客户加速数字化和绿色化双转型，迈向高质量可持续发展。
-工作地：不限（便于工作开展：武汉，江浙沪，北京，天津，等沿海城市）
-Description:
-1. 精通施耐德电气各种中压环网柜（干燥空气系列、SF6系列 ）；
-2. 对环网柜的数字化有深刻认知；
-3. 熟悉继电保护原理，对保护的调试有丰富的实践经验;
-4. 规划团队人才技术能力建设体系、人才技能发展方向
-5. 为一线工程师提环网柜产品培训及技术支持;
-
-Qualifications:
-1. 本科以上学历，电气工程相关专业;
-2. 5年以上中压领域相关技术工作经验； 3年以上20人以上工程师团队的能力培训、技能管理体系方面的经验
-3. 熟悉中低压配电系统;
-4. 沟通能力优秀
-5. 具备英语听、说、读、写能力。语言能力流畅者，条件可适当放宽",施耐德电气（中国）有限公司,谈燕纷,人事经理 · 施耐德电气（中国）有限公司,在线,,今日回复50+次,运维,厦门,2026-09-09 21:00
 通信技术工程师,5000-10000元,厦门 海沧 海沧,1-3年,大专,运维|硬件/设备运维|网络运维||||||,"运维
 硬件/设备运维
 网络运维
@@ -17162,66 +16788,6 @@ FE公共设施工程师,1.2-2.4万·16薪,厦门 翔安 新圩,5-10年,本科,�
 2. 具备3年以上软件售后运维经验，熟悉软件实施、故障排查及客户服务全流程。
 3. 拥有大型软件企业售后服务管理经验者优先，具备团队管理或流程优化项目经验。
 4. 具备较强的客户沟通能力与问题解决能力，能独立处理高优先级客户诉求。",厦门安必兴信息科技有限公司,张女士,安必兴HR · 厦门安必兴信息科技有限公司,在线,,,运维,厦门,2026-09-09 21:01
-Maintenance Specialist,,厦门 翔安 民安,3-5年,本科,智能化设备|设备维护,"智能化设备
-设备维护
-Reporting to:
-Production Manager
-所属部门：生产部-生产发展
-汇报对象：设备主管 / 生产发展经理
-一、岗位概述
-本岗位面向3–5年工作经验的中级维修工程师，核心聚焦智能化产线的设备维修与通信链路稳定保障。工程师需具备扎实的机电维修基础，同时具备工业通信网络排查、MES/EAM信息化平台操作及设备数据分析能力（此能力可入职后培训），能够独立处理中等复杂度的故障，并参与维保体系持续优化。
-二、岗位职责
-2.1 设备维修与日常运维（40%）
-● 负责智能化产线（AGV、机器人、自动化工装站、自动输送线、自动立体库等）机械与电气故障的独立排查与抢修，控制MTTR，保障产线OEE达标；
-● 执行TPM预防保养计划，完成关键部件定期点检与易损件更换，有效提升MTBF，降低重复故障率；
-● 完成伺服驱动器、变频器、传感器、气缸、减速机、导轨丝杠等部件的拆装调试与精度校正。
-2.2 工业通信与智能化链路维护（30%）
-● 负责设备工业网络日常运维，独立排查Profinet、Modbus TCP/IP、EtherNet/IP等主流工业协议通信故障，定位硬件断线、PLC通信异常、网关配置错误等问题；
-● 维护MES与设备之间的数据采集链路，处理工单下发异常、质量数据追溯中断、设备状态上报失败等通信类故障；
-● 负责工控机、工业触摸屏、数据采集网关（边缘计算终端）的日常运维，处理采集终端离线、组态画面无数据、OPC-UA/MQTT数据异常等问题；
-● 协助IT部门完成设备IP规划与固定配置、工业交换机端口排查、工业局域网VLAN调试，保障设备数据稳定上传；
-● 了解SCADA/工业组态软件基础操作，可调取设备实时运行数据与历史趋势曲线，辅助故障诊断。
-2.3 维保数据分析与体系优化（20%）
-● 熟练操作MES、EAM设备管理系统及ERP备件模块，独立完成维修工单提交、维保任务闭环、备件线上申领与库存盘控；
-● 统计并分析设备KPI（OEE/MTBF/MTTR、），利用系统报表定位高频故障点，输出故障趋势分析与改善报告；
-● 建立和更新设备维修台账、保养SOP、备件台账，完成故障RCA，推动重复性故障闭环整改；
-● 管理备品备件：库存盘点、安全库存优化、消耗管控，避免缺件停机并控制维修物料成本。
-2.4 新设备导入与安全管理（10%）
-● 参与新设备进厂验收、安装调试、上电联调及试产跟进，完成程序备份、参数固化与操作培训；
-● 遵守电气安全、特种设备安全操作规范，落实6S现场管理；
-● 对一线操作员进行基础设备点检与简易异常处理培训，降低人为损坏概率。
-三、任职要求
-3.1 学历与经验
-● 本科及以上，机电一体化、电气自动化、通信工程、工业自动化、工业机器人等理工科专业；
-● 3–5年智能化工厂设备维修工作经验，有工业网络/通信维护经验者；
-● 持证要求：低压电工证；工业机器人操作与运维证书（优先）。
-3.2 核心专业技能
-机械与电气基础
-● 能识读机械装配图、气路/液压原理图；
-● 能识读电气接线图与PLC梯形图；熟练操作西门子或三菱主流PLC之一，可独立排查I/O点位故障；
-● 熟练调试伺服驱动器、变频器、编码器、光电/接近传感器。
-工业通信与智能化（核心方向，重点考察）
-● 掌握至少两种主流工业通信协议（Profinet、Modbus TCP/IP、EtherNet/IP、OPC-UA中的2种以上），能独立排查通信链路故障；
-● 具备基础工业网络知识：设备固定IP配置、交换机端口排查、网关通信检测，能区分硬件断线、PLC通信故障与信息化平台链路故障；
-● 熟悉数据采集网关（如Kepware、HMS Anybus等主流品牌）基础配置与运维；
-● 了解MQTT/OPC-UA数据协议基础，可辅助排查边缘采集终端数据异常；
-● 了解SCADA/组态软件（如WinCC、iFIX、InTouch之一）基础操作，可调取实时数据与历史曲线。
-机器人与AGV
-● 至少熟悉一种主流工业机器人品牌（ABB/KUKA/FANUC）的本体、控制柜、示教器故障维修；
-● 有AGV、视觉检测设备或在线检测设备维修经验者优先；
-● 能查阅设备日志，结合通信状态辅助定位机器人与MES的联动故障。
-信息化平台操作
-● 熟悉PLC编程软件（博途TIA Portal或GX-Works）基础操作；
-● 具备Office数据处理能力，了解SQL基础查询（能够从数据库导出故障数据做分析；
-● 熟练操作MES生产执行系统、EAM设备管理系统、ERP备件管理模块优先。
-3.3 综合素质要求
-● 逻辑清晰，故障定位快，动手能力强，安全意识强；
-● 能承受产线紧急抢修压力，接受白/夜班轮换安排；
-● 跨部门沟通顺畅（生产、工艺、采购、IT、设备厂商），具备团队协作精神；
-● 学习能力强，能快速适应新机型、新工控技术与新智能制造信息化系统；
-● 具备基本英文读写能力，可阅读设备英文说明书与错误日志。
-关于 ABB
-ABB 是全球领先的电气和自动化技术解决方案提供商。我们在电力与自动化技术领域的专业能力，助力客户安全、高效、可持续运营。ABB 中国一次开关柜产品享誉国内外，广泛应用于核电、水电、火电等关键行业。公司严格遵守国家法律法规，为所有候选人提供平等就业机会，按要求完成背景调查。",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,运维,厦门,2026-09-09 21:01
 技术服务资深工程师 (MJ004995),1.2-2.4万,厦门 同安 洪塘,5-10年,本科,自动化设备|储能电站技术支持||,"自动化设备
 储能电站技术支持
 储能系统运维
@@ -17504,18 +17070,6 @@ AI
 5、主导过信息化建设项目交付，覆盖机房、车间、直播室及培训教室。
 6、具备机房、服务器、办公电脑、网络及直播设备运维管理能力。
 7、有扎实的软件文档输出基本功，能够熟练运用工具快速而严谨地输出业务调研需求文档。888沟通能力、责任心强，具有较强的业务理解能力、协作能力，业务推动能力",雅米士(厦门)航空食品有限公司,陈敏,人事经理 · 雅米士(厦门)航空食品有限公司,在线,,,运维,厦门,2026-09-09 21:01
-服务工程师-厦门 (MJ019447),,厦门 湖里 殿前,3-5年,本科,中低压开关柜,"中低压开关柜
-岗位职责：
-1、中低压配电设备安装指导、调试验收及故障处理等现场服务工作；
-2、已装机设备的数字化台账、维护维保、适配改造等存量业务的执行交付；
-3、配电设备的数字化部署、调试及交付；
-4、发掘已装机设备的业务机会。
-任职要求：
-1、电气、自动化、通信相关专业，大学本科及以上学历；
-2、熟悉中压配电系统及设备的应用、原理和相关技术标准；
-3、有环网柜、中置柜等中压产品的现场安装、调试、运维经验；
-4、对存量业务、能效数字化有一定的了解和认识。
-5、有综保调试经验优先",施耐德电气（中国）有限公司,谈燕纷,人事经理 · 施耐德电气（中国）有限公司,在线,,今日回复50+次,运维,厦门,2026-09-09 21:01
 实施工程师,5000-10000元,厦门 海沧 海沧,1-3年,本科,通信/网络设备,"通信/网络设备
 岗位职责：
 1、负责信息化系统的项目实施并及时撰写项目资料；
@@ -18084,31 +17638,6 @@ KA大客户
 1.本科学历以上；
 2.1-3年团购经验、商品、销售支持经验，鞋服零售行业尤佳；
 3.具备较强沟通协调能力、抗压能力、项目管理及闭环能力。",鸿星尔克,hr · 鸿星尔克,,在线,,今日回复5次,数据分析,厦门,2026-09-09 21:03
-业务分析专员,,厦门 翔安 民安,业务分析,本科,,"业务分析
-Reporting to:
-EL Sales Support Specialist - Sales Process
-Your role and responsibilities
-
-In this role, you will have the opportunity to support the assigned Sales organization (division and market) and customers during the proposal process. Each day, you will serve as a key technical resource in the assigned area. You will also showcase your expertise by preparing technical descriptions of the products and technology, determining costs, and preparing final documentation.
-The work model for the role is: onsite
-This role is contributing to the EL Marketing & Sales in China.
-You will be mainly accountable for:
-Define, setup and maintain data sources (manual and automated) for sales team to provide insight for decision-making of sales management.
-Collaborate with sales managers to set analytics systems and KPI for sales performance, market and competition studies.
-Develop reporting template and dashboards for sales team, ensuring data consistency and accuracy.
-Manage sales master data and generate routine sales tracking reports, e.g. pipeline management, order estimation, quotation analysis.
-Customize master data analysis dashboard in different metrics based on business requirements.
-Work with IT specialist to set up data warehouse for long term analysis and documentation.
-Qualifications for the role
-Bachelor’s degree in Data Science, Statistics, Business Analytics, or a related field.
-3+ years of hands-on experience in data analysis, with a proven ability to translate business questions into analytical insights.
-Strong proficiency in data visualization tools, with extensive experience in Power BI and excel.
-Solid experience in managing and analyzing sales data, with familiarity in sales KPIs, pipeline tracking, and performance reporting.
-Excellent communication and collaboration skills, capable of working closely with sales team and cross-functional teams to understand business and define analytical requirements.
-Experience in working with IT teams to define requirements for data sources, data warehousing, or BI system setup is a strong plus.
-More about us
-
-ABB is a technology-based provider of power and automation products, systems, solutions and services. Building on our core strengths of technology leadership, pioneering spirit and a sustainable approach to business, ABB helps our customers to become more profitable while lowering environment impact.",ABB,查清,人事经理 · ABB,在线,49分钟前回复,今日回复50+次,数据分析,厦门,2026-09-09 21:03
 厦门-数据分析岗,9000-10000元,厦门 思明 鹭江,数据挖掘,本科,数据分析|数据报告|劳动合同,"数据挖掘
 数据分析
 数据报告
@@ -18409,63 +17938,6 @@ AI训练师,6000-8000元,厦门 思明 莲前,1-3年,大专,图像标注|文本�
 3、数据管理：熟悉运营数据的管理（完整性、准确性与时效性），定期输出事业部运营数据分析报告，支持管理层决策。
 4、项目管理：具有项目管理经验，熟悉项目管理工具，能推动项目落地。
 5、沟通能力：具备优秀的运营管理业务能力，良好的学习能力、组织协调能力与沟通能力，与销售、制造、研发等多部门协同，推动工作落地。",厦门金鹭,董女士,HR · 厦门金鹭,在线,,,数据分析,厦门,2026-09-09 21:04
-项目专员,,厦门 翔安 民安,3-5年,本科,项目助理|文档管理|完善的培训体系,"项目助理
-文档管理
-项目专员
-
-您将拥有项目的信息主干——对项目的指定工作包进行文档控制和催交，并支持项目经理管理和执行项目。负责整个项目生命周期的文档控制，为工程师和项目经理提供准确的按需状态和里程碑报告。提高项目文档管理能力，并对工具和流程等提出改进建议。
-
-您的角色和核心职责
-
-文件管理：
-1）及时为项目准备、分发和归档准确的客户、ABB和供应商文件；
-2）建立和维护项目文档清单；确保严格的版本控制，实时状态跟踪；触发并跟进内部行动（提交计划、收款等）；
-3）为工程师和项目经理提供准确的文档需求状态和里程碑报告，定期记录文档状态报告，为项目会议提供信息。
-持续改进：
-分析项目与文档管理绩效，通过创建用户友好的工作流程说明、文件模板和工具来不断提高项目/文件管理能力，以降低项目执行风险。
-
-工作地点：现场办公
-
-所属业务：一次开关设备事业部（Primary Switchgear, ELDS）
-
-任职要求
-1）大学本科；
-2）1年以上文档/项目管理类工作经验，有开关柜工作经验优先；
-3）熟练使用office全系列办公软件，如MS Project/Power BI/Excel/PPT等；
-4）具备较好的数据分析及进度管控能力；
-5）具备一定的英语书写和口语交流能力；
-6）工作认真细致，注重团队协作，具有良好的沟通和协调能力。
-
-岗位培养：
-我们构建了完善的培训体系，根据个人成长进度与能力矩阵制定针对性的培养方案，致力于培养优秀的开关柜行业人才。
-厦门ABB开关有限公司诚邀您的加入！
-Project Specialist
-You will own the project’s information backbone—running both document control and expediting for assigned work packages of a project and supports project managers in management and execution of the project. Responsible for document control throughout the entire project lifecycle, supports engineers and project managers with accurate on-demand status and milestone reporting.
-Improves project document management competence and suggests improvements for tools and processes etc.
-Your role and responsibilities
-Document Control:
-1）Prepares, distributes, and stores accurate customer, ABB, and supplier documents for projects in a timely manner.
-2）Build and maintain the project document matrix; ensure strict version control, real-time status tracking; trigger and follow up internal actions (submission plan, payment collection).
-3）Supports engineers and project managers with accurate on-demand status and milestone reporting, periodic document status reports to feed project meetings.
-Continuous improvement:
-Conducting analysis of project performance, continuously raise project/document management competence by creating user-friendly work instructions, document templates, and tools to reduce risk.
-The work model for the role is: on site
-
-This role is contributing to the function in Primary Switchgear, ELDS.
-
-Qualifications for the role
-1）Bachelor's degree.
-2）1+ years in document/project management; with experience in switchgear is preferred.
-3）Proficient in office software, such as MS Project, Power BI, Excel, PPT.
-4）Strong data analysis and schedule-control skills.
-5）Good English skills (listening, speaking, reading, writing).
-6）Strong focus on details, emphasizing teamwork, good communication and coordination ability.
-
-Job Training
-We offer a ‌comprehensive training program‌ tailored to individual growth and capabilities, aiming to cultivate outstanding talents in the switchgear industry.
-
-Join Us
-ABB Xiamen Switchgear Co., Ltd. invites you to join our team!",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:04
 激光焊接工程师（技术/科研）,6000-8000元,厦门 湖里 禾山,学术/科研,本科,电气机械/电力设备|专用设备制造,"学术/科研
 电气机械/电力设备
 专用设备制造
@@ -18597,22 +18069,6 @@ hrbp,9000-12000元·14薪,厦门 思明 梧村,,本科,,"岗位职责：
 2、登记货品供需订单基础信息，整理每日货品供需明细，完成当日数据复盘；
 3、依据公司提供的行业参考资料，完成固定的数据统计工作指标；
 4、定期汇总货品市场报表，同步整理存档，配合团队完成月度数据核对工作",厦门憬澄电子商务有限公司,刘乾,人事经理 · 厦门憬澄电子商务有限公司,在线,,,数据分析,厦门,2026-09-09 21:05
-薪酬绩效岗,,厦门 思明 筼筜,5-10年,硕士,,"【基本条件】
-1.爱岗敬业，有责任感，吃苦耐劳，具备良好的职业操守。
-2.身体健康，品行端正、品德优良，未曾受过违纪违法处罚。
-3.有团队合作精神，具备良好的沟通与协作能力。
-4.服从公司工作任务分配，能够较快适应新的工作环境。
-【岗位职责】
-1.推进公司薪酬绩效机制改革，设计差异化薪酬激励体系与员工绩效考核体系，完善公司薪酬管理制度、员工绩效考核管理制度；
-2.负责工资总额管理工作，组织工资总额预算编制、执行管控与清算工作，对接上级单位完成总额申报、备案，指导各直管企业工资总额管理工作；
-3.负责公司本部薪酬核算及人工成本管理工作，统筹对接直管企业人工成本管理工作；
-4.负责组织实施公司本部员工绩效考核工作；
-5.完成上级交办的其他工作。
-【任职要求】
-1.硕士研究生及以上学历，人力资源管理、会计学、统计学、企业管理等相关专业，中共正式党员优先；
-2.5年及以上相关工作经验，具有咨询机构、大型企业或央、国企集团总部人力工作经验者优先；
-3.熟悉并掌握国企薪酬、工资总额等相关政策规定；具备良好的数据分析能力和报告撰写能力，能够独立完成各类工作报告；
-4.有国企薪酬绩效改革实操经验，能独立负责企业薪酬绩效机制改革，过往主导过至少1个薪酬绩效体系搭建并成功落地。",厦门国有资本运营有限责任公司,余女士,,在线,,,数据分析,厦门,2026-09-09 21:05
 运营助理,3000-5000元,厦门 集美 侨英,接受无经验,大专,数据处理|主播助理|互联网游戏||,"接受无经验
 数据处理
 主播助理
@@ -19018,65 +18474,6 @@ AI技术认知：理解机器学习基本能力边界（分类/回归/聚类/生
 1、大学本科及以上学历，计算机、金融、经济管理等相关专业。
 2、五年以上相关工作经验，其中至少三年以上软件需求分析经验。
 3、具备产品经理或银行业相关工作经验者优先。",厦门银行股份有限公司,吴女士,,,,,数据分析,厦门,2026-09-09 21:06
-Continuous Improvement Specialist,,厦门 翔安 民安,,,,"持续改进专员
-Reporting to:
-Manufacturing Unit Manager
-In this role, you’ll help run what runs the world, by taking on meaningful work that drives real impact.
-Your Role: Own the Challenge/Take on the Journey
-“电”亮智慧星计划
-Unlock Your Potential with ABB's Smart Power Division!
-General information
-- In this dynamic role, you will kick-start your ABB career by joining a 12~24 months full time rotational program within Smart Power Division of ABB's Electrification Business (ELSP) and embark on an exciting journey that will shape your future as a global leader in ABB Smart Power Division.
-- ABB’s Smart Power is a technology leader in data centers, energy transition and smart industries. Its core product portfolio makes electricity safe and reliable. Smart Power’s teams create efficient, intelligent solutions that deliver an unbeatable customer experience and help make a zero-carbon future possible.
-- Through the rotational program, by leading or being part of the team in challenging and influential business assignments on local and global level, you have unique opportunity to grow with high-visibility and gain broad-based knowledge, skills, insights and hands-on experience across diverse operational areas (Manufacturing, Quality, Product Engineering, Process Engineering, Procurement, Logistic and Planning & Fulfillment) with global perspective.
-- Your responsibilities
-1. Engage in a 12~24-month job rotation program to lead or participate in high-visibility cross-functional projects spanning Manufacturing, Quality, Product Engineering, Process Engineering, Procurement, Logistic and Planning & Fulfillment across multiple sits and cultures.
-2. Collaborate with international teams to implement best practices, drive efficiency, and enhance operational performance.
-3. Analyze manufacturing data, identify improvement opportunities, and develop actionable strategies for cost reduction, productivity gains and digital transformation.
-4. Engage with stakeholders from different cultural and professional backgrounds to align operational goals with business objectives.
-5. Support the development and execution of global operations initiatives, ensuring compliance with industry standards and company policies.
-Our Team Dynamics
-Our teams support each other, collaborate, and never stop learning. Everyone brings something unique, and together we push ideas forward to solve real problems. Being part of our team means your work matters - because the progress we make here creates real impact out there.
-Qualifications for the Role
-1. Master’s degree or above in Engineering (Mechanical, Electrical, Electronics, Industrial, or Automation), Software/ AI/Digital. Education from top-tier overseas universities is preferred.
-2. At least 5 years of relevant professional work experience to drive operational excellence in multinational manufacturing companies. Diverse functional experience in Operation areas is advantageous.
-3. Excellent verbal and written communication skills in English
-4. Flexible geographical location and willing to work overseas
-5. Good level in Learning agility, Problem solving, Resilience and Career ambitions
-6. Strong analytical skills and system thinking, excellent interpersonal skills and communication skills.
-7. Motivation to acquire new skills and knowledge
-8. Ability to work collaboratively in a team-oriented environment and adapt to diverse cultural settings.
-What’s in it for you?
-We empower you to take initiative, challenge ideas, and lead with confidence. You’ll grow through meaningful work, continuous learning, and support that’s tailored to your goals. Every idea you share and every action you take contributes to something bigger.
-
-- We empower you to take the lead, share bold ideas, and shape real outcomes. You’ll grow through hands-on experience, mentorship, and learning that fits your goals. Here, your work doesn’t just matter, it moves things forward
-Benefits
-From well-being to retirement, ABB offers benefits that support every stage of your career.
-More about us
-ABB Smart Power provides energy distribution solutions for data centers, industrial and
-manufacturing plants, critical infrastructure and commercial buildings. The Division’s technical teams
-work closely with industry partners, delivering advanced solutions that support rapid growth, energy
-transition, and sustainability objectives. The Division’s portfolio includes industrial circuit breakers,
-low-voltage systems, motor starting applications, and safety devices like switches and relays. Its Power Protection unit supports the world’s largest data center companies with advanced energy-efficient UPS solutions. The Division’s ABB Ability™ Energy Manager provides a scalable, easy-to-use platform that helps organizations save energy and reduce CO2 emissions.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:06
-资金运营岗,,厦门 思明 筼筜,3-5年,本科,资金管理经验,"资金管理经验
-【基本条件】
-1. 爱岗敬业，有责任感，吃苦耐劳，具备良好的职业操守。
-2. 身体健康，品行端正、品德优良，未曾受过违纪违法处罚。
-3. 有团队合作精神，具备良好的沟通与协作能力。
-4. 服从公司工作任务分配，能够较快适应新的工作环境。
-【岗位职责】
-1. 资金集中管理：统筹全集团资金池建设与运营，实施基金全集团集中管理，协调成员单位资金归集与内部划转，提高资金使用效率。
-2. 理财统筹运作：统筹集团闲置资金理财管理，制定结构性存款、理财等投资标的配置方案，在确保安全前提下提升资金收益。
-3. 资金计划与预测：统筹制定集团资金计划，预测现金流需求，监控资金流动性指标，预警潜在缺口，制定应急融资方案。
-4. 资金信息化建设：协助推进资金信息化建设与司库体系建设，优化资金运营流程，引入自动化工具，降低操作成本。
-5. 资金分析报告：定期编制资金运营分析报告，为管理层决策提供数据支持。
-6. 完成领导交办的其他工作。
-【任职要求】
-1. 本科及以上学历，财务管理、会计学、金融学等财经类相关专业。
-2. 3年以上企业资金管理经验，熟悉集团资金池运作或司库体系建设者优先。
-3. 熟悉资金计划编制与现金流预测模型，掌握资金集中管理及内部往来运作机制；具备闲置资金投资的分析与配置能力；了解资金系统建设逻辑，能够主导或配合完成资金管理数字化转型。
-4. 熟练使用Office办公软件，精通Excel进行资金数据分析与测算，具备优秀的报告撰写能力。工作严谨细致，责任心强，具备良好的跨部门沟通协调能力与执行力，能承受一定工作压力。
-5. 持有中级会计师、CPA、CFA等相关资格证书者优先。",厦门国有资本运营有限责任公司,余女士,,在线,,,数据分析,厦门,2026-09-09 21:06
 区域运营BP(J16444),1.5-1.8万,厦门 思明 梧村,运营管理,大专,业务支持|赋能培训,"运营管理
 业务支持
 赋能培训
@@ -19699,26 +19096,6 @@ App推广运营岗
 2.熟练使用工作软件，具备基础的数据分析能力及财务知识；
 3.细致耐心、条理性较好，能高效处理多任务；
 4.协调能力较强，抗压能力较好；",厦门建发恒融供应链有限公司,林菁菁,人事经理 · 厦门建发恒融供应链有限公司,在线,,,数据分析,厦门,2026-09-09 21:07
-财务分析岗,,厦门 思明 筼筜,3-5年,硕士,财务及投资经验,"财务及投资经验
-【基本条件】
-1. 爱岗敬业，有责任感，吃苦耐劳，具备良好的职业操守。
-2. 身体健康，品行端正、品德优良，未曾受过违纪违法处罚。
-3. 有团队合作精神，具备良好的沟通与协作能力。
-4. 服从公司工作任务分配，能够较快适应新的工作环境。
-
-【岗位职责】
-1. 集团财务分析：负责集团整体及成员单位财务状况分析，定期输出经营分析报告，揭示经营亮点与风险点，为管理层决策提供财务支持。
-2. 投资决策支持：深度参与集团投资项目，负责财务测算、建模及可行性分析，开展财务尽职调查，为投资决策提供数据支撑与风险提示。
-3. 预算管理：协助组织全面预算编制与执行监控，分析预算偏差并提出改进建议。
-4. 业财融合：深入业务一线，建立财务与业务联动的分析机制，推动财务赋能业务。
-5. 专题分析：针对重大经营事项开展专题财务分析，输出高质量分析报告。
-6. 完成领导交办的其他工作。
-
-【任职要求】
-1. 硕士研究生及以上学历，财务、会计、金融等相关专业。
-2. 3年及以上财务或投资分析相关工作经验，有央国企工作经验或投资机构背景者优先。
-3. 熟练使用Office办公软件，精通Excel财务建模与数据透视，具备优秀的报告撰写与演示能力。
-4. 具备优秀的沟通能力与书面表达能力，逻辑严密，能独立输出高质量财务报告；适应高强度工作节奏，抗压能力强；严守商业机密，具备高度职业道德。",厦门国有资本运营有限责任公司,余女士,,在线,,,数据分析,厦门,2026-09-09 21:07
 外运华南-福建公司-项目管理岗(J33006),5000-7000元·13薪,厦门 湖里 殿前,1-3年,本科,汽车制造|工业工程|项目管理|,"汽车制造
 工业工程
 项目管理
@@ -20049,36 +19426,6 @@ Tableau
 2、会基础数据分析，懂商品优化、活动玩法、引流推广逻辑；
 3、做事细心有耐心，抗压能力强，具备良好沟通协调能力
 4、本科学历，对电商行业感兴趣，对未来从事职业有明确规划；",惠尔康东方(厦门)食品有限公司,李女士,,,,,数据分析,厦门,2026-09-09 21:08
-销售运营专员,,厦门 翔安 民安,业务管理,本科,销售运营,"业务管理
-销售运营
-Reporting to:
-EL Sales Support Specialist - Sales Process
-Your role and responsibilities (Mandatory)
-
-In this role, you will have the opportunity to support the assigned Sales organization (division and market) and customers during the proposal process. Each day, you will serve as a key technical resource in the assigned area. You will also showcase your expertise by preparing technical descriptions of the products and technology, determining costs, and preparing final documentation.
-
-The work model for the role is: onsite.
-
-This role is contributing to the EL Marketing & Sales Team in China.
-
-You will be mainly accountable for:
-Supports a proper implementation and communication of the sales processes, e.g., opportunity to order, quotations process, order handling.
-Act as owner of sales related process, collaborate with cross functional teams to understand process bottlenecks and lead optimization projects to address the inconsistency.
-Act as the champion of sales tools, e.g., Salesforce, Conga, iProcess, Ep site, and a representative of lead business for all tools-related topics in the assigned area.
-Collect the business requirements from Sales team about the sales processes and develop new tools accordingly to enhance sales efficiency. Responsible for improvements of all sales tools based on business evaluation to achieve simplification and increase user acceptance.
-Set up training framework and collaborate with various teams to organize training sessions to Sales team, e.g., session of product knowledge, sales process and tools, proper communication and updates on issues related to tools development and new functionalities.
-Build up and maintain sales documents library, e.g., commercial documents, technical documents, process white paper, tool manual, guidelines, and updates.
-Qualifications for the role (Mandatory)
-Bachelor's degree in Business Administration, Management, or a related field.
-Minimum 5 years of experience in process management or project management, preferably within sales operations.
-Demonstrated experience in leading cross-functional collaboration projects, with a strong ability to understand business needs, identify process bottlenecks, and drive optimization initiatives.
-Excellent communication and interpersonal skills, with the ability to effectively engage, influence, and train stakeholders at all levels.
-High proficiency in Salesforce; experience with tools like CPQ is a plus.
-Experience in developing training materials and conducting user training sessions.
-Fluent in English writing and oral is essential.
-More about us
-
-ABB is a technology-based provider of power and automation products, systems, solutions and services. Building on our core strength of technology leadership, pioneering spirit and a sustainable approach to business, ABB helps our customers to become more profitable while lowering environment impact.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:08
 厦门市二轻科技有限公司新媒体运营,8000-12000元,厦门 思明 梧村,1-3年,本科,新媒体流量投放,"新媒体流量投放
 一、公司介绍
 厦门市二轻科技有限公司，系厦门市二轻集体企业联社全资控股的市场化科技运营主体，于2026年7月14日完成法人公司注册登记。公司构建“数字运营服务+产业数字化赋能+创新业态培育”三位一体的业务体系，主营业务涵盖品牌数字化运营、政务服务数字化等核心板块，以科技动能助推转型升级、提质增效。
@@ -20451,32 +19798,6 @@ AI
 三、备注
 1.清华大学多组学研究团队，多年来聚焦于分子超高分辨成像和多组学数据智 能算法开发，并应用于临床智能诊断和治疗。人员可入职北京晨星基因（清华校园内）或者星光智能医学（厦门清华海峡研究院内）。
 2.提供优秀的成长平台和空间（清华大学内），表现优异者工作满一定年限将纳入公司非全定向培养工程博士的培养计划。",清华海峡研究院(厦门),廖慧婷,人事经理 · 清华海峡研究院(厦门),,,,数据分析,厦门,2026-09-09 21:09
-International Operational Excellence Future Lead(96636624),,厦门 翔安 民安,5-10年,本科,生产/加工/制造,"生产/加工/制造
-At ABB, we are dedicated to addressing global challenges. Our core values: care, courage, curiosity, and collaboration - combined with a focus on diversity, inclusion, and equal opportunities - are key drivers in our aim to empower everyone to create sustainable solutions.
-Write the next chapter of your ABB story.
-- “电”亮智慧星计划
-- Unlock Your Potential with ABB's Smart Power Division!
--
-- General information
-- In this dynamic role, you will kick-start your ABB career by joining a 12~24 months full time rotational program within Smart Power Division of ABB's Electrification Business (ELSP) and embark on an exciting journey that will shape your future as a global leader in ABB Smart Power Division.
-- ABB’s Smart Power is a technology leader in data centers, energy transition and smart industries. Its core product portfolio makes electricity safe and reliable. Smart Power’s teams create efficient, intelligent solutions that deliver an unbeatable customer experience and help make a zero-carbon future possible.
-- Through the rotational program, by leading or being part of the team in challenging and influential business assignments on local and global level, you have unique opportunity to grow with high-visibility and gain broad-based knowledge, skills, insights and hands-on experience across diverse operational areas (Manufacturing, Quality, Product Engineering, Process Engineering, Procurement, Logistic and Planning & Fulfillment) with global perspective.
-- Your responsibilities
-- 1. Engage in a 12~24-month job rotation program to lead or participate in high-visibility cross-functional projects spanning Manufacturing, Quality, Product Engineering, Process Engineering, Procurement, Logistic and Planning & Fulfillment across multiple sits and cultures.
-- 2. Collaborate with international teams to implement best practices, drive efficiency, and enhance operational performance.
-- 3. Analyze manufacturing data, identify improvement opportunities, and develop actionable strategies for cost reduction, productivity gains and digital transformation.
-- 4. Engage with stakeholders from different cultural and professional backgrounds to align operational goals with business objectives.
-- 5. Support the development and execution of global operations initiatives, ensuring compliance with industry standards and company policies.
-- 1. Master’s degree or above in Engineering (Mechanical, Electrical, Electronics, Industrial, or Automation), Software/ AI/Digital. Education from top-tier overseas universities is preferred.
-- 2. At least 5 years of relevant professional work experience to drive operational excellence in multinational manufacturing companies. Diverse functional experience in Operation areas is advantageous.
-- 3. Excellent verbal and written communication skills in English
-- 4. Flexible geographical location and willing to work overseas
-- 5. Good level in Learning agility, Problem solving, Resilience and Career ambitions
-- 6. Strong analytical skills and system thinking, excellent interpersonal skills and communication skills.
-- 7. Motivation to acquire new skills and knowledge
-- 8. Ability to work collaboratively in a team-oriented environment and adapt to diverse cultural settings.
-We value people from different backgrounds. Apply today for your next career step within ABB and visit to learn about the impact of our solutions across the globe. #MyABBStory
-Benefits",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:09
 京东超体用户运营副店长,1.2-2万·15薪,厦门 湖里 禾山,5-10年,大专,C端用户|用户增长|会员体系|||||,"C端用户
 用户增长
 会员体系
@@ -21434,34 +20755,6 @@ ERP系统实施和配置：
 10、年终奖金将根据公司当年运营情况给予基本底薪3-10倍的年终奖金，销售人员有更丰厚的提成；
 11、每年多次举办全体员工活动，分别为春季和秋季2次全体员工出游、中秋博饼、年底乒乓球、羽毛球比赛 （参与者根据名次可获得200-2000不等奖金）；全体出游时设有众多比赛，根据比赛得分额外赢取部门活动经费；
 12、重视员工的职业生涯规划及发展，提供完善的职业培训，多种内部竞聘机会及广阔的晋升空间；",厦门宇电自动化科技有限公司,吴梓晴,HR · 厦门宇电自动化科技有限公司,,,,数据分析,厦门,2026-09-09 21:11
-Accounting & Reporting Analyst-Payable,,厦门 翔安 民安,1-3年,本科,英语可作为工作语言|出纳经验,"英语可作为工作语言
-出纳经验
-Your role and responsibilities
-Process accounting transactions for Accounts Payable (AP) in a complete, accurate and timely manner while ensuring compliance with internal
-guidelines and procedures and external regulatory requirements.
-
-Main Accountabilities:
-1. Transaction pro-cessing
-Payment processing, ensuring accurate, timely processing and tracking. Performing other jobs/projects, complete related testing as require.
-2. Monthly closing
-Performs necessary activities within the Accounts Payable area to ensure accurate and timely reporting.
-3. Analysis
-Executes analysis and reports as assigned and takes appropriate action as necessary.
-4. Internal controls
-Complies with and helps achieve Internal Control over Financial Reporting compliance in Accounts Payable for applicable templates.
-Participates in internal control testing and prepares relevant documentation.
-5. Communication
-Ensures all relevant stakeholders are aware of progress and/or issues to maximize customer satisfaction.
-
-Qualifications for the role
-
-1. 1~ 2 years job experience at finance position
-2. Bachelor’s degree or above, major in Finance and Accounting
-3. Good oral and written English.
-4. Outstanding attention to detail, accuracy, improvement, good written and verbal communication skills.
-5. Experience in SAP/Excel/PPT/Power BI Skill
-6. Possess strong numerical sensitivity, clear logical reasoning in calculations.
-7. Easy going, optimistic, patient, persevering, good inter-personal skills, with result orientation and customer orientation.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:11
 地下空间工程师,2-2.2万,厦门 集美 集美街道,3-5年,硕士,结构工程|隧道工程|工程施工,"结构工程
 隧道工程
 工程施工
@@ -21525,25 +20818,6 @@ VR店员4.5K+接受无经验+社保+工作轻,4000-5000元,厦门 思明 中华,
 4、严格遵守公司营运标准，配合门店盘点、场地调整等事务工作，积极参与公司各项培训；
 5、热情接待到店顾客，提供优质服务，倾听顾客诉求并及时反馈，维护门店良好形象。
 6、展览厅轮岗巡逻，进行正确操作引导、卫生清洁、客户接待等基础工作",北京易才博普奥管理顾问有限公司,林女士,人事经理 · 北京易才博普奥管理顾问有限公司,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:12
-美团骑行-区域负责人（华东 华南）,,厦门,3-5年,本科,可持续发展|完善的培训体系,"美团骑行事业部在全国各个城市开展美团单车、电单车业务，提供绿色、便捷的共享出行服务，是美团出行板块重要的组成部分。我们力求为城市可持续发展提供低碳智能的解决方案，通过技术创新和硬件升级，不断优化全流程骑行体验，为低碳出行提供更好的服务。其中，美团单车旨在为城市居民提供通勤接驳服务，满足用户短途接驳出行需求；美团电单车则满足用户中短途多场景低碳出行需求。
-我们有开放的工作氛围，也有充满韧劲和创造力，心系低碳出行的伙伴。加入我们，一起为用户创造更好的出行体验。
-岗位职责
-1. 负责美团骑行的日常运营与运维管理，确保车辆高效调度与良好车况。
-2. 带领团队，制定并执行区域运营策略，提升车辆使用率与用户满意度。
-3. 协调政府关系、物业及第三方合作方，保障车辆投放与回收合规有序。
-4. 监控运营数据，分析问题并提出优化方案，持续改善区域运营效率。
-5. 处理突发运营事件，建立应急响应机制，保障服务稳定运行。
-岗位基本需求
-1. 大学本科及以上学历，5年以上运营或运维相关工作经验。
-2. 具备团队管理经验，有共享出行、物流或城市运营背景者优先。
-3. 熟悉城市交通环境与政策法规，具备较强的沟通协调能力。
-4. 数据敏感度高，能熟练使用各类工具进行数据分析与汇报。
-5. 能适应高频次现场巡查与跨城市出差，具备较强的韧性。
-岗位亮点
-1. 参与城市绿色出行建设，推动可持续交通发展。
-2. 拥有跨区域管理经验，提升综合管理能力与视野。
-3. 公司提供完善的培训体系与职业发展通道。
-4. 团队氛围积极，扁平化管理，鼓励创新与结果导向。",北京三快在线科技有限公司,赵先生,,人事经理 · 北京三快在线科技有限公司,,,数据分析,厦门,2026-09-09 21:12
 产品经理/专员,5000-7000元,厦门 同安 新民,英语,大专,市场调研|产品规划|需求分析||||||||||||||||||||,"英语
 市场调研
 产品规划
@@ -22267,31 +21541,6 @@ AI
 2、熟练操作办公软件、较强的数据分析能力；
 3、良好的沟通能力及团队合作精神，有强烈的工作责任心；
 4、适应无尘车间工作环境。",瀚天天成电子科技(厦门)股份有限公司,蔡女士,HRBP · 瀚天天成电子科技(厦门)股份有限公司,在线,,今日回复2次,数据分析,厦门,2026-09-09 21:13
-Operations Finance Analyst,,厦门 翔安 民安,3-5年,本科,财务分析,"财务分析
-Reporting to:
-Operations Finance Manager
-Your role and responsibilities
-This role is contributing to the ELSP LVS business in Xiamen.
-You will be mainly accountable for:
-● Follow up Capex with all business functions, include Capex PO trace, GR follow up, Capex estimation monthly...
-● Follow up CAPEX disposal process, cooperate with Facility management dept discard/sale disabled FXA
-● Depreciation comparison between actual with Budget & Forecast by CC, analyze root cause and come up proposal to business
-● Local admin for Fixed Assets parts in iProcess system Prepare yearly FA count documents and lead each function to go through physical counting. Analyze deviations if any and come up with suggestions on FA management.
-● Issue and received debit note and check with supporting documents to ensure accuracy and timely
-● IBH coordinators include payment and receivable, work with business function and bank to make sure monthly IBH cycle excuses smoothly.
-● Bank Acceptance management: issue new BAD or endorsement jointly work together with SCM; BAD received, collection or discount if any. BAD monthly reconciliation…etc.
-● Foreign currency related activities due to government policy and restrictions. Example: trade and non-trade foreign currency payment documentation and reporting
-● Monthly review and clear BS open items, such as follow up outstanding items of all banks, GRIR, APDP clear…
-● ABACUS report and quarterly disclosure package for the BAD, ATPF, related party.
-● Support prepare AP related documents or bank related documents required by KPMG audit or tax audit or supplier audit required by customer.
-● Support on the financial documents filling
-● Issue the VAT invoice, such as material scrap income, debit note …etc.
-Qualifications for the role
-● Bachelor’s degree (major in accounting or finance).
-● 3+ years of accounting experience in manufacturing company, with rich experience in accounting and reporting.
-● Working knowledge of SAP
-● Be fluent in written English.
-● Familiar with MS Excel is must and power BI will be better.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,数据分析,厦门,2026-09-09 21:13
 品牌小红书运营,7000-9000元,厦门 思明 莲前,1-3年,大专,策划热点事件|数据分析|家居,"策划热点事件
 数据分析
 家居
@@ -22306,23 +21555,6 @@ Qualifications for the role
 3、具备营销思维，积极探索和创新推广方式，具有一定的品牌意识，能对品牌账号进行分析学习；
 4、自学能力强，可以快速了解掌握一个新行业的重点知识和推广要点；
 5、具备较强的沟通能力和团队协作精神；",厦门市麦哲文化传播有限公司,李音佳,人事经理 · 厦门市麦哲文化传播有限公司,,,,数据分析,厦门,2026-09-09 21:13
-履约-众包站长,,厦门,1-3年,本科,,"美团配送是以科技为内核的即时物流品牌，利用高效、稳定、广阔的配送网络和前沿科技能力为各行业客户提供涵盖商流物流一体化、流量赋能、行业定制化即时配送、末端配送、前置仓等服务在内的全方位同城物流综合解决方案。
-作为科技创新和智慧物流的实践者，美团配送在人工智能（AI）、5G应用、物联网（IoT）、云计算等多维度不断探索科创蓝海，让同城物流进入数智化时代。美团配送在IoT智能设备、外卖柜、换电网络、无人配送体系等硬件设施与服务上不断推陈出新，持续优化骑手、消费者、商家体验；自研同城物流系统，通过智能分析为用户提供更便捷的生活方式，为商家提供更高效的履约服务。
-加入我们，一起把世界送到消费者手中！
-岗位职责
-1.对负责区域制定配送体验优化方案并有效地执行方案，同时对执行结果进行有效复盘；
-2.重点围绕骑手的招聘，培训，提效，留存，淘汰等环节开展工作，保证负责区域的运力活力以及提升履约服务质量，提升用户体验；
-3.处理由履约原因产生的相关商户问题，以及能够良好地协同其他部门进行问题解决；
-4.对负责的骑手运营项目，能够做出短、中、长期的规划，制定高效的运营方案并达成业务结果。
-岗位基本需求
-1.本科及以上学历，有物流、互联网、O2O等相关行业或运营经验者优先；
-2.熟练运用互联网常见分析工具，掌握物流数据分析方法论；
-3.业务灵敏度强，能从数据运营中发现问题，并提出解决路径；
-4.有较强的自驱与学习能力，有长远职业发展的规划。
-岗位亮点
-1.能够参与并推动履约运营体系完善与搭建；
-2.可参与到跨部门重点项目协调推进；
-3.可与优秀物流运营者共同成长。",北京三快在线科技有限公司,赵先生,,人事经理 · 北京三快在线科技有限公司,,,数据分析,厦门,2026-09-09 21:13
 光储市场分析师（数能-厦门/北京）,1.5-2万·14薪,厦门 湖里 殿前,新能源,硕士,,"新能源
 岗位职责
 1、负责新能源光储市场研究体系和信息情报系统的建设和日常维护管理；
@@ -34123,12 +33355,6 @@ CQE客户质量工程师,1-1.8万,福州 长乐 航城,3-5年,本科,QA|全面�
 ●工作时间：
 
 8：20-17：30 ，五天八小时工作制",福建丸顺新能源汽车科技有限公司,丁女士,,在线,,今日回复31次,测试,福州,2026-09-09 21:53
-硬件测试工程师,,福州 闽侯 上街,1-3年,本科,万用表|安规测试|可靠性测试|PCB,"万用表
-安规测试
-可靠性测试
-PCB
-负责SI测试环境搭建，测试执行，实验室管理
-负责电源测试环境的搭建，指标的测试；掌握基本的测试技能",中软国际,黄珍珍,HR · 中软国际,在线,,今日回复50+次,测试,福州,2026-09-09 21:53
 中试工程师,5000-7000元,福州 马尾 马尾,1-3年,本科,硬件调试|原理图分析|通信/网络设备,"硬件调试
 原理图分析
 通信/网络设备
@@ -36060,25 +35286,6 @@ QE
 3） 具备电气设计及相关计算能力。
 4） 具备良好的团队协作能力。
 5） 英语六级，熟练的英文听说读写能力。",利莱森玛电机科技(福州)有限公司,陈女士,,在线,,今日回复13次,测试,福州,2026-09-09 21:57
-小象超市-储备城市品控经理,,福州,3-5年,本科,发展空间|完善的培训体系,"小象超市为美团自营零售业务，定位为社区居民的“30分钟快送超市”，采用“手机App+线下服务站”的模式，通过在社区设立的集存储、分拣、配送为一体的便民服务站，为社区居民提供生鲜食杂日用及配送服务。目前，小象超市已在北京、上海、深圳、广州、武汉、苏州、杭州等多个城市上线。在美团“零售+科技”战略聚焦下，小象超市承载着“深耕即时零售，提升消费体验”的任务，是公司在线上零售探索的核心业态之一，给一二线城市用户带来线上零售即时达的消费体验，解决城市家庭追求快速、品质服务的需求。在这里，我们有来自国内外知名零售公司的大牛和一群热爱零售，胸怀使命，心系民生的伙伴，小象超市欢迎你的加入！
-岗位职责
-1. 负责所在城市商品质量管控体系的搭建与优化，确保供应链各环节符合公司品质标准。
-2. 统筹管理城市品控团队，制定工作计划并监督执行，提升团队专业能力与工作效率。
-3. 组织开展供应商审核、商品抽检、仓储物流质量检查等工作，及时发现并推动解决质量问题。
-4. 建立质量数据监控机制，定期输出质量分析报告，为业务决策提供支持。
-5. 协同采购、运营、物流等部门，推动质量问题的闭环整改与预防机制落地。
-岗位基本需求
-1. 大学本科及以上学历，质量管理、供应链管理、食品科学、生物工程等相关专业优先。
-2. 5年以上商品质量管理或供应链品控相关工作经验，有团队管理经验者优先。
-3. 熟悉国家相关法律法规及行业标准，具备较强的质量风险识别与应对能力。
-4. 具备优秀的沟通协调能力、数据分析能力和跨部门推动能力。
-5. 能适应跨城市出差，工作地点为福州市、武汉市、南宁市或南昌市。
-6.掌握基本的AI工具，使用工具提升工作流程效率。
-岗位亮点
-1. 管理百人规模团队，具备广阔的职业发展空间与领导力锻炼机会。
-2. 深入参与城市供应链体系建设，对业务有实质性影响力。
-3. 公司提供完善的培训体系与职业发展通道，支持长期成长。
-4. 工作地点覆盖多个重点城市，可根据个人情况灵活安排。",北京三快在线科技有限公司,赵先生,,人事经理 · 北京三快在线科技有限公司,,,测试,福州,2026-09-09 21:57
 ATE工程师（TE工程师）,7000-9000元·13薪,福州 闽侯 南屿,1-3年,本科,自动化测试|电子设备制造|,"自动化测试
 电子设备制造
 工业自动化/机器人
@@ -39885,29 +39092,6 @@ BOPP
 2、熟悉常用办公软件，会CAD；
 3、具备五年以上（含五年）专业基础知识和维修经验；有现场处理能力，并对非标设备有一定认知；
 4、有BOPP、BOPE、BOPA、BOPI、BOPET等双拉行业设备等相关经验，优先考虑。",福融新材料股份有限公司,薛淑灵,,在线,,今日回复12次,运维,福州,2026-09-09 22:06
-美团单车招聘货运运维司机/带载具,,福州 晋安 茶园,B2驾驶证,,C1驾驶证|栏板式货车|||||||||||,"A2驾驶证
-B2驾驶证
-C1驾驶证
-栏板式货车
-厢式货车
-自卸式货车
-4米2货车
-5米2货车
-9米6货车
-短途货运
-同城配送
-长途货运
-1. 单车运维货运司机
-- 工作内容：根据区域需求（如地铁口、商场等人流密集区）调度闲置车辆，回收故障车辆至仓库。
-
-- 薪资模式：计件模式，月薪资8000-15000；新手前期正常270元/天，月薪资8000上下，平均薪资8500--15000。
-
-- 要求：需要自带三轮车或其他车辆，比如：高顶依维柯，厢货车，面包车，三轮车。
-
-工作要求
-
-要求，无犯罪记录，不是失信人员，有安卓手机，薪资发本人银行卡，不能代领，需要有载具驾照，自备车辆优先.
-工作地点，福州仓山区，台江区，鼓楼区，晋安区可就近安排工作地点。",北京三快在线科技有限公司,杨先生,,人事招聘专员 · 北京三快在线科技有限公司,,今日回复5次,运维,福州,2026-09-09 22:06
 it工程师,7000-10000元,福州 福清 江阴,1-3年,大专,桌面运维|信息安全|软件/IT服务,"桌面运维
 信息安全
 软件/IT服务
@@ -40232,24 +39416,6 @@ H3CSE
 5、具备较强经营意识与财务思维，能有效把控成本、利润与现金流；
 6、以结果为导向，抗压能力强，具备优秀的团队领导力与跨部门协调能力；
 7、了解GB 50314、GB 50348等行业技术标准者优先；持有高级项目经理证书或一级建造师（机电工程）证书者优先。",恒荣智算(福建)科技有限公司,冯先生,人力行政经理 · 恒荣智算(福建)科技有限公司,在线,,,运维,福州,2026-09-09 22:07
-009J3O-服务工程师-配电-福建 (MJ016644),,福州 台江 宁化,3-5年,本科,高压证|中低压柜安装调试|继电保护|,"高压证
-中低压柜安装调试
-继电保护
-业务介绍：
-施耐德电气服务业务Services China为客户提供EcoConsult咨询服务、EcoCare运维服务和EcoFitTM适配改造服务，打造端到端全生命周期服务能力、协同服务合作伙伴，主力客户加速数字化和绿色化双转型，迈向高质量可持续发展。
-负责区域：福建
-工作地点：福州或厦门
-岗位职责：
-1、中低压配电设备安装指导、调试验收及故障处理等现场服务工作；
-2、已装机设备的数字化台账、维护维保、适配改造等存量业务的执行交付；
-3、配电设备的数字化部署、调试及交付；
-4、发掘已装机设备的业务机会。
-任职要求：
-1、电气、自动化、通信相关专业，大学本科及以上学历；
-2、精通仪表、综保装置，有通信相关知识基础；
-3、熟悉中低压配电系统及设备的应用、原理和相关技术标准；
-4、对存量业务、能效数字化有一定的了解和认识；
-5、接受区域内的频繁出差",施耐德电气（中国）有限公司,谈燕纷,人事经理 · 施耐德电气（中国）有限公司,在线,,今日回复50+次,运维,福州,2026-09-09 22:07
 技术支持工程师（福建）(J10533),9000-11000元,福州 闽侯 南屿,1-3年,本科,软件产品|云桌面|技术支持,"软件产品
 云桌面
 技术支持
@@ -43293,30 +42459,6 @@ HRIS总监,1.5-3万·13薪,福州 台江 瀛洲,5-10年,本科,招聘管理系�
 3、有互联网思维,熟悉数据库、人事信息系统以及较新型的人事类移动应用;
 4、熟练掌握数据和统计分析的工具,例如SPSS、SQL、Excel等;
 5、具备较强的逻辑思维能力,内驱力强,有系统开发对接、数据平台搭建、HR数据分析经验者优先。",福州朴朴电子商务有限公司,章女士,,,,,数据分析,福州,2026-09-09 22:15
-营运与规则职员-福建分公司 (MJ002650),,福州 晋安 岳峰,3-5年,本科,门店运营,"门店运营
-岗位职责:
-一. 门店日常运营
-1、负责分公司体验店日常运营，确保环境整洁、陈列规范、物资齐备、运营流程顺畅。
-2、负责政府职能部门及市场伙伴的参观接待工作，制定接待流程与讲解方案。
-二. 客户接待与服务响应
-1、负责进店顾客的标准化接待与动线引导，为顾客提供产品介绍与建议，提供高水准的服务体验。
-2、接听并妥善处理客户电话咨询，提供准确的产品信息、服务指引。
-3、受理产品售后问题与客户投诉，建立客诉台账，协调推动产品与服务优化，提升客户满意度。
-三. 体验活动策划与落地
-1、策划并组织体验中心小型体验活动（如健康沙龙、产品体验日、互动讲座等）。
-2、负责活动前期方案拟定、物料筹备、现场执行管控，以及后期效果评估与数据复盘，提升客户活跃度与品牌黏性。
-四. 市场规范宣导与合规监督
-1、协助开展市场规范培训与宣导工作，确保经销商严格遵守公司市场管理制度与合规要求。
-2、定期收集市场反馈，及时纠正不规范行为，维护市场秩序。
-五. 门店升级项目专项跟进
-1、全程跟进“养生会客厅”门店升级改造项目，对接设计方、施工方及内部跨部门团队。
-2、监督项目进度，协调解决实施过程中的问题，确保按期交付并顺利开业。
-任职要求:
-1、有销售或直销行业相关从业经历（护肤彩妆销售经验优先）。
-2、具备一定的数据分析能力、客诉经验。
-3、有较强的沟通、表达能力。
-4、可以组织策划市场活动。
-5、团队意识强，有良好的服务意识与能力。",无限极（中国）有限公司,陈女士,HR · 无限极（中国）有限公司,在线,,,数据分析,福州,2026-09-09 22:15
 防异物专员（可接受应届毕业生）,5000-7000元,福州 福清 宏路,1-3年,本科,核电安全管理,"核电安全管理
 岗位要求：
 1、有1年以上核电相关工作经验，接受应届毕业生；
@@ -43385,25 +42527,6 @@ toB
 4、具备目标管理能力，能制定团队目标及行动计划的能力，并且有效的完成；
 5、2-3年的项目推动能力和管理能力；
 6、有良好的逻辑思维能力、跨部门沟通和问题处理能力。",北京雍禾医疗科技集团有限公司,杨女士,人事经理 · 北京雍禾医疗科技集团有限公司,在线,,今日回复5次,数据分析,福州,2026-09-09 22:16
-商务专员,,福州 闽侯 上街,3-5年,本科,数据分析|数据统计|跟单员|,"数据分析
-数据统计
-跟单员
-财务/审计/税务
-岗位职责：
-1、传达公司及省办的各种通知及文件并学习，准确及时接发各类文件，传递各类工作信息，及省办与总部的对接。
-2、销售合同签订后，负责核对合同、将合同传真至总部，并做好发货和货物跟踪及合同的管理和归档。
-3.对需外购的产品及主机主板下任务单。
-4.负责登记统计销售人员日常销售业绩。
-5.协助业务员开票，登记应收货款回款情况，监督区域到期应收及特批发货回款情况。
-6.监督区域例会召开情况，并做好会议记录，整理留存。
-7.统计办事处人员考勤，协助办事处招聘等人事事宜。
-8.月底核对销售人员合同数、发货数量、回款额及债权。
-9.月初邮寄各类资料的汇总及报销资料。
-任职要求：
-1、大专以上学历，财务、统计专业优先；
-2、3年以上工作经验，能熟练运用office办公软件；
-3、熟悉ERP系统（如U8系统)、有销售统计、销售助理或财务工作经验优先；
-4、诚实敬业，具有高度的责任心、工作踏实细致。",四川久远智能消防设备有限责任公司,高女士,商务经理 · 四川久远智能消防设备有限责任公司,,,,数据分析,福州,2026-09-09 22:16
 项目经理,9000-15000元,福州 鼓楼 鼓东,5-10年,本科,PMP|产业互联网平台|,"PMP
 产业互联网平台
 通信运营商/电信增值服务
@@ -44419,23 +43542,6 @@ E. 工作严谨负责、执行力强，能配合产线加班 / 夜班。",锐捷
 4、熟悉仓储管理系统（WMS）及办公软件操作，具备较强的数据分析能力；
 5、具备良好的团队领导能力、跨文化沟通技巧及解决问题的能力；
 6、能适应越南当地工作环境，责任心强，具备较强的抗压能力与应变能力。",福州科瑞特纸品有限公司,史锐,人事经理 · 福州科瑞特纸品有限公司,在线,,,数据分析,福州,2026-09-09 22:18
-PC城市负责人--华南,,福州,3-5年,大专,晋升空间大,"小象超市为美团自营零售业务，定位为社区居民的“30分钟快送超市”，采用“手机App+线下服务站”的模式，通过在社区设立的集存储、分拣、配送为一体的便民服务站，为社区居民提供生鲜食杂日用及配送服务。目前，小象超市已在北京、上海、深圳、广州、武汉、苏州、杭州等多个城市上线。在美团“零售+科技”战略聚焦下，小象超市承载着“深耕即时零售，提升消费体验”的任务，是公司在线上零售探索的核心业态之一，给一二线城市用户带来线上零售即时达的消费体验，解决城市家庭追求快速、品质服务的需求。在这里，我们有来自国内外知名零售公司的大牛和一群热爱零售，胸怀使命，心系民生的伙伴，小象超市欢迎你的加入！
-岗位职责
-1、履约保障：全面统筹加工中心日常运营管理，制定并分解生产计划，确保各环节有序推进、按时交付，保障中心整体产能目标达成。
-2、团队建设：负责团队的选用育励汰，为团队成员的成长和发展负责，建设一直高执行、高标准的一线运营团队。
-3、跨部门协同：建立与横向部门高效的协同关系，推动链路卡点解决，善于形成方法论，推动流程制度建设。
-4、精益改善：建立生产数据监控机制，定期分析关键指标（效率、质量、损耗等），识别瓶颈与异常，持续优化加工工艺与作业流程，提升效率，保障加工品质，提出针对性改进方案，推动持续改善。
-5、项目运营：负责新项目的测试进度、结果分析总结，推动新项目落地。
-岗位基本需求
-1. 大学本科及以上学历，物流、工业工程、食品等相关专业优先。
-2. 具备5年以上物流、食品加工、生鲜领域工作经验，有大规模（300人以上）团队管理经验。
-3. 熟悉生产管理流程，具备较强的数据分析能力和问题解决能力。
-4. 具备良好的沟通协调能力和项目管理能力，能独立推动复杂项目落地
-5. 工作责任心强，能适应快节奏工作环境。
-6.有中央厨房、净菜生产经验优先。
-岗位亮点
-平台宽广，晋升空间大；
-业务快速发展期，个人成长快速",北京三快在线科技有限公司,赵先生,,人事经理 · 北京三快在线科技有限公司,,,数据分析,福州,2026-09-09 22:18
 制冷工程师,6000-9000元,福州 福清 城头,1-3年,大专,维修/保养|电气设备|,"维修/保养
 电气设备
 食品/饮品/烟酒制造
@@ -54526,21 +53632,6 @@ AI 工具 有使用 AI 编程工具的实际经验（ChatGPT/Cursor/DeepSeek等�
 有成本意识，懂得合理使用资源
 喜欢钻研，遇到问题习惯自己先研究
 沟通顺畅，能和不懂技术的同事协作",泉州市哆啦树卫生用品有限公司,童女士,HRD · 泉州市哆啦树卫生用品有限公司,在线,,今日回复12次,Java,南平,2026-09-09 22:51
-财富总监(J13505)-晋江,,泉州 晋江市 梅岭街道,3-5年,本科,基金从业资格证|证券从业资格证|||,"基金从业资格证
-证券从业资格证
-投资理财
-产品销售
-资产配置
-岗位职责:
-1.负责协助营业部负责人制定财富与机构业务、营销活动、产品销售方案并组织实施。
-2.负责协助营业部负责人整合区域资源、拓展渠道，与公司相关业务部门进行交流和合作。
-3.负责营业网点前台业务团队的管理与赋能。
-4.开发和维护客户，完成个人及团队各项业绩指标及公司交办的其他任务。
-任职要求:
-1.本科及以上学历，金融、经济、管理等相关专业优先。
-2.3年以上证券、金融相关行业从业年限，2年以上财富管理相关工作经验。
-3.具备证券从业资格、基金从业资格，已通过证券投资顾问业务考试（或证券投资分析考试）。
-4.身体健康、正直诚信，认同公司企业文化和经营理念，具有团队管理能力和开拓精神，无任何违法违规不良记录，与公司员工不存在回避关系。",东北证券,招聘专员 · 东北证券,,在线,,,Java,南平,2026-09-09 22:51
 IT运维主管（五险一金、周休1.5天）,8000-12000元,泉州 丰泽区 丰泽街道,1-3年,大专,Nginx|Vmware|Kafka|Python|||||||,"Nginx
 Vmware
 Kafka
@@ -75126,24 +74217,6 @@ KA大客户
 3.具备精馏装置现场经验，精通DCS系统，能独立处理技术问题；
 4.有同位素分离、化工生产开发经验者优先。
 博士学历待遇面议。",江苏华益核医药股份有限公司,唐女士,,在线,,今日回复3次,数据分析,广州,2026-09-09 23:57
-支公司团险业务部负责人,,苏州 常熟 琴川,3-5年,本科,保险|团队绩效|五险一金|||||||||,"保险
-岗位职责：
-1.开展市场调研，收集行业信息，及时反馈市场动态，调整业务策略；
-2.负责渠道拓展、合作维护与业务推动，统筹资源落实业务目标，确保计划有效执行；
-3.负责团队组建、日常管理、培训辅导与绩效考核，提升团队专业能力与业务产能；
-4.维护并深化重点客户关系，提升客户满意度与续保率，推动客户价值持续增长；
-5.监控业务经营数据，定期分析团队绩效与渠道表现，发现问题并推动改进，优化业务流程；
-6.完成上级领导交办的其他各项工作任务。
-任职要求：
-1.大学本科及以上学历；
-2.保险、金融、经济、市场营销等相关专业优先考虑；
-3.具备3年以上保险行业工作经验，其中至少2年团险营销或业务督导相关工作经验；
-4.具备较强的团队管理、客户开发、数据分析及沟通协调能力；
-5.熟悉保险行业相关法律法规及监管政策，具备较强的合规经营意识与风险防范能力；
-6.特别优秀者，任职条件可适当放宽。
-福利待遇：
-1.公司正式在编内勤员工；
-2.五险一金、绩效奖金、餐补、通讯补助、带薪年假、定期体检、企业年金、补充医疗保险、子女医疗等福利。",东吴人寿,马女士,人力资源部经理 · 东吴人寿,在线,,今日回复1次,数据分析,广州,2026-09-09 23:57
 会计主管,8000-11000元,苏州 常熟 东南,3-5年,本科,会计中级职称|会计高级职称|||,"会计中级职称
 会计高级职称
 总账会计
@@ -76643,17 +75716,6 @@ SAP开发工程师,6000-9000元·13薪,宁波 鄞州 福明,SAP开发,本科,系
 2、具备SAP ABAP开发经验、熟悉制造业流程者优先；
 3、掌握跨系统数据交互与报文处理技术，有财务、供应链或生产制造模块运维经验者优先；
 4、具备良好的沟通协调与团队协作能力。",东方电缆,王先生,HR · 东方电缆,在线,,今日回复50+次,Java,东莞,2026-09-10 00:01
-java中级开发工程师,,宁波 海曙 鼓楼,3-5年,本科,软件/IT服务,"软件/IT服务
-工作职责
-1.参与需求分析，系统设计，集成测试以及安装部署工作
-2.负责分工的相应模块的设计文档撰写。
-3.负责程序开发、开发后的单元测试，配合测试组的测试，及时解决问题。
-4.完成业务系统的编码以及开发、维护。
-5.及时跟踪、解决系统故障，并提出改良建议
-任职要求
-熟悉java与springboot框架，有完整项目的开发经验。
-有一定沟通能力，能对接客户以及第三方团队，梳理需求，编写技术文档。
-有ERP和OA系统对接经验、熟悉对应的、金蝶云星空的开放平台的优先。",东华软件股份公司,李政江,人事经理 · 东华软件股份公司,在线,,今日回复42次,Java,东莞,2026-09-10 00:01
 后端开发工程师,1.2-1.6万,宁波 鄞州 福明,5-10年,本科,Python|JavaScript|Spring|,"Python
 JavaScript
 Spring
@@ -79381,33 +78443,6 @@ QNX/LINUX
 有自动化测试、CI或数据平台业务经验者优先。
 具备一定AI能力:能使用AI工具辅助测试设计、用例生成、脚本开发或问题分析。
 有AI应用/智能化测试相关实践者优先。",重庆软维科技有限公司,肖宁,,在线,,今日回复8次,Java,东莞,2026-09-10 00:06
-智能制造应用系统主管 (MES方向),,宁波 北仑 春晓,5-10年,本科,MES系统,"MES系统
-一、【岗位职责】
-1、负责制定并执行制造核心应用（MES/WMS）的运维治理策略、年度计划及应急预案，保障系统高可用性。
-2、负责集团级制造核心系统的标准化推广与实施落地，确保最佳实践在工厂的有效执行。
-3、项目与交付
-(1) 主导工厂MES/WMS项目的方案设计、实施上线及持续运维全生命周期管理，对项目交付质量负责。
-(2) 组织并协调二线交付团队及业务部门，完成新需求、新功能的方案讨论、开发交付及平稳转运维。
-4、创新与赋能
-(1) 主动挖掘工厂在智能制造、AI与大数据分析领域的高价值需求，并协同技术团队完成方案设计与落地，驱动业务创新。
-(2) 利用低代码（Low-Code）平台与BI工具，进行轻量化应用的快速开发与交付，敏捷响应本地化业务需求，实现需求自闭环。
-5、服务与支持
-(1) 作为工厂业务部门的首要IT接口人，高效对接并闭环用户需求及Bug故障，提升用户满意度。
-(2) 建立和完善知识管理体系，通过文档沉淀和质量巡检，持续提升运维服务的标准化与专业化水平。
-二、【任职要求】
-1、必备条件
-(1) 统招本科及以上学历，计算机科学、信息技术、工业工程或相关专业。
-(2) 5年以上制造业信息化工作经验，至少主导过2个及以上MES或WMS项目的实施或深度运维。
-(3) 精通数据库(Oracle/MySQL等)、中间件、操作系统(Linux/Windows)的运维与管理，具备强大的系统性问题排查能力。
-(4) 掌握至少一门开发语言(Java/C#/Python)，能够进行脚本编写、日志分析及接口调试。
-(5) 出色的项目管理和跨团队协作能力，能够有效管理内外部团队，推动项目进展。
-(6) 具备优秀的业务理解力和沟通能力，能将业务需求转化为技术方案。
-2、优先考虑
-(1) 有大型汽车制造集团信息化工作经验者优先。
-(2) 具有低代码平台开发经验或BI项目开发经验（如Tableau, Power BI, 帆软等）。
-(3) 熟悉工业自动化架构，了解OPC UA、PLC数据采集等物联网（IoT）技术。
-(4) 对人工智能、大数据在制造业的应用场景有浓厚兴趣或实践经验。
-(5) 国际化语言沟通能力",吉利控股集团,孙女士,HRBP · 吉利控股集团,,,,Java,东莞,2026-09-10 00:06
 软件开发工程师,1-1.5万,宁波 余姚 凤山,3-5年,本科,C++|OpenCV|图像识别产品|,"C++
 OpenCV
 图像识别产品
@@ -79811,30 +78846,6 @@ ETL开发工程师（银行项目）,1.2-1.5万,宁波 江北 前江,3-5年,本�
 5.3-5年工作经验，计算机本科相关专业优先；
 6.主动性和责任心强，有良好的抗压能力，有强烈的学习/技术研究能力和良好的团队精神。
 备注：有AI相关经验和业务知识优先。",北京神州数字科技有限公司,吴先生,,在线,,今日回复50+次,Java,东莞,2026-09-10 00:07
-技术架构支持主管,,宁波 北仑 春晓,3-5年,本科,SQL,"SQL
-【技能要求】
-(1) 大型基础设施项目经验：
-企业集团级内网搭建、AD域搭建、邮箱及即时通讯；
-网络安全域、网络准入、DLP数据泄露、终端磁盘加密；
-(2) 精通 思科、华为、H3C等核心交换机管理；
-(3) 精通虚拟化管理平台
-(4) 精通Linux系统
-(5) 熟悉各类故障转移、负载均衡等集群及应用中间件
-(6) 熟悉主流DELL/HP服务器,可以快速解除硬件故障;
-(7) 熟悉EMC/3Par存储设备运维管理；
-(8) 熟悉信息安全ISO/IEC27001标准体系；
-(9) 具备核心机房网络交换、防火墙、上网审计等设备及物理服务器运维管理；
-(10) 了解Oracle、SQL Server数据库，具备数库备份、迁移及快速恢复能力.
-【网络专业证书】
-思科：CCNP(中级)、CCIE(高级)；
-华为：HCIP(中级)、HCIE(高级)
-华三：H3CNE(中级)、H3CSE(高级)
-【素质要求】
-(1) 本科 计算机及网络技术相关专业，工作5年及以上经验；
-(2) 自律性强、责任心强、能吃苦耐劳、服从组织；
-(3) 具有良好的职业道德，责任心强，原则性强；
-(4) 具有较强的组织、协调、沟通能力；
-(5) 认同企业文化，忠于服务业务，服从集团工作安排；",吉利控股集团,孙女士,HRBP · 吉利控股集团,,,,Java,东莞,2026-09-10 00:07
 Java开发工程师,5000-8000元·14薪,宁波 鄞州 首南,1-3年,本科,Java|SpringBoot|Mybatis|Vue|||||||||||,"Java
 SpringBoot
 Mybatis
@@ -81755,26 +80766,6 @@ Python
 1.在NLP/大语言模型方向有完整项目经验（从数据到部署）。
 2.熟悉开源大模型与工程框架（如Lang Chain、Dify、Haystack等）。
 3.熟悉算力调度、GPU/TensorRT 推理优化和 CI/CD 流水线。",信雅达,金晶,HRBP · 信雅达,在线,,今日回复15次,Python,东莞,2026-09-10 00:14
-人工智能应用开发工程师,,宁波 慈溪 庵东,3-5年,本科,深度学习|智能驾驶|TensorFlow||||||,"深度学习
-智能驾驶
-TensorFlow
-PyTorch
-Python
-C++
-车载AI应用开发
-车规级模型部署优化
-车载系统架构设计
-工作职责
-1. 负责车载AI应用（如智能座舱交互、自动驾驶辅助功能）的技术方案设计与开发落地。
-2. 基于深度学习框架（TensorFlow/PyTorch）进行模型部署与性能优化，适配车规级硬件环境。
-3. 与算法团队协作，将AI模型转化为可量产的工程化解决方案，解决实际业务场景中的技术难题。
-4. 参与车载AI系统的架构设计，保障系统的稳定性、实时性与安全性。
-任职要求
-1. 本科及以上学历，计算机、自动化、电子信息等相关专业。
-2. 3年以上AI应用开发经验，精通Python/C++，熟悉至少一种深度学习框架。
-3. 具备端侧AI模型优化（如模型压缩、量化）或嵌入式设备开发经验者优先。
-4. 了解汽车电子电气架构（EEA）或车载系统（如Linux/QNX）者优先。
-5. 具备良好的问题分析能力与跨团队协作能力，能快速定位并解决技术问题。",吉利控股集团,周金泽,人事经理 · 吉利控股集团,在线,,,Python,东莞,2026-09-10 00:14
 数据开发工程师（充电补能推荐方向）,1.3-1.8万,宁波 慈溪 庵东,3-5年,大专,数据治理|数据架构|ETL|Sql||||,"数据治理
 数据架构
 ETL
@@ -82655,27 +81646,6 @@ Bug排查
 有新人培养经验
 【成长路径】
 开发工程师 → 高级开发工程师 → 技术负责人 → 架构师 → CTO",湖北聚博汇人力资源有限公司,谢思怡,,在线,,今日回复2次,Python,东莞,2026-09-10 00:17
-电驱测试工程师（NVH）,,宁波 慈溪 周巷,5-10年,大专,安全测试|性能测试|Python|||,"安全测试
-性能测试
-Python
-DISCOM
-EOL
-专用设备制造
-岗位职责：
-1.每日测试线（主要nvh）不良分析、改善
-2.产线防错功能维护
-3.mes配方维护
-4.试装跟进（新型号导入、物料变更等）
-5.0km、市场问题跟进整改
-6.负责电驱NVH问题分析定位，提出、推动改善方案
-7.测试线工艺文件维护
-任职要求：
-1.本科及以上
-2.五年以上nvh测试分析相关工作经验，有电驱总成测试工作经验优先
-3.熟练discom等nvh测试软件使用
-4.熟悉库卡、舍弗勒EOL台架
-5.熟悉16949质量体系
-6.良好沟通协调能力，团队意识强",吉利控股集团,许圆吉,人事经理 · 吉利控股集团,在线,,今日回复1次,Python,东莞,2026-09-10 00:17
 嵌入式软件工程师,8000-15000元,宁波 鄞州 首南,1-3年,本科,32位单片机|C语言|C++|linux|||,"32位单片机
 C语言
 C++
@@ -82709,38 +81679,6 @@ linux
 4. 有光谱仪、环境监测、水质监测等科学仪器开发经验。
 5. 有物联网平台、边缘计算、视频流或自动化测试相关经验。
 6. 熟悉 Python/Shell 脚本开发，具备较强的问题分析与调试能力。",安华海洋智能装备(深圳)有限公司,孙兆凤,人事经理 · 安华海洋智能装备(深圳)有限公司,在线,,今日回复1次,Python,东莞,2026-09-10 00:17
-新能源电控测试工程师,,宁波 慈溪 周巷,3-5年,本科,CANoe|CAN/LIN|性能测试|||||||,"CANoe
-CAN/LIN
-性能测试
-安全测试
-老化测试
-Python
-CAPL
-电控测试
-新能源/燃油车零部件
-电气机械/电力设备
-主要职责：
-测试方案与执行： 负责电驱控制器下线测试（EOL测试）的具体实施，包括但不限于：
-安规测试（Safety Test）： 熟练进行绝缘电阻、耐压强度（HIPOT）、接地电阻等安全规范测试，确保产品符合国际安全标准。
-上电与低压功能测试（Power-on & Low Voltage Function Test）： 执行控制器上电、低压唤醒、CAN/LIN通信、传感器模拟量/数字量信号检测、IO功能验证等。
-老化测试（Aging Test）： 参与制定并执行高温/带载老化测试流程，监控产品在长时间运行下的稳定性与可靠性。
-气密性测试（Sealing Test）： 使用气密测试仪对控制器壳体进行IP67/IP6K9K等防护等级的密封性检测。
-EOL综合测试： 操作自动化EOL测试台架，完成所有测试项的集成校验、软件刷写（Flash）、故障注入（FIT）及结果判定。
-问题分析与解决： 对测试过程中出现的故障（NG）单元进行初步分析、定位，与设计、工艺团队协同完成根本原因（Root Cause）排查与问题闭环。
-文档与记录： 编写标准化测试作业指导书（SOP），准确记录测试数据，生成测试报告，并维护测试记录的可追溯性。
-持续改进： 参与测试设备的日常维护、点检与校准，并不断优化测试流程，提升测试效率和覆盖率。
-任职要求：
-学历专业： 本科及以上学历，电气工程、自动化、车辆工程、电子科学与技术等相关专业。
-经验要求：
-必备经验： 具备1年以上电控产品（如VCU， MCU， BMS， OBC等）下线测试（EOL） 或硬件在环（HIL）测试经验。
-核心技能： 必须熟练掌握电控下线测试的安规、上电、气密、老化和EOL等测试项目的原理、设备操作与标准解读。
-工具与设备：
-熟悉常用测试仪器，如万用表、示波器、绝缘耐压测试仪、气密检漏仪、CANoe/CANalyzer等。
-有操作自动化测试台架经验者优先。
-能力素质：
-具备强烈的质量意识和责任心，严谨细致，能坚守测试原则。
-具备良好的逻辑分析和问题解决能力，能应对测试中的异常情况。
-具备良好的团队协作精神和沟通能力。",吉利控股集团,许圆吉,人事经理 · 吉利控股集团,在线,,今日回复1次,Python,东莞,2026-09-10 00:17
 光学工程师,6000-12000元,宁波 鄞州 首南,1-3年,本科,工艺设计|仿真设计|研发||||||||||||,"工艺设计
 仿真设计
 研发
@@ -83630,27 +82568,6 @@ FBA岗前客服,6000-11000元,宁波 鄞州 新明,1-3年,大专,港前客服|�
 1.专科及以上学历，国际贸易，物流类相关专业
 2.有1年以上FBA、跨境电商物流经验优先
 3.熟悉使用新智慧物流系统或大客户跟单客服经验相关优先",宁波中威国际物流有限公司,陈女士,人事经理 · 宁波中威国际物流有限公司,在线,,今日回复4次,后端,东莞,2026-09-10 00:24
-北非堆场管理,,宁波 慈溪 庵东,3-5年,本科,集装箱操作|非洲航线|海运订舱统筹||,"集装箱操作
-非洲航线
-海运订舱统筹
-海运单证管理
-口岸异常处置
-工作职责
-1. 统筹区域港口海运订舱全流程，对接船公司、船代确认船期排期，跟进放箱指令下发，统筹协调提柜、还柜作业计划，保障舱位匹配与运力衔接顺畅。
-2. 负责海运及港口全链路单证管理，完成提单、舱单、装箱单、设备交接单等各类单证的审核、制作、递交与归档，确保单货一致、单单一致，符合属地海关及国际运输合规要求。
-3. 协同属地报关行推进进出口报关报检工作，保障申报资料按时准确提交，全程跟进通关进度，高效配合海关查验等监管动作，压缩整体通关时效。
-4. 实时跟踪港区内集装箱及货物动态，覆盖进港、装卸、堆存全节点管控，协调码头、堆场、车队按计划执行作业，保障货物周转效率。
-5. 联动内部销售、客服、运营团队，同步在港货物状态、费用明细及异常预警，打通口岸端与后端业务的信息链路，保障信息传递及时准确。
-6. 作为公司属地口岸接口人，搭建并维护与港口当局、码头运营方、堆场、海关、运输车队、仓储服务商等外部合作方的良性协作关系，保障属地作业通道顺畅。
-7. 牵头处置港口环节各类突发异常，包括但不限于船期延误、爆舱甩柜、海关查验、货物破损、滞箱滞港费用争议等，最大限度降低异常对交付时效与成本的影响。
-8. 前置识别港口作业潜在风险，覆盖极端天气、港区拥堵、属地政策变动等场景，提前制定应急预案并同步相关方，从源头降低供应链中断风险。
-任职要求
-1. 本科及以上学历，物流管理、国际经济与贸易、供应链管理等相关专业优先。
-2. 具备3年以上国际货运、港口操作或堆场管理相关工作经验，熟悉海运进出口全流程操作规范，了解北非区域港口作业规则与海关监管要求者优先。
-3. 精通海运单证制作与审核标准，熟悉订舱、报关、堆存、提还柜等各环节作业逻辑，能够独立处理全链路口岸操作事务。
-4. 具备优秀的跨主体沟通协调能力，能够高效对接内外部多方协作单位，具备较强的突发问题处置能力与抗压能力。
-5. 具备基础的英语或法语沟通能力，能够满足日常工作邮件及对外沟通需求，可接受属地办公安排。
-6. 具备较强的成本意识与风险预判能力，能够主动识别作业环节的成本优化空间与潜在风险点。",吉利控股集团,罗女士,HRBP · 吉利控股集团,在线,,今日回复16次,后端,东莞,2026-09-10 00:24
 车载视觉算法工程师,2-2.5万,宁波 慈溪 周巷,1-3年,本科,新能源/燃油整车研发制造,"新能源/燃油整车研发制造
 工作要求：
 1.本科及以上学历,计算机、自动化、模式识别等相关专业,2年及以上计算机视觉算法落地经验,有车载视觉项目经验优先
@@ -84467,17 +83384,6 @@ Python
 3、熟悉GB4706、GB/T 22090等家电国家标准、行业标准；
 4、具备良好的动手能力、学习能力与沟通协调能力；
 5、做事细致有条理，有团队合作精神；",康蒂(宁波)电器设备有限公司,陈女士,人事行政主管 · 康蒂(宁波)电器设备有限公司,,,,测试,东莞,2026-09-10 00:28
-测试,,宁波 慈溪 庵东,1-3年,大专,BASETECH网络测试,"BASETECH网络测试
-职位描述
-汽车研发类/软件开发
-1. 负责basetech网络测试
-2、复测样件及自测报告收集、TD文档释放、Basetech台架搭建等基础工作""
-任职资格
-""1.熟练掌握Ethernet、FlexRay、CAN(FD)、LIN等车载总线知识及相关国际标准；
-2. 熟练掌握相关测试和诊断工具，如：VT System、CANOE等；
-3.熟练掌握Ethernet、FlexRay、CAN(FD)、LIN、NM、GateWay、诊断协议、诊断刷写、OTA测试等工作包测试方法及问题分析能力；
-4. 熟练掌握AutoSar网络管理内容，掌握PNC&VFC等NM知识；
-会uds诊断就行了",吉利控股集团,hr · 吉利控股集团,,,,,测试,东莞,2026-09-10 00:28
 测试工程师,1.1-1.6万,宁波 慈溪 逍林,1-3年,大专,连接器|充电枪,"连接器
 充电枪
 岗位职责：
@@ -85016,18 +83922,6 @@ VehicleSpy
 - 对材料或化工行业有浓厚兴趣，愿意在质量、生产、工艺、研发等领域长期发展。",宁波日新恒力科技有限公司,邹梦椒,人事经理 · 宁波日新恒力科技有限公司,,,,测试,东莞,2026-09-10 00:31
 实验员（测试员）,5000-6000元,宁波 慈溪 庵东,1-3年,大专,电气机械/电力设备,"电气机械/电力设备
 具备压缩机量热计测试设备，压缩机噪音测试，低压启动，压缩机耐久设备等等，学历要求大专以上，相关经验2～3年，有压缩机测试经验优先",浙江冰峰压缩机有限公司,鲍女士,人事经理 · 浙江冰峰压缩机有限公司,在线,,今日回复30次,测试,东莞,2026-09-10 00:31
-智能驾驶测试工程师,,宁波 慈溪 庵东,1-3年,本科,新能源汽车|新能源/燃油整车研发制造,"新能源汽车
-新能源/燃油整车研发制造
-岗位职责:
-1、参与PRD编制测试用例，评价指标
-2、参与操作弱势目标物，搭建测试场景
-3、参与试验样车管理及推动整车、智驾域内件不良状态反馈及维修
-任职要求：
-1、具备1-3年智能驾驶实车测试经验
-2、熟练使用欧标、国标智能驾驶典型目标物道具及控制台操作，
-能够独立并指导他人完成道具使用
-3、熟悉L3准入智驾法规，对法规必过项和指标清晰
-有3年以上驾驶经验，能识别基本的车辆问题",吉利控股集团,hr · 吉利控股集团,,,,,测试,东莞,2026-09-10 00:31
 QE工程师,8000-12000元,宁波 慈溪 庵东,1-3年,大专,QE|家电,"QE
 家电
 职位描述：
@@ -85438,23 +84332,6 @@ UG
 任职资格：
 1、从事过汽配行业质量管理岗位，熟悉质量问题识别、分析、解决、跟踪管理；有注塑产品经验优先。
 2. 熟悉IATF16949体系中的质量管理要求（熟悉质量五大工具、8D报告等）。",宁波帅特龙汽车系统股份有限公司,严美波,HR · 宁波帅特龙汽车系统股份有限公司,在线,,,测试,东莞,2026-09-10 00:32
-精密测量技术（增距镜）,,宁波 余姚 阳明,3-5年,本科,制造业|基础培训,"制造业
-岗位职责：
-1 .负责新产品检测方法和检测方案的确定
-2 .负责新产品量测/评价设备的选型和量测/评价设备能力的确认
-3 .负责新产品前期量测结果的输出及判定
-4 .负责新品设计验证表管控项目的确认
-5 .负责产品新品质检测类问题的反馈、组织检讨及问题关闭跟进
-6 .负责测量设备稳定性的保证及提升的方案确认
-7 .推进测量设备GRR等异常的原因分析及能力的改善提升检讨
-8 .负责对IQC等品质量测人员培养，以及部门内新人的基础培训工作
-9 .量测及评测业务管理流程优化
-10 .负责新品客户端量测、及手法的打合
-任职要求：
-1. 本科及以上学历，光学、机械等相关理工科专业；
-2. 相关行业及岗位3年及以上工作经验
-3. 对问题能够较为准确的分析出问题发生的原因及对策，具有数据分析能力；
-4. 素质要求：具有较强的责任心，分析判断能力，组织协调能力、逻辑思维能力和执行力，拥有良好的工作心态。",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,测试,东莞,2026-09-10 00:32
 质量控制工程师（可年后入职）,1.2-1.7万·14薪,宁波 镇海 庄市,5-10年,本科,航空航天质量管理体系||||||||||||||||||||,"航空航天质量管理体系
 汽车行业质量管理体系
 DQE
@@ -85838,30 +84715,6 @@ QC
 2. 熟悉制程品质流程，熟练运用QC七大手法等工具，能判图与产品特性。
 3. 熟练使用Excel（透视表、函数）及MES系统。
 4. 诚信敬业，有责任心，具团队精神、创新与学习能力。",宁波佳音机电科技股份有限公司,李女士,,在线,,今日回复6次,测试,东莞,2026-09-10 00:33
-过程质量管理,,宁波 慈溪 周巷,5-10年,本科,QE|制程检验（IPQC）|||||||,"QE
-制程检验（IPQC）
-成品检验（FQC）
-出货检验（OQC）
-汽车行业质量管理体系
-动力总成质量管理
-电子设备制造
-新能源/燃油整车研发制造
-新能源
-岗位职责：
-承接公司级目标，制定过程质量目标（如合格率、质量成本、客诉目标、质量重复发生率、问题关闭率等）
-参与控制计划和FMEA编制和更新，并负责检验作业指导书编制和审核；
-熟练掌握质量异常（客诉、来料、制程）处理流程、不合格品处置流程、变更变化点管理流程等；
-根据质量问题风险等级、项目紧急程度，合理调配资源，推动问题解决；
-负责过程质量指导文件编制和QMS系统的维护，具备具备质量管理流程文件编制、更新和组织推行能力；
-负责检验班组的建设和检验员能力培养，负责指导过程质量控制的方法，确保检验团队资质符合要求
-负责组织产品审核、过程审核、分层审核、工艺要素审核等，迎接公司或客户的各类现场审核。
-任职要求：
-""1.熟悉IATF16949/ISO9001/ISO14001等质量体系；
-2.体系内审员资格,理解质量/环境/禁限用物质体系知识及质量工具。
-3.机械识图能力和产品工艺过程知识。
-4.熟悉8D，5Why, 五大工具APQP\PPAP\FMEA\SPC\MSA，QCC，6sigma等
-5.掌握QMS、MES等电子化系统操作。""
-具备领导力、抗压力、有良好的组织协调能力、沟通能力和问题解决能力等，工作富有热情和原则",吉利控股集团,许圆吉,人事经理 · 吉利控股集团,在线,,今日回复1次,测试,东莞,2026-09-10 00:33
 质量工程师/质量主管,1-1.5万,宁波 慈溪 庵东,1-3年,本科,日化制造|印刷/包装/造纸|五险一金||||||,"QE
 制程检验（IPQC）
 成品检验（FQC）
@@ -86163,27 +85016,6 @@ IATF16949
 熟悉ISO9001和IATF16949质量管理体系，熟悉并会应用五大工具和七大手法；
 其他要求 ：
 具有良好的组织 、计划、沟通协调能力，以及较强的决策力。",合盛硅业,严先生,人事经理 · 合盛硅业,在线,,今日回复3次,测试,东莞,2026-09-10 00:34
-过程质量管理（PQE）,,宁波 余姚 阳明,3-5年,本科,QC|QA|QE|制程检验（IPQC）||,"QC
-QA
-QE
-制程检验（IPQC）
-成品检验（FQC）
-出货检验（OQC）
-岗位职责：
-1.负责组装的品质检验、品质分析及监督改善。
-2.通过提升外观良率，降低过程损耗，提升镜头工序全流程利用率；
-3.通过工序优化、强化全员品质意识，提升镜头外观良率，满足客户更高的要求；
-4.实现对品质异常波动进行有效的管理和监控，采用通过率体现预警机制；
-5.负责对领用的物料在使用的过程中出现异常及时对策处理并安排协调处理；
-6.负责制定有效的个数管理措施，减少和避免加工工程中发生失散现象；
-7.负责定期计划、组织、实施必要的盘点工作，定期处理长期在制呆滞品，并防止在制呆滞品的产生；
-8.负责试装产品的检验入库跟进，减少和避免在制呆滞品的产生；
-9.负责组装的品质检验、品质分析及监督改善。
-任职要求：
-1.大专以上学历，理工科专业；
-2.具有品质改善及异常解析能力；
-3.具有较强的动手能力，分析判断能力、组织协调能力、逻辑思维能力和执行力；
-4.可以承受较强的工作压力，拥有良好的工作心态。",舜宇集团有限公司,李珂,人事经理 · 舜宇集团有限公司,在线,,今日回复4次,测试,东莞,2026-09-10 00:34
 信息安全测试工程师,6000-10000元,宁波 慈溪 庵东,1-3年,大专,信息安全测试|渗透测试|||||||,"信息安全测试
 渗透测试
 网络安全测试
@@ -86833,17 +85665,6 @@ DFMEA分析
 3、具备整车功能测试经验
 4、驾照3年以上，能够驾驶车辆开展测试工作
 5、有整车OEM 工作经验者优先",浙江西图盟数字科技有限公司,娄嘉,人事经理 · 浙江西图盟数字科技有限公司,,,,测试,东莞,2026-09-10 00:35
-过程质量控制PQE,,宁波 余姚 阳明,3-5年,本科,QE,"QE
-根据生产任务，对全流程中涉及外观相关品质进行解析验证改善。
-1.日次对产线线尾或总送检前的产线产品外观进行抽样，确认产线实际组装品质是否异常，及时跟进解析；日次过漏检把握情况进行抽样纠正，反馈产线班长对异常检验员进行考核；
-2.日次对后道品检外观处的不良镜头进行抽样，确认流转到外观处的实际品质状况，是否有机台过检、漏检，品检人为造成的外观不良等，异常及时确认，联络担当对应改善；日次确认产线的来料抽样情况、过程全检和过程巡检实际良率报表；
-3.依据后道外观的不良分布、外观反馈的异常批次信息，结合以上1、2、3三点内容，进行综合的外观分析和验证改善；
-4.常规外观项的周、月报资料输出，日常改善验证资料的输出；
-5.工艺流程梳理优化、修正外观相关的SOP文件、IPQC文件；
-6.客诉及现场出现的外观异常的解析验证；
-7.杂光良率的解析改善（品保杂光小组为主，PQE辅助涉及外观相关改善）
-8.LCB良率的解析改善（品检后道设备技术和品保机台验收人员为主，PQE辅助涉及外观相关改善）；
-9.量产阶段ABC对外周度件号良率损失报告编制（外观项）；",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,测试,东莞,2026-09-10 00:35
 巡检员,7000-8000元,宁波 宁海 力洋,IPQC,,生产质量管理|新能源/燃油车零部件||||||,"IPQC
 生产质量管理
 新能源/燃油车零部件
@@ -87108,27 +85929,6 @@ CQE-风扇,1-1.3万,宁波 余姚 大隐,3-5年,大专,金属制品/机加工|�
 2）3年以上风扇行业客户质量经验，或工业电子产品或家用风扇的客户质量从业经验；
 3）熟悉质量管理体系及核心工具（如FMEA、SPC、8D报告）；掌握产品工艺与失效模式；具备一定的报告编制能力；
 4）逻辑清晰，数据分析能力强，能承受一定的工作压力。",浙江西图盟数字科技有限公司,程先生,HR · 宁波生久科技有限公司,在线,,,测试,东莞,2026-09-10 00:36
-制程质量工程师,,宁波 余姚 阳明,3-5年,本科,PQA/PQE|半导体/芯片|||||||||,"PQA/PQE
-半导体/芯片
-电子设备制造
-专用设备制造
-职责描述：
-1. 依据新产品和物料试产要求，审核新产品资料汇总表内容、试产结果、 PFMEA报告；
-2. 审核产品QC工程图、产品检验标准和作业指导书，评估检验工装治具的可靠性。
-3. 制程品质异常处理和跟踪。
-4. 客诉及客退问题处理，制定客诉报告，提供解决措施。
-5. 制程品质、检验质量数据、品质报表和8D报告的制作和分析，并指导闭环处理。
-6. 根据客户对产品制程质量数据的需求，审核相关的质量数据报表。
-7. 根据标准相关要求，审核对应的流程文件及实施记录。
-8. 指导和对应内外部审核及纠正、预防措施的实施。
-9. 完成上级安排的工作。
-任职要求：
-1. 本科及以上学历，光学、机械、质量、工业工程等专业；
-2. 有一定品质管理方法、数据分析方法、熟悉质量管理体系的架构和运行机制理念。
-3. 可运用QC七大手法、六西格玛、minitab等工具对产品数据进行分析处理。
-4. 熟悉光学制品的加工、检测流程及异常的解析方法者优先。
-5. 具有良好的沟通协调能力、逻辑思维能力，工作认真负责，有上进心。
-职位福利：五险一金、包吃、包住、年底双薪、加班补助、餐补、房补、带薪年假",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,测试,东莞,2026-09-10 00:36
 测试组长,7000-10000元·13薪,宁波 鄞州 梅墟,1-3年,大专,性能测试|半导体/芯片|仪器仪表||||||,"性能测试
 半导体/芯片
 仪器仪表
@@ -87562,10 +86362,6 @@ Demonstrated experience in Operational Excellence initiatives",康龙化成,徐�
 1年以上小批量生产管理经验，有调光玻璃、夹层玻璃、汽车玻璃或光学元件制备经验者优先。
 具备一定的跨部门沟通和外部协调能力，出色的逻辑分析能力和团队领导力。
 了解电致变色（EC）、PDLC、SPD等调光技术的基本原理。",览锐新材料(宁波)有限公司,罗俊博,,在线,,,测试,东莞,2026-09-10 00:37
-质量高级工程师,,宁波 余姚 阳明,5-10年,本科,电子/半导体|电子器件|数码产品,"电子/半导体
-电子器件
-数码产品
-岗位职责： 1. 负责客户品质标准解读和内部转化标准制订； 2. 负责新机种产品品质策划及控制，QCP/PFMEA等品质文件制作及落地确认； 3.负责新品试做各阶段品质风险识别及管控项目目标达成控制； 4. 负责新品试做内部异常处置推进改善、发货样品放行判定； 5. 负责新品试做客户投诉、返品及时处置跟进并建立有效对策防止再发； 6 负责新品试做各阶段客户品质报告制作，确保客户监察清单无缺失项； 7. 完成上级安排的工作。 任职要求： 1. 本科以上学历，光学、质量、工业工程、机械大类等相关专业； 2. 熟悉质量管理体系及质量管理方法（SPC/8D/FMEA等）及数据分析方法； 3. 具有较强的动手能力，分析判断能力、组织协调能力、逻辑思维能力和执行力； 4. 可以承受较强的工作压力，拥有良好的工作心态。",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,测试,东莞,2026-09-10 00:37
 品质工程师(J10064),6000-12000元,宁波 慈溪 周巷,1-3年,大专,QE|全面质量管理体系,"QE
 全面质量管理体系
 岗位职责:
@@ -87956,27 +86752,6 @@ DQE工程师,1-1.8万,宁波 慈溪 逍林,5-10年,大专,QE|汽车行业质量�
 6.具备项目管理能力，能主导项目落地；
 7.热爱质量相关工作。
 我们承诺:1.坚守合法用工标准，营造包容安全氛围，确保公平职业发展;2.招聘流程透明公开，不收取任何费用。",公牛集团股份有限公司,干女士,,在线,,,测试,东莞,2026-09-10 00:38
-DQE（英语）,,宁波 余姚 阳明,5-10年,本科,生产质量管理|CQE|DQE/DQA||||||||||,"生产质量管理
-CQE
-DQE/DQA
-半导体/芯片
-电子设备制造
-通信/网络设备
-岗位职责：
-1. 负责客户品质标准解读和内部转化标准制订；
-2. 负责新机种产品品质策划及控制，QCP/PFMEA等品质文件制作及落地确认；
-3.负责新品试做各阶段品质风险识别及管控项目目标达成控制；
-4. 负责新品试做内部异常处置推进改善、发货样品放行判定；
-5. 负责新品试做客户投诉、返品及时处置跟进并建立有效对策防止再发；
-6 负责新品试做各阶段客户品质报告制作，确保客户监察清单无缺失项；
-7. 完成上级安排的工作。
-任职要求：
-1. 本科以上学历，光学、质量、工业工程、机械大类等相关专业；
-2. 熟悉质量管理体系及质量管理方法（SPC/8D/FMEA等）及数据分析方法；
-3. 具有较强的动手能力，分析判断能力、组织协调能力、逻辑思维能力和执行力；
-4. 可以承受较强的工作压力，拥有良好的工作心态。
-5.英语可作为工作语言，口语流利。
-职位福利：五险一金、包吃、包住、年底双薪、加班补助、餐补、房补、带薪年假",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,测试,东莞,2026-09-10 00:38
 品质技术主管,1-1.5万,宁波 海曙 集士港,3-5年,大专,QC|QA|QE|全面质量管理体系|||||,"QC
 QA
 QE
@@ -88283,27 +87058,6 @@ DQE工程师
 2、熟悉消费类电子产品研发过程及其相关可靠性测试设备及标准，能独立完成整机相关的实验测试；
 3、熟悉消费类电子产品制程生产工艺流程，试产项目可制造性评审（DFM流程，开发全过程质量缺陷跟进，能运用质量工具（PFMEA\APQP\QFD）进行问题点的分析改善；
 4、工作责任感强，工作作风严谨，有良好的沟通表达能力，具备系统的品质意识；",浙江摩根集团有限公司,张女士,HRBP · 浙江摩根集团有限公司,,,,测试,东莞,2026-09-10 00:39
-DQE工程师,,宁波 余姚 阳明,3-5年,本科,精益生产|生产质量管理|8D报告||||||||||||,"精益生产
-生产质量管理
-8D报告
-QC七大手法
-DQE/DQA
-电子设备制造
-半导体/芯片
-通用设备制造
-岗位职责：
-1.客户标准校对。负责开发前期客户质量要求的评估，制定质量可行性评估报告，并与客户沟通检验标准，最终制定镜头成品检验标准。
-2.新产品品质策划及控制：（开发阶段）新机种内部异常处置推进改善，各阶段目标达成控制，设计阶段产品Design review，评审RD设计是否符合设计规则，发货样品品质确认判定。
-3. 新机种质量体系和标准建立，样品可靠度验证，试作品质风险评估和风险控制。
-4.内部异常处置：内部异常处置推进改善,发货样品放行判定。
-5.负责制定新产品阶段质量验证计划(AQP)及质量控制计划(QCP)。
-6.客户投诉、返品及时处置跟进并建立有效对策防止再发。
-7.完成上级交办的其他任务。
-任职要求：
-1.基本条件：本科及以上学历，光学专业；
-2. 专业知识技能：同行技术工作经验优先；熟悉光学制品的加工、检测流程及异常的解析方法；有一定品质管理方法、数据分析方法、熟悉质量管理体系的架构和运行机制理念。可运用QC七大手法、六西格玛、minitab等工具对产品数据进行分析处理。
-3. 能力素质：具有良好的沟通协调能力、逻辑思维能力，工作认真负责，有上进心。
-职位福利：五险一金、包吃、包住、年底双薪、加班补助、餐补、房补、带薪年假",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,测试,东莞,2026-09-10 00:39
 PQM工程师,1-1.4万,宁波 慈溪 龙山,3-5年,大专,汽车行业质量管理体系|电子行业|,"汽车行业质量管理体系
 电子行业
 动力电池
@@ -89077,21 +87831,6 @@ Oracle
 5、熟练掌握各类电脑办公软件的应用，包括：Excel、WORD、PPT、VISIO等；
 6、持低压电工证；
 职位福利：五险一金、餐补、带薪年假、弹性工作",顺丰速运,王先生,招聘经理 · 顺丰速运,在线,,今日回复4次,运维,东莞,2026-09-10 00:41
-电力工程主管工程师,,宁波 慈溪 庵东,5-10年,本科,,"岗位职责：
-1.负责编制及完善基地高低压输配电系统设备设施操作、点巡检、维修保养等各项作业标准及管理要求，监督、检查系统设备设施的运行状态，确保基地供配电系统稳定、安全运行;
-2.负责基地电力供应系统应急预案的制定、演练与实施；
-3.负责监督、检查、评估基地输配电系统设备设施运行状态，指导运行班组运行操作；
-4.协助科长联系市政电力部门，定期进行各类电力指标监测并形成报表；
-5. 负责基地电力运行质量改善，组织并参与电力系统节能、分析与改进；
-6.参与基地供配电系统技术改造；
-7.负责领导交办的其他工作事项。
-任职要求：
-1.本科及以上学历（经验丰富可适当放宽），电气工程、电力系统或机电一体化等相关专业；
-2.5年以上大型工况企业高低压配电系统运维技术或工程施工及项目管理经验；
-3.熟悉高低压输配电系统设备原理及技术参数；熟悉高低压配电专业设计规范及行业标准；
-4.熟悉了解工矿企业电力运行特点和过程；
-5.良好的组织和人际沟通能力，抗压能力强；
-6.学习能力强，能接受异地项目出差。",吉利控股集团,黄康,hrbp经理 · 吉利控股集团,在线,,今日回复3次,运维,东莞,2026-09-10 00:41
 设施运行值班\维修员,7000-9000元,宁波 慈溪 庵东,1-3年,本科,电气设备|机电设备|低压电工证||,"电气设备
 机电设备
 低压电工证
@@ -91289,17 +90028,6 @@ C. 财务方向
 3-5年培养为业务骨干/中层管理者
 财务岗7年培养为财务条线管理核心骨干
 业务岗7年培养为项目高管",杉杉商业集团有限公司,孙女士,集团招聘经理 · 杉杉商业集团有限公司,在线,,,数据分析,东莞,2026-09-10 00:48
-结算业务岗(004134),,宁波 鄞州 福明,银行清算,本科,,"银行清算
-岗位职责:
-1.根据国家外汇管理局的政策要求和单位制度，办理外汇会计业务。
-2.负责信用证、托收等单证结算业务的处理与操作。
-3.负责贸易融资业务相关的资料审查及会计结算操作与台账管理。
-4.负责国际收支申报审核，处理与结算业务相关的查询、对账、差错调整与数据报送。
-
-任职资格:
-1.大学本科（含）以上学历。同时需取得英语四级或以上证书。
-2.1年（含）以上国际业务相关工作经验。
-3.掌握外汇政策、国际贸易或国际结算相关知识。",台州银行,盛小丹,人事经理 · 台州银行,在线,,,数据分析,东莞,2026-09-10 00:48
 实验分析员,4000-6000元,宁波 白沙路,化学,大专,化学分析检测|化工|环保|五险一金||||||||||||||,"化学
 化学分析检测
 化工
@@ -91876,21 +90604,6 @@ AI产品经理,1-1.3万,宁波 镇海 骆驼,1-3年,本科,大模型|知识图�
 3、熟练使用 Word、Excel、PPT 等办公软件 。
 4、品行端正，思维敏捷，诚实细心，具有较强的责任心，工作积极主动并能承受工作压力，具有良好的团队合作精神。
 5、具体一定的英文读写能力（能够处理日常业务邮件）。",浙江联运盒子物流科技有限公司,应曜婷,人事经理 · 浙江联运盒子物流科技有限公司,在线,,,数据分析,东莞,2026-09-10 00:50
-生产计划,,宁波 余姚 阳明,10年以上,本科,生产物料管理|成本管理|,"生产物料管理
-成本管理
-PMC管理
-岗位职责：
-1.根据营销下达生产指令合理排定生产计划出货计划；按营销样品指令对应安排生产，确保样品及时完成出货；
-2.根据排定生产计划核算物料需求，并下达物料需求申请，调控跟进物料到位；
-3.建立、维护、修订生产计划看板（组测/镀膜/腐蚀/白物/返修），下达各制造课日次生产计划，确保计划执行准确、无误的开展日常生产安排；
-4.监督现场计划进度，协调生产工序按生产计划执行；协调各部门异常信息，配合确保工序计划顺畅流转；
-5.管理订单台帐，及时修订新增加订单、出货等信息，确保数据准确性；
-6.复核组装课领料单（主材），确保按生产计划投料正常，关注、控制产线制程仕挂与报损；
-7.月末生产订单及时关帐对应，监督各生产部门完成月末仕挂等。
-任职要求：
-1.熟练使用Excel函数、办公软件，了解PMC相关知识；
-2.数据分析、逻辑思维能力、协调能力、沟通能力；
-3.团队意识、保密意识、执行能力、数字敏感性。",舜宇集团有限公司,李珂,人事经理 · 舜宇集团有限公司,在线,,今日回复4次,数据分析,东莞,2026-09-10 00:50
 仓库管理,7000-8000元,宁波 慈溪 庵东,仓储供应链管理,,库存管理|库位管理|||||,"仓储供应链管理
 库存管理
 库位管理
@@ -92591,22 +91304,6 @@ LinkedIn
 技能要求 熟练使用Excel等办公软件进行数据分析；熟悉SEO、SEM基础原理
 综合素质 具备较强的数据敏感度、学习能力与抗压能力，能适应平台规则快速变化。
 有阿里巴巴橙点同学认证（Orange Student Certification）者优先",宁波高松电子有限公司,钟真,人事经理 · 宁波百狮特威日用品有限公司,,,,数据分析,东莞,2026-09-10 00:52
-注塑成型工程师（试模）,,宁波 余姚 阳明,5-10年,大专,光学镜片|试模,"光学镜片
-试模
-岗位职责
-1. 根据树脂特性及产品结构特点设定工艺条件；
-2. 负责产品测定结果的分析，并给出模拟分析结论，汇总产品调试履历，并及时总结；
-3. 负责模具设计结构的检讨，找出产品离型的影响因素，并提出改善对策；
-4. 结合镜头组装品质状况，通过成型工艺、模具调整，提升镜头整体品质；
-5. 负责穴号差异和镜头不良的原因解析，对不良项目进行优化调试，提升模具的取穴及良率；
-6. 协助上级进行成型标准化调试履历的建立，以及成型新材料新方法的研究导入；
-7. 完成上级安排的工作。
-任职要求
-1. 大专及以上学历，光学、模具、机械等理工科专业；
-2. 光学注塑成型2年以上工作经历；熟练操作住友、发那科成型机，熟悉光学注塑成型，会对异常品质分析对策；
-3. 电脑操作熟练，具备基础Office技能，有一定的数据分析能力；
-4. 具有良好的沟通协调能力、分析能力和执行力；
-5. 主动积极、责任心强，有较强的上进心和抗压能力。",舜宇集团有限公司,何先生,招聘经理 · 舜宇集团有限公司,在线,,今日回复5次,数据分析,东莞,2026-09-10 00:52
 成本会计,9000-14000元,宁波 北仑 柴桥,3-5年,本科,高新技术企业|数据分析|成本核算||,"高新技术企业
 数据分析
 成本核算
@@ -93080,26 +91777,6 @@ lazada
 2. 具备跨境物流、支付结算及出口合规知识，能独立处理国际订单的全链路流程。
 3. 有良好的数据分析能力，能通过平台后台数据等工具输出运营决策建议。
 4. 具备英语读写能力，能独立完成Listing撰写与海外客户沟通。",宁波腾拓科技有限公司,毛乙,人事经理 · 宁波腾拓科技有限公司,在线,,今日回复13次,数据分析,东莞,2026-09-10 00:53
-运输管理岗,,宁波 慈溪 庵东,铁路运输,本科,道路运输|水路运输,"铁路运输
-道路运输
-水路运输
-岗位职责：
-1、新车型项目物流管理：
-负责新车型项目零部件集货运输的全面管理，协同采购、SQE等部门，推动供应商解决采购与物流问题，确保项目在进度、质量与风险控制上达标；
-主导新车型入厂运输前期规划，按节点要求完成阀点审核材料输出，并管控运输物流模式的选定；
-制定新车型集货项目启动计划，进行运输成本核算与预算提报，确保项目按主控计划落地，达成各阶段目标；
-2、成本与数据管理：
-负责车型运输主数据维护及各车型单台运输成本的归口管理、分析与优化；
-负责设定并分解各基地集货运输项目的绩效指标，跟踪落地实施并进行归口评价；
-完成年度各车型运输成本基准核算，并分解、落实下一年度的降本目标；
-管理日常集货数据变更，并为新增运输线路提供商务定价支持；
-3、异常处理与流程优化：
-负责复核、分析异常集货数据，并提供临时性异常事项的支持解决方案；
-负责编制和优化本岗位相关的流程制度与体系文件，持续提升管理标准与效率。
-任职要求：
-1、本科及以上学历，物流管理、供应链管理、车辆工程、项目管理等相关专业；
-2、具备一定的成本核算、数据分析和预算管理能力；
-3、具备优秀的跨部门沟通协调能力和项目推动力，能有效解决问题。",吉利控股集团,陈佳怡,人事经理 · 吉利控股集团,在线,,,数据分析,东莞,2026-09-10 00:53
 投标资料分析专员（光储）(J12956),1-1.5万,宁波 宁海 梅林,1-3年,本科,光储|投标分析,"光储
 投标分析
 岗位职责:
@@ -93151,38 +91828,6 @@ lazada
 (2)英语能力良好，大学英语六级及以上；
 (3)具备1年及以上跨境电商产品开发经验，对家居户外类产品具备一定认识，熟悉电商渠道产品特性；
 (4)具备较强的沟通能力及团队合作精神，较强的组织协调力，善于跨部门组织、沟通和协调资源。",宁波诺亚歌曼户外用品有限公司,厉女士,人事专员HR · 宁波诺亚歌曼户外用品有限公司,在线,,,数据分析,东莞,2026-09-10 00:53
-设备维修工,,宁波 慈溪 庵东,3-5年,大专,生产设备|机床设备|机电设备|||||||||||||,"生产设备
-机床设备
-机电设备
-设备维护计划制定
-PLC基础编程
-倒班适应能力
-工作职责
-1. 负责车间生产设备（如CNC机床、压铸设备、自动化产线）的日常巡检、预防性维护及故障诊断与维修。
-2. 制定设备维护计划，记录设备运行数据，分析故障规律并优化维护方案，降低设备停机率。
-3. 配合生产部门完成设备调试、技改项目实施，确保设备性能满足生产工艺要求。
-4. 参与设备安全管理，落实设备操作规程，消除安全隐患，保障作业安全。
-任职要求
-1. 大专及以上学历，机电一体化、机械维修等相关专业优先。
-2. 具备3年以上金属加工/机加工行业设备维修经验，熟悉液压、电气、机械传动系统原理。
-3. 能独立完成常见生产设备（如CNC、压铸机）的故障排查与维修，掌握PLC基础编程者优先。
-4. 具备较强的动手能力与应急处理能力，能适应倒班或设备突发故障时的加班需求。",中信戴卡,王亚辉,人事经理 · 中信戴卡,在线,,今日回复1次,数据分析,东莞,2026-09-10 00:53
-生产计划pmc,,宁波 余姚 阳明,3-5年,本科,PMC管理|半导体/芯片,"PMC管理
-半导体/芯片
-1. 根据营销下达生产指令合理排定生产计划出货计划；
-2. 根据排定生产计划核算物料需求，并下达物料需求申请，调控跟进物料到位；
-3. 协调各部门异常信息，配合确保工序计划顺畅流转；
-4. 维护、修订生产计划看板，下达各制造课日次生产计划，确保计划执行准确、无误的开展日常生产安排；
-5. 监督现场计划进度，协调生产工序按生产计划执行；
-6. 管理订单台帐，及时修订新增加订单、出货等信息，确保数据准确性；
-7. 复核组装课领料单，确保按生产计划投料，关注、控制产线制程仕挂与报损；
-8. 按营销样品指令对应安排生产，确保样品及时完成出货；
-9. 月末生产订单及时关帐对应，监督各生产部门完成月末仕挂等；
-10. 完成上级安排的工作。
-1. 本科以上学历，工业工程、物流管理、机械等专业；
-2. 了解计划管理的相关知识；有光学、电子类产品工作经验的优先考虑；
-3. 有较强的数据分析和逻辑思维能力；
-4. 有较强的沟通、表达、组织和协调能力，具有较强的团队意识，保密意识，执行力强。",舜宇集团有限公司,蔡晓祎,,在线,,今日回复2次,数据分析,东莞,2026-09-10 00:53
 EL研发工程师,1.2-1.8万·13薪,宁波 鄞州 梅墟,材料研发,硕士,材料检测|工艺设计|高分子材料|||||||||||,"材料研发
 材料检测
 工艺设计
@@ -95962,28 +94607,6 @@ Python
 9. 知识面广，思路开阔，创新能力强，对新技术持有敏感性并愿意致力于新技术的探索和研究。
 10. 关注开源社区，开源项目贡献者优先；
 11.关注AI，利用AI提升日常工作效率者优先；",浙江和达科技股份有限公司,舒女士,,在线,,,Java,佛山,2026-09-10 01:02
-Software / Customer service Intern,,嘉兴 平湖市 钟埭街道,物料采购,大专,英语|订单维护,"实习证明
-物料采购
-英语
-订单维护
-Responsibilities
-• Assist with daily processes such as processing purchase requisitions and material requisitions;
-• 协助处理采购申请单、物料申请单等日常流程；
-• Track the status of requests and maintain relevant records;
-• 跟踪申请状态并维护相关记录
-• Assist the team with document organization and other support tasks.
-• 协助团队完成文档整理及其他支持性工作
-Requirements
-• Current student, college or above;
-• 在校学生，大专及以上学历
-• Proficient in using Microsoft Office software;
-• 熟练使用 Office 办公软件
-• Diligent, detail-oriented, responsible, and possessing strong communication skills.
-• 工作认真细致，责任心强，具备良好的沟通能力
-• Candidates with an interest in software and electrical automation will be preferred;
-• 对软件、电气自动化有兴趣者优先
-• Candidates with good English reading and writing skills will be preferred.
-• 英语读写能力良好者优先",利勃海尔(中国)有限公司,刘一蔚,人事经理 · 利勃海尔(中国)有限公司,在线,,今日回复20次,Java,佛山,2026-09-10 01:02
 支付宝官方理财顾问+周末双休+六险一金,1.5-2.5万,嘉兴 海宁市 海洲街道,1-3年,本科,资产配置|周末双休|六险一金|||||||||||||||||,"资产配置
 我们的优势:
 1.互联网金融风口机会，晋升快，工作氛围愉快
@@ -97334,25 +95957,6 @@ C#
 5、精通 Halcon 图像处理算法库，能独立完成Blob分析、模板匹配、测量、标定等视觉任务；
 6、熟悉工业通信协议（TCP/IP、Modbus、Profinet、串口通信等）；
 7、具备相机标定、手眼标定（Eye-in-Hand / Eye-to-Hand）经验。",金东唐,人事 · 金东唐,,在线,,今日回复1次,Python,佛山,2026-09-10 01:06
-交换机硬件测试,,嘉兴 嘉善县 天凝镇,3-5年,本科,Python,"Python
-入职交换机测试团队
-岗位职责：
-审查硬件设计规范，遵循标准硬件测试流程，制定测试计划并开发测试工具。
-使用被测设备（UUT）及测试仪器、线缆等搭建完整的硬件测试环境。
-依据测试计划及思科技术主管指导，执行手动或自动化测试用例集。
-与硬件/软件设计师紧密协作，对测试过程中发现的问题进行故障排查与根因分析。
-熟练操作各类测试仪器（如环境试验箱、交直流电源、流量发生器）及执行测试套件所需的各类网络设备。
-测试工作的技术判断力、整体适用性及数据准确性将接受严格审核。
-运用专业专业知识做出技术决策，在既定标准范围内行使判断权，并及时与技术主管沟通确认。
-任职要求：
-掌握TCP/IP网络协议与网络通信基础知识。
-掌握通用交换机产品硬件架构及其功能的基本知识。
-工作主动积极，乐于迎接挑战；具备优秀的团队协作精神与出色的跨部门沟通能力。
-熟练掌握脚本语言与开发工具：Python/TCL/Linux环境。
-熟悉主流网络测试仪器与工具（如IXIA、Spirent等）。
-具备光通信/光器件硬件知识者优先。
-具备出色的中英文书面及口语表达能力，可适应全英文技术工作环境。
-教育背景： 电子工程、计算机或通信相关专业硕士学历且具备约1年相关经验，或本科学历且具备约3年相关经验。",中软国际,魏女士,,在线,,,Python,佛山,2026-09-10 01:06
 功能性应用评估测试工程师,9000-15000元,嘉兴 桐乡市 梧桐街道,性能测试,大专,,"性能测试
 岗位职责：
 1、围绕植物提取ai智能体应用场景，独立设计并开展各类功能性验证实验，覆盖智能成分识别、工艺参数分析、智能质控等场景，完成全流程功能验证。
@@ -100058,27 +98662,6 @@ ISO9001
 全面质量管理体系
 电声
 1.负责相关客户的客诉处理，对品质业务流程熟悉，有相关的客诉处理经验 2.会写8D报告，逻辑思维能力强，有一定的沟通能力 3.能适应加班，有责任心",浙江豪声电子科技股份有限公司,沈惠玉,人事经理 · 浙江豪声电子科技股份有限公司,在线,,,测试,佛山,2026-09-10 01:18
-测试工程师 (MJ087041),,嘉兴 秀洲区 高照街道,3-5年,本科,功能测试|性能测试|功率模块||,"功能测试
-性能测试
-功率模块
-半导体行业
-岗位要求:
-1.负责测试设备日常维护，尤其是电气部件（线路板等）的管理；
-2.负责测试设备电气备件的日常管理 (日常用量，库存等)；
-3.指导和监督产线倒班技术员及PM Team 的PM 执行并达到合格；
-4.负责日常测试设备维护及维修后的设备验收放行及新设备验收；
-5.负责测试设备日常管理相关数据的汇总；
-6.负责测试技术员和操作员的测试技能培训和认证；
-7.负责设备6S；
-8.协助其他工序工程师相关电气部件的问题诊断；
-9.了解EHS管理体系并遵守EHS政策。
-1.本科或硕士学历，微电子、电力电子、集成电路等相关专业；
-2.3年及以上设备电气相关管理经验作，尤其是能够维修线路板（有能力维修到电子元件）；
-3.丰富的数字电路或模拟电路知识；
-4.能够使用统计工具解决问题并进一步改进流程；
-5.具备阅读理解英文技术资料的能力；
-6.较强的自动化知识；
-7.性格外向，有良好的沟通协调能力，工作责任心和执行力佳",吉利科技集团,郭玉婷,人事经理 · 吉利科技集团,,,,测试,佛山,2026-09-10 01:18
 质量工程师,9000-14000元·15薪,嘉兴 海宁市 海昌街道,3-5年,本科,QC|来料检验（IQC）|SQE|,"QC
 来料检验（IQC）
 SQE
@@ -100601,22 +99184,6 @@ QC
 精通 GD&T，熟悉尺寸 IPQC 测量流程、GP12 出货管控，会 QC 七大手法；
 有管理测量员 + GP12 团队经验、汽车零部件、IATF16949 经验优先；
 擅长人员管理与跨部门沟通，细心严谨，能配合加班处理急单。",欧络伊红高新技术(嘉兴)有限公司,周丽佳,人事经理 · 欧络伊红高新技术(嘉兴)有限公司,,,,测试,佛山,2026-09-10 01:20
-质量技术员,,嘉兴 海盐县 武原街道,3-5年,大专,金属制品/机加工,"金属制品/机加工
-岗位职责：
-1.按照检查作业指导书要求对产品进行检查，并做好相应质量记录并核实操作者的检验记录。终检检测合格后开具合格证；
-2.按照不合格品控制流程对不合格产品开具《不合格品评审单》，并协助质量工程师、质量主管对不合品的判定、隔离、追溯、排查等工作；
-3.熟练使用检具，并掌握基本的产品验证试验技能；
-4.及时反馈现场遇到的各种问题、风险，并给出相应建议和意见；
-5.自主或与团队协作识别工作中的改进机会，共同实现部门及公司的持续改善目标；
-6.完成领导安排的其它工作。
-岗位要求：
-1.大专及以上学历或具备相关技术或专业背景；
-2.熟悉机械图纸，掌握各种尺寸和公差；
-3.熟悉常用检验设备如卡尺、外径千分尺等；
-4.了解测量仪器设备如轮廓仪、三坐标等，熟悉操作者优先；
-5.熟悉Office办公软件的基本操作；
-6.身体健康，无色弱、色盲及化学品(切削液等)过敏史；
-7.能适应长期出差。",丹佛斯在华子公司,张倩,人事经理 · 丹佛斯在华子公司,,,,测试,佛山,2026-09-10 01:20
 PQM工程师,1-1.6万·15薪,嘉兴 嘉善县 惠民街道,1-3年,本科,汽车行业质量管理体系|||,"汽车行业质量管理体系
 动力电池制程质量管控
 质量异常分析解决
@@ -101105,29 +99672,6 @@ QE
 3、熟练掌握SPC、MSA、FMEA等质量工具，能独立编制检验作业指导书及控制计划；
 4、持有内审员资格证者优先，具备优秀的逻辑思维能力及突发状况应急处理能力；
 5、工作严谨细致，原则性强，具备良好的跨部门沟通协调能力及抗压能力。",正泰电气股份有限公司,胡嘉倩,人事经理 · 正泰电气股份有限公司,在线,,今日回复1次,测试,佛山,2026-09-10 01:21
-项目质量工程师,,嘉兴 平湖市 钟埭街道,3-5年,本科,船舶/航空/航天/军工,"船舶/航空/航天/军工
-Role Responsibilities and Tasks：
-1) Develop, implement, and maintain quality assurance plans and procedures for projects.
-2) Conduct regular quality audits and inspections to ensure compliance with internal standards, customer specifications, and industry regulations.
-3) Collaborate with cross-functional teams to identify quality risks and develop mitigation strategies.
-4) Lead root cause analysis and corrective/preventive action (CAPA) processes for non-conformities.
-5) Review and approve project documentation, including design specifications, test plans, and validation reports.
-6) Manage customer and third-party quality audits, ensuring timely resolution of findings.
-7) Take ownership of the end-to-end management process for customer complaints and quality feedback related to assigned projects.
-8) Prepare and submit detailed, timely, and professional 8D reports (or other designated formats) to customers, ensuring clear communication of containment actions, root cause analysis, and corrective plans.
-9) Organize and lead cross-functional corrective action meetings to drive root cause analysis (e.g., using 5 Whys, Fishbone Diagram) and develop effective, sustainable corrective and preventive actions (CAPA).
-10) Track, verify, and validate the implementation and effectiveness of all corrective actions, ensuring issues are robustly resolved and prevented from recurrence.
-Requirements
-1) Bachelor or above;
-2) Majored in Engineering, Quality Management, or similar,
-3) Trained as an QE.
-4) Minimum of 3–5 years of experience in a quality engineering role, preferably
-5) Be familiar with whole process in manufacturing industry, refrigeration or railway industry is a plus；
-6) Be familiar with project quality control, process approach, ISO/TS 22163 is a plus.
-7) Be familiar with QC tools, such as 5M1E, FMEA, QCC, Pareto, fishbone diagram, system diagram, 5W1H，project management is a plus.
-8) Good written English, oral is a plus;
-9) Communication and negotiation skills;
-10) Knowledge of ERP, MS working tools, word, PPT, excel, outlook…",利勃海尔(中国)有限公司,王毓安,人事经理 · 利勃海尔(中国)有限公司,,,,测试,佛山,2026-09-10 01:21
 售前质量工程师 (MJ014049),8000-15000元,嘉兴 海宁市 黄湾镇,QA,,QE,"QC
 QA
 QE
@@ -105854,33 +104398,6 @@ SAS
 工作细致耐心，具备较强的责任心与抗压能力。
 补充说明
 薪酬福利：带薪年假、包吃",浙江焕美科技有限公司,孙女士,HRBP · 浙江焕美科技有限公司,,,,数据分析,佛山,2026-09-10 01:33
-Order Fulfillment Representative-订单专员,,嘉兴 海盐县 武原街道,1-3年,本科,订单审核|订单制作|订单售后处理|,"订单审核
-订单制作
-订单售后处理
-国外客户
-The Impact You'll Make
-Order Fulfillment Representative main response customer order on time delivery as customer requirement through working with CSR team, Internal planning team, Purchasing team, Warehouse team, Transportation team, Production team, also manage the lead time, Stock.
-What You’ll Be Doing
-Responsibilities for this position include, but are not limited to, the following.
- Monitor weekly on time delivery performance.
- Conduct Sales & Operations Planning (S&OP) analysis and schedule production in SAP.
- Review Master Production Schedule (MPS) and monitor execution.
- Confirm and deliver sales orders in a timely manner.
- Collaborate closely with fulfillment and outbound logistics teams to meet customer demands.
- Manage data quality in SAP and ensure accurate order management and delivery processes.
- Provide high-level service to both internal and external customers to achieve maximum satisfaction.
- Handle customer requests through SAP system and emails.
- Communicate regularly with the sales and fulfillment teams to enhance delivery and stock performance.
- Identify, investigate, and resolve logistic issues and customer delivery complaints.
- Ensure timely responses and quality resolutions to customer inquiries.
-What We're Looking For
- Bachelor’s Degree in Supply Chain & Operations Management or related field is required.
- 1 - 2 Years of experience in supply chain and customer service
- Experience in SAP or Familiarity with SAP is beneficial, but if you're experienced with other ERP systems, we can provide training to help you get up to speed.
- Strong analytical and mathematical skills. Have strong numerical skills and a high level of proficiency in Excel (e.g., extracting data, creating spreadsheets for better overview, etc.).
- Ability to solve practical problems and handle a variety of situations with limited standardization.
- Ability to coordinate activities across multiple departments and maintain contact with key stakeholders.
- English advanced",丹佛斯在华子公司,顾佳依,人事经理 · 丹佛斯在华子公司,在线,,,数据分析,佛山,2026-09-10 01:33
 数据处理小能手文职无压力,3000-4000元,嘉兴 南湖区 长水街道,文本标注,大专,人工智能|住宿补贴|节假日福利|||||,"文本标注
 人工智能
 工作内容：无人驾驶车数据处理与文本审核岗 （全职，可接受实习生），纯电脑办公，无销售、无出差。
@@ -106186,39 +104703,6 @@ ISO质量管理体系
 4. 具备较好的数据分析和问题解决能力。",宁波信泰机械有限公司,徐魏富,,在线,,今日回复2次,数据分析,佛山,2026-09-10 01:34
 农产品现货交易员,5000-10000元,嘉兴 秀洲区 新城街道,节假日休息,,加提成,"现货交易
 1、根据实时数据分析，进行操作 2、接受无经验，前期有专门的培训 3、工作时间9:00-16:00，双休，节假日休息 4、薪资有责加提成",嘉兴市秀洲区新城街道茗期汇茶叶商行(个体工商户),虞先生,人事经理 · 嘉兴市秀洲区新城街道茗期汇茶叶商行(个体工商户),在线,,,数据分析,佛山,2026-09-10 01:34
-周末双休（09:00-18:00）+六险一金+福利好,,嘉兴 南湖区 城南街道,周末双休,,数据好，开单容易|||||||||||||||||||||||||||||||||||,"早九晚六不加班
-周末双休
-数据好，开单容易
-咨询服务
-银行
-互联网生活服务(O2O)
-●●岗位急招 招满即停
-●企业文化:
-我们固定早九晚六周末双休我们绝对不加班，下班就走，我们适合喜欢做服务，而又不想有太多工作压力的人同时对于有晋升欲望、有赚钱欲望的人，我们也给予充足的空间。人性化工作时间+周末双休不加班!
-●福利待遇：
-工资构成:
-1、基础无责底薪+职级津贴+岗位津贴+绩效，综合薪资7-25k
-2、缴纳社保:医疗保险，意外医疗、疾病医疗、生育险、失业保险+企业保险+住房公积金。
-●工作时间:
-早上:09:00-18:00，7小时工作制，午休两个小时。绝不加班。
-周末双休。带薪年假，年底双薪，法定节假日带薪休假+带薪158天产假
-●发展空间:
-需要锻炼自己、提升自己，那么平台就很重要，上市公司五百强晋升培养机制完善，管理岗位需求大，对于有晋升意愿的伙伴提供职位直升扶持!
-绝对的公平公正公开，全靠实力，全是实力派。
-●培训
-不用担心自己不会哦
-1、新人入职了解公司、熟悉产品、超简单、这么聪明的你肯定没问题。也有平安大学做后盾
-2、培训结束，公司分配师傅、组长、团队主管手把手教
-●工作环境:
-1、5A级舒适的办公环境(氛围融洽友好，团队年轻而富有活力)
-2、员工旅游+员工生日会+发放丰厚奖励，优秀员工每月有表彰(超多惊喜等你一起)
-3、每年5-15天带薪年假(幸福感超足哦)
-4、享受国家法定婚假产假以及陪产假等(一起见证你人生的每一个重大时刻)
-5、琳琅满目的零食、咖啡、饮料、下午茶(工作的同时放松一下)
-6、丰富的企业活动，聚餐等
-●●●员工关怀
-1.为员工提供多途径反馈工作、生活中遇到的问题困难，通过面对面圆桌会，线上答疑等方式给予解助
-2.为家庭特别困难员工提供帮助，领导可爱同事暖心",中国平安,李娇静,人事经理 · 中国平安,在线,,今日回复50+次,数据分析,佛山,2026-09-10 01:34
 车间线长,8000-12000元,嘉兴,1-3年,本科,,"岗位职责
 1、生产组织与效率管理
 ①负责车间产线人员及资源的计划、组织与协调，确保交付、质量、安全、效率、OEE 等关键指标达成
@@ -107062,43 +105546,6 @@ SAP
 ③掌握专业数据分析软件（如 Origin/Matlab/SPSS/R 等）、绘图软件（如 Visio/AI/GraphPad）或科研绘图工具；
 ④具备外语读写能力，能熟练翻译英文文献、撰写英文摘要 / 论文；
 ⑤有高校、科研院所、重点实验室科研助理工作经历者优先，要有工作经验。",浙江清华长三角研究院,李先生,,在线,,今日回复1次,数据分析,佛山,2026-09-10 01:37
-Trade Compliance Analyst,,嘉兴 海盐县 武原街道,5-10年,本科,贸易合规|关税成本节约,"贸易合规
-关税成本节约
-The Impact You'll Make
-This role is responsible for supporting trade compliance activities with a primary focus on Preferential Origin. This role ensures that products meet applicable origin requirements to support preferential duty treatment, maintain compliance with regulatory standards, and enable duty savings opportunities. The position requires strong expertise in rules of origin analysis and supporting documentation.
-This role works closely with procurement, engineering, and cross-functional stakeholders to validate origin qualification outcomes. This role acts as a subject matter expert in rules of origin, enabling compliant and defensible Preferential Origin qualification decisions across the organization.
-What You’ll Be Doing
-● Lead Preferential Origin qualification activities, ensuring alignment with regulatory requirements and internal compliance standards, ensuring all required documentation is properly collected, validated, and retained to support full regulatory compliance. Qualification agreements could be anywhere globally, including USMCA, EU/UK-based agreements, MERCOSUR, etc.
-● Analyze Bills of Materials (BOMs) and supporting data to determine origin qualification
-● Coordinate the collection and validation of supplier origin documentation (LTVDs), ensuring integrity, completeness, and audit readiness
-● Create and provide necessary preferential origin certificate as requested by customers
-● Assess completeness and accuracy of supplier declarations to ensure compliance with PO requirements and mitigate risk exposure
-● Provide guidance to internal stakeholders on rules of origin, qualification outcomes, and potential compliance risks
-● Collaborate cross-functionally with procurement, engineering, and suppliers to strengthen origin data quality
-● Identify gaps or risks in origin data
-● Contribute to duty optimization strategies by ensuring accurate origin qualification and effective use of free trade agreements
-● Maintain complete and audit-ready records of origin documentation in accordance with applicable regulations and internal policies
-● Support customs-related activities by ensuring documentation readiness
-What We're Looking For
-● Bachelor’s degree in Supply Chain, Logistics, International Trade, Business, Law, or related field
-● 3–5 years of experience in trade compliance, customs brokerage, or customs
-● Experience in manufacturing or global supply chains preferred
-● Strong knowledge of customs regulations, HS classification, and origin rules
-● Familiarity with export control regimes (e.g. EAR, ITAR, EU Dual-Use)
-● Experience with ERP systems (e.g. SAP) and customs management tools
-● Strong analytical and documentation skills
-What You'll Get from Us
-2. We promote from within and support your learning with mentoring, training, and access to global opportunities.
-4. You’ll have flexibility, autonomy, and support to do your best work while maintaining a healthy work-life balance. Your well-being matters to us.
-6. We strive to create an inclusive work environment where people of all backgrounds are respected, and valued for who they are.
-8. You’ll receive benefits like 13th salary, annual bonus, paid vacation, pension plans, personal insurance, and more. These vary by country and contract, but they’re worth asking about—we think they’re pretty great.
-Ready to Make a Difference?
-If this role excites you, we’d love to hear from you! Apply now to start the conversation and learn more about where your career can go with us.
-Our Commitment to Transparency
-Salary ranges listed reflect only primary location and currency. For local salary ranges and specific benefits in your preferred hiring location, please ask your Talent Acquisition representative for more information.
-The actual salary offer will carefully consider a wide range of factors, including your skills, qualifications, experience, and location. Any benefits listed do not promise or guarantee any particular benefit or specific action. They may depend on country or contract specifics and are subject to change at any time without prior notice.
-Want to know more? Please visit our .
-All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, age, disability, veteran status, or other protected category.",丹佛斯在华子公司,黄女士,人事经理 · 丹佛斯在华子公司,在线,,,数据分析,佛山,2026-09-10 01:37
 运营专员,6000-8000元,嘉兴 南湖区 南湖街道,内容运营,大专,新媒体运营|销售运营|抖音||,"内容运营
 新媒体运营
 销售运营
@@ -109282,18 +107729,6 @@ PD
 1.本科及以上学历，财务管理、会计学、金融学、统计学等相关专业；
 2.学习能力强，熟悉会计准则与财税法规；
 3.严谨细致，对数据敏感，具备良好的逻辑思维能力。",卫星化学股份有限公司,苏女士,,在线,,今日回复30次,数据分析,佛山,2026-09-10 01:43
-嘉兴中支业务管理岗/业管牵头人岗(J14656),,嘉兴 南湖区 新兴街道,3-5年,本科,财产险|保险,"财产险
-保险
-岗位职责:
-1、负责嘉兴地区个客/团客业务追踪、数据分析、承保管理、续保管理、费用测算、风险管控等工作；
-2、负责承接分公司销管部及销售序列业务部门的工作部署；
-3、承接分公司渠道经营企划分析、渠道销售推动工作；
-4、嘉兴地区出单作业管理；
-5、领导交办的其他相关工作
-任职要求:
-1、大学本科学历；
-2、有保险行业3年以上工作经验，有财产险公司业管工作经验优先；
-3、有较强的逻辑思维能力与数据分析能力，责任心强，做事严谨。",大家保险集团有限责任公司,陈女士,,在线,,,数据分析,佛山,2026-09-10 01:43
 新营销运营,7000-8000元,嘉兴 秀洲区 王店镇,3-5年,大专,抖音|快手|电商类|直播|运营|,"抖音
 快手
 电商类
@@ -117688,26 +116123,6 @@ SPC过程控制
 3、拥有良好的逻辑思维能力和跨部门沟通协作意识;
 4、抗压能力强，具备较强的学习意愿和职业韧性;
 5、认同公司企业文化，愿意在供应链领域长期发展",味斯美食品科技(安吉)有限公司,施女士,人事经理 · 味斯美食品科技(安吉)有限公司,在线,,今日回复2次,数据分析,珠海,2026-09-10 02:09
-商业招商岗 (MJ109405),,湖州 长兴县 太湖街道,5-10年,大专,区域销售|渠道销售|企业客户||,"区域销售
-渠道销售
-企业客户
-政府客户
-KA大客户
-岗位职责
-1. 负责商业项目招商规划制定，明确业态定位与招商节奏；
-2. 开发品牌商户资源，建立并维护品牌合作资源库；
-3. 统筹招商谈判与合同签订，跟进商户进场全流程对接；
-4. 分析区域商业市场动态，评估竞品招商策略与业态布局；
-5. 协调商管、运营等内部团队，推动招商落地与商户衔接；
-6. 监控招商进度与指标完成情况，优化招商策略与落地路径；
-7. 对接已入驻商户需求，跟进续约调整及经营问题协调。
-任职要求
-1. 具备5年以上商业地产、商业综合体或零售行业招商相关工作经验；
-2. 熟悉商业招商全流程，掌握主流业态品牌特性与合作模式；
-3. 拥有一定品牌商户资源储备，具备较强的商务谈判能力；
-4. 具备市场调研与数据分析能力，能够独立完成业态研判报告；
-5. 具备良好的跨部门沟通协调能力，抗压能力强，能适应招商外勤需求；
-6. 恪守商业合作准则，无行业不良从业记录。",吉利控股集团,杨先生,招聘经理 · 吉利控股集团,在线,,,数据分析,珠海,2026-09-10 02:09
 计划主管,1.5-2.5万,湖州 南浔区 南浔镇,3-5年,本科,五险一金|提供住宿,"岗位职责：
 （一）集团计划与产销协同
 负责集团 S&OP（销售与运营计划）数据收集分析，协同各基地开展需求与产能计划，保障生产连续性与交付达成。
@@ -118113,27 +116528,6 @@ CRO公司
 2. 熟练掌握工艺质量控制工具，能独立运用根本原因分析方法解决前段生产异常。
 3. 具备数据分析能力，能支撑前段工艺方案设计与数据化决策。
 4. 有钠电或锂电量产线前段工艺放大、良率提升项目经验者优先。",辽宁宏成电力股份有限公司,李女士,,在线,,今日回复4次,数据分析,珠海,2026-09-10 02:10
-营销助理（湖州）,,湖州 吴兴区 龙溪街道,市场推广,本科,市场策划|市场拓展||||||||,"市场推广
-市场策划
-市场拓展
-消费电子/智能硬件
-家具/家居/办公制造
-家电批发/零售/贸易
-市场职责：
-1.区域门店终端形象管理，含展台维护、样机物料管理、片源规范演示等；
-2.区域内培训赋能支持，萃取销售经验并赋能分享；
-3.区域内市场信息的收集及竞品对手的分析，并制定产品销售方案。
-业务职责：
-1.区域管辖门店的产品销售，完成销售任务；
-2.区域内的客户方案设计工作（包含激光板块的电商及专业渠道上门设计，工 程类客户方案设计等） ；
-3.负责区域内产品销售和推广，辅助营销经理管理维护客户关系；
-4.辅助营销经理，开拓新渠道，发展新客户，增加产品销售范围。
-任职资格：
-1、学历：本科及以上学历，25-26届应届生；
-2、专业：不限；
-3、知识要求：熟练使用办公软件，熟悉EXCEL表格工具使用，了解基础的市场营销理论知识；
-4、能力要求：具备较强的沟通表达、组织协调和数据分析能力，对当前家电市场环境敏感，执行力强，有较强的进取心和学习能力。
-职位福利：五险一金、绩效奖金、带薪年假、定期体检、节日福利",海信集团,人事管理 · 海信集团,,在线,,今日回复20次,数据分析,珠海,2026-09-10 02:10
 立库维护工程师,1-1.5万,湖州 德清县 阜溪街道,3-5年,大专,WMS|ERP|库位管理||,"WMS
 ERP
 库位管理
@@ -119265,21 +117659,6 @@ ERP系统操作
 4.熟悉环保、安全等法规要求；
 5.熟悉电气、设备自动化、质量控制；
 6.擅长制造过程失效模式分析、数据分析；",浙江久功新能源科技有限公司,陈柯娜,人事经理 · 浙江久功新能源科技有限公司,在线,,今日回复50+次,数据分析,珠海,2026-09-10 02:12
-湖州中支业务管理部经理(J14107),,湖州 吴兴区 龙泉街道,财产险,本科,,"财产险
-岗位职责:
-1、依据公司保险业务管理制度和操作流程，协助上级有效执行并完成车险、非车险营销工作；
-2、通过各种渠道开发内部及外部客户资源，做好新、老客户的营销工作，维系客户资源，建立和维护客户档案
-3、为投保客户有效、细致的进行问题咨询与解答；
-4、统计营销业务数据，通过数据提出合理化建议，供上级参考；
-5、收集和分析营销数据，汇总并定期反馈工作完成情况；
-6、完成上级领导临时委派的工作任务。
-任职要求:
-1、本科及以上学历；
-2、具有保险营销工作经验，了解保险管理知识；
-3、具有保险业务开拓、客户关系维系经验；
-4、具有团队协作能力；
-5、掌握保险行业政策法规及行业标准；
-6、熟练应用办公软件，能做数据分析。",大家保险集团有限责任公司,陈女士,,在线,,,数据分析,珠海,2026-09-10 02:12
 生产计划员,7000-9000元,湖州 长兴县 煤山镇,1-3年,大专,电子设备制造,"电子设备制造
 岗位职责：
 1.根据销售订单和库存情况，制定合理的生产计划和物料需求计划
@@ -124336,26 +122715,6 @@ IATF16949体系落地
 4. 具备较强的书面和口头表达能力、团队协作精神，具备良好的职业素养和服务意识；
 5. 工作认真细致，具备较强的数据分析能力和解决问题的能力。
 双休，工资面议",安庆明邦财务咨询有限公司,徐女士,人事经理 · 安庆明邦财务咨询有限公司,在线,,,数据分析,杭州,2026-09-10 02:27
-液罐车业务经理（皖南）,,安庆 宜秀区 白泽湖乡,代理商/经销商,本科,新能源/燃油整车研发制造,"代理商/经销商
-新能源/燃油整车研发制造
-岗位职责:
-1、通过市场调研和分析，寻找潜在客户和市场机会，并与客户进行沟通和洽谈，开发新的业务渠道;
-2、负责销售和推广公司产品，与客户建立良好的业务关系，了解客户需求，达成销售目标。
-岗位工作核心考核目标:
-1、业绩指标:
-销售额:完成公司设定的销售目标，确保业务收入的稳定增长。销售利润:在实现销售额的同时，控制成本，保证销售利润率达到或超过预期水平市场占有率:通过有效的市场策略，提高公司产品或服务在目标市场中的份额。
-2、客户管理:
-客户满意度:通过优质的服务，确保客户对公司产品和服务的满意度达到较高水平，如通过定期的客户满意度调查，使评分保持在一定标准之上。客户忠诚度:采取措施提高客户的重复购买率和忠诚度，减少客户流失率。
-3、市场拓展:
-新客户开发:制定并执行新客户开发计划，不断扩大客户群体，新增客户数量和销售额达到既定目标。市场推广效果:组织实施市场推广活动，提高公司品牌知名度和产品影响力，如通过市场调研评估品牌知名度的提升幅度。
-4、渠道管理:
-协助经销商完成渠道人员布局、销售指标分解、销售计划制定。经销商订单计划、销售、开票、应收等指标管理，督促经销商按时完成各项任务组织及协助经销商业务人员开展新市场开发、客户拜访、客户档案建立、销售线索获取销售合同签订、在手订单管理、开票提车等工作，跟踪经销商业务经理各项工作完成情况跟踪经销商工作计划以及经销商公司月会等基础管理执行情况,协助经销商制定对应改进措施。负责经销商经销协议签订、经销商公司档案管理等工作。
-教育要求:
-本科及以上学历，市场营销、工商管理、经济学等相关专业优先;对于有丰富行业经验者学历要求可适当放宽。
-专业技能及资质要求:
-1、市场分析:熟练运用行业报告、大数据分析工具，深度剖析国内市场趋势、竞争格局挖掘潜在业务机会，精准定位目标客户群体，制定具有前瞻性的市场拓展略。
-2、具备出色的商务谈判技巧，能在复杂的商务场景中与客户、合作伙伴、供应商等进行高效沟通，维护公司利益，达成合作共识。
-注：需有汽车，接受驻外出差，介意者勿投！",中集车辆(集团)股份有限公司,陈先生,HR · 中集车辆(集团)股份有限公司,在线,,,数据分析,杭州,2026-09-10 02:28
 人事经理（异地招聘）,8000-12000元,安庆 大观区 十里铺乡,5-10年,本科,制造业,"制造业
 异地招聘，工作城市：铜陵！
 岗位职责：
@@ -131655,14 +130014,6 @@ ISO13485
 任职要求：
 1、大专及以上学历，机械工程、电子工程、工业工程等相关专业，2 年以上医疗器械生产或系统管理相关工作经验；
 2、熟悉医疗器械生产流程与洁净区管理要求，了解 GMP/ISO 13485 质量管理体系，具备生产现场管理经验者优先。",朗润医疗,人事 · 朗润医疗,,在线,,,测试,苏州,2026-09-10 02:49
-现场质量工程师,,丽水 龙泉市 兰巨乡,3-5年,大专,QE|汽车行业质量管理体系,"QE
-汽车行业质量管理体系
-1、负责产品生产过程中的质量控制，确保生产流程符合公司质量标准和客户要求。
-2、制定并优化质量检验流程，监督生产过程中的关键质量控制点。
-3、分析生产过程中的质量问题，提出改进措施并跟踪实施效果。
-4、协调跨部门团队（如生产、研发、采购等）解决质量相关问题。
-5、参与新产品的试生产，评估其质量风险并提出预防措施。
-6、编制质量报告，定期向管理层汇报生产过程中的质量状况和改进建议。",吉利控股集团,吴炉美,人事经理 · 吉利控股集团,,,,测试,苏州,2026-09-10 02:49
 26品质,5000-8000元,丽水 青田县 腊口镇,金属制品/机加工,本科,,"金属制品/机加工
 1、进行产品研发阶段、新项目设计开发及成熟产品制造过程的质量确认，开展项目阶段审核与体系审核，识别并规避潜在风险，确保项目进度与产品质量符合标准；
 2、依据标准要求，编制年度质量内审计划并组织实施，推动全员学习质量体系标准，优先改进薄弱过程，确保体系有效落地和持续改进；
@@ -132903,38 +131254,6 @@ UV墨水研发
 2、薪资待遇：10K-15K，奖金等，（优秀者薪资面议）；
 3、购买社保，带薪年假，可提供员工宿舍（或住房补贴）；
 4、团建活动，节日福利：春节、端午节、中秋节等节日期间发放实物或津贴。",缙云轩墨新材料科技有限公司,高女士,,,,,数据分析,苏州,2026-09-10 02:52
-销售担当 [GT]（丽水）,,丽水 莲都区 紫金街道,3-5年,大专,代理商/经销商|TT小店|食品快消|,"代理商/经销商
-TT小店
-食品快消
-工作内容：
-在充分理解公司经营方针和销售本部战略的基础上，致力于市场价格的稳定化，在自己所担当的业务范围内担负起相关责任，通过实现“铺市质和量的目标”，确保销量和利润目标的达成。
-业务范围是指，在3级及以下城市，包括MT及TT渠道在内的线下流通市场中的所有与Shopper的接触点。业务开展的主要内容为、以相关目标达成为前提进行商务谈判，对经销商、门店等进行管理。
-1. 销售目标管理与策略制定（30%）
-·承接公司下达的区域销量目标，制定年度/季度/月度销售计划，完成销售数据预估（PSI），并对目标达成进度进行动态跟踪与管理；
-·管理区域内MT及TT渠道的铺市率与店内执行质量，确保达成铺市与陈列目标；
-·围绕目标达成，制定区域经销商开拓计划、门店开拓计划及促销计划，并推动落地实施。
-2. 经销商规划、开拓与管理（20%）
-·基于经销商画像及公司标准，规划并开拓区域内MT及TT渠道经销商，通过商务谈判建立并维护长期合作关系；
-·向经销商传达公司产品价值与利益点，确保经销商能够准确理解并有效传递；
-·跟踪管理经销商进销存数据，确保DMS系统内数据真实准确；基于销售数据分析生意机会，制定生意增量计划，保障经销商健康经营。
-3. 门店开拓与终端管理（30%）
-·基于尼尔森数据及竞品覆盖情况，制定区域门店覆盖目标，明确行动方案并推动达成；
-·协同经销商团队，指导并跟进门店开拓、铺市计划的落地执行；
-·对小店开拓相关的执行人员，通过经销商的业务经理，进行指导与培训（促销政策传达、执行跟进、激励政策落地等），提升产品卖进能力与店头执行效率，提高小店开拓成功率与活跃度；
-·通过定期门店拜访，掌握店头实际情况，及时进行对应与优化。
-4. 其他相关业务（20%）
-·市场信息收集：收集区域内公司产品市场价格信息，汇报窜货情况；收集竞品动态（价格、促销、新品）、门店反馈及市场趋势，及时向上反馈；
-·投诉应对：发生投诉时，进行门店拜访，完成产品回收、信息反馈及处理报告提交；
-·内勤业务：根据需要完成上述业务所涉及的资料制作与提交（汇报、申请、核销等），按公司及上级要求完成系统操作；
-·临时工作：完成上级指派的其他相关工作。
-职位要求：
-1、要求学历：大学大专及以上；
-2、必要的知识：①FMCG行业基础知识；②MT、TT渠道运作模式及经销商管理知识；
-3、必要的经验：①具备快消品行业2年及以上工作经验；②有经销商开拓经验；③有门店管理及客情维护经验;
-4、语言skill：口齿清晰，普通话表达流利；
-5、其他skill：①熟悉各类Office软件操作；②基本的销售技巧；
-6、行动·态度要求：① 有不断完善业务水平的意愿，具备持续学习能力；② 工作态度认真，具备较强的工作责任心与抗压能力；③ 勇于尝试，敢于在工作中探索新方法、新路径；④ 具备良好的合作意识，能够协同内外部资源推进工作；⑤ 工作心态积极乐观，主动应对挑战。
-（出勤地：浙江省丽水市）",上海江崎格力高食品有限公司,彭斐,人事副主管 · 上海江崎格力高食品有限公司,在线,,今日回复50+次,数据分析,苏州,2026-09-10 02:52
 成本会计,5000-10000元,丽水 松阳县 赤寿乡,1-3年,大专,金属制品/机加工|财务/审计/税务,"金属制品/机加工
 财务/审计/税务
 岗位职责
@@ -137476,19 +135795,6 @@ AI集成能力
 3、了解LangChain4j或类似Java Agent框架，对RAG、Agent有实践探索。
 4、熟悉阿里云PAI、DataWorks、Lindorm等产品，有实际项目经验。
 5、有开源项目贡献或技术博客。",苏州麦科斯数字科技有限公司,许先生,人事总监 · 苏州麦科斯数字科技有限公司,在线,,今日回复2次,Java,南昌,2026-09-10 03:05
-FDE工程师（苏州）,,苏州 相城 北河泾,5-10年,硕士,工业自动化/机器人|人工智能,"工业自动化/机器人
-人工智能
-岗位职责:
-1、深入客户生产一线，负责 AI 产品/系统（如视觉检测、预测性维护、智能排产、工业大模型应用等）在制造现场的端到端交付；
-2、负责现场原型开发能力与工业现场实施；-深入理解客户生产工艺与业务痛点，将需求转化为技术方案，进行现场定制化开发；基于客户需求对 AI 应用进行二次开发；
-3、负责完成从环境搭建、系统集成、调试优化到稳定投产的全流程，并持续为客户提供现场技术支持与培训，确保 AI 解决方案在真实工业场景中创造可量化的业务价值。
-4、将现场发现的产品缺陷、模型不足、性能瓶颈反馈至研发与产品团队，推动迭代优化；沉淀可复用的现场交付工具、组件库与最佳实践，提升团队整体交付效率；参与内部技术分享，输出行业 know-how 与现场交付经验。
-任职资格:
-1. 研究生及以上学历，计算机、自动化、机械电子等相关专业，具备扎实的编程基础，熟练掌握至少一门开发语言（Python/Java/C++/Go）。
-2. 熟练使用AI 产品与研发工具，能够快速实现。能够适应出差和现场工作环境，具备良好的沟通能力和抗压能力，能够高效地在客户和研发团队之间传递信息。
-3. 具备工业现场实施/软件开发/系统集成相关经验，有智能制造、工业 AI、机器视觉等项目交付经验者优先；熟悉制造业生产流程（如基础零部件、离散制造等至少一个行业）。
-4. 有工业大模型（LLM/多模态）在制造场景落地经验，如智能问答、工艺知识库、报表生成等；熟悉 MES/ERP/WMS/PLM 等制造信息系统，有系统间集成经验；
-5. 能向非技术背景的客户（车间主任、厂长、操作工）清晰解释技术方案与操作步骤；对项目交付质量与进度负责，确保系统按时稳定投产；",国机数字科技有限公司,杜女士,,在线,,今日回复50+次,Java,南昌,2026-09-10 03:05
 软件开发工程师,1.2-2万,苏州 虎丘 枫桥,3-5年,本科,ERP开发|ERP|MySQL||||||||||||||,"ERP开发
 ERP
 MySQL
@@ -138864,31 +137170,6 @@ IT开发工程师（HR绩效考核方向）,9000-14000元·14薪,苏州 吴中 �
 5. 掌握HR数据分析工具（如Power BI、Oracle存储过程）；
 6. 具备良好的沟通能力，表达能力和团队协作精神，能够快速融入团队；
 7. 工作认真负责，注重细节，有良好的服务意识。",苏州维信电子,钱婉青,HRBP · 苏州维信电子,,,,Java,南昌,2026-09-10 03:07
-【华为应届】【27秋招】软件开发工程师,,苏州 工业园区,C语言,硕士,C++|5G|移动通信|通信设备研发||,"C语言
-C++
-5G
-移动通信
-通信设备研发
-AI辅助研发
-AGENT开发
-【招聘对象】
-2027年1月1日-2027年12月31日毕业的国内高校本科生与硕士研究生；
-2026年1月1日-2027年12月31日毕业的国内高校博士生与海外高校本硕博学生。
-【岗位职责】
-1、负责产品/平台的软件需求分析、方案设计、代码开发、静态检查、单元测试、本地构建、测试环境搭建、集成测试、问题定界定位、资料开发等工作；
-2、负责相关组件/模块的看护及重构，持续优化提升代码质量（可维护性、可扩展性、可测试性等）；
-3、负责后端故障诊断和项目支持技术活动，包括问题解决、产品维护、项目支撑等；
-4、负责智能化演进，探索AI应用、AI智能体等关键技术，持续提升产品竞争力。
-【岗位要求】
-1、计算机科学与技术、电子科学与技术、信息与通信工程、数学、人工智能等相关专业；
-2、具备基本的编程能力，熟悉包括但不限于C/C++/Rust/Java/Python/JS/HTML5等编程语言中的一种或数种，有良好的编程习惯；
-3、具备独立工作和解决问题的能力，热衷新技术，勤于实践，善于总结和分享，乐于沟通和协作；
-4、掌握常用的数据结构和算法；
-5、优选条件：
-1）熟悉TCP/IP等通信协议原理，有分布式、云化、容器化、HarmonyOS等软件开发经验；
-2）在校期间积极参加软件编程大赛、开源社区活动，并获得奖项和荣誉；
-3）熟悉使用AI工具，有AI辅助软件开发实践经验。
-地域：苏州/东莞/北京/南京/杭州",华为技术有限公司,薛先生,HR · 华为技术有限公司,,,,Java,南昌,2026-09-10 03:07
 项目经理（对日）（苏州/如皋/无锡）,1-1.6万,苏州 虎丘,5-10年,本科,Java|日语|计算机软件|团建活动,"Java
 日语
 计算机软件
@@ -139792,32 +138073,6 @@ PIC单片机
 7、 掌握伺服电机性能测试（转矩、转速、效率、温
 升、振动、噪声等）。
 8. 具有团队协作精神，善于沟通，责任心强",鸣志电器,蔡俊涛,人事经理 · 鸣志电器,在线,,今日回复9次,Java,南昌,2026-09-10 03:09
-【华为应届】【27秋招】AI应用工程师,,苏州 工业园区,知识图谱,硕士,智能问答|大模型|通信/网络设备|,"知识图谱
-智能问答
-大模型
-通信/网络设备
-人工智能
-【岗位意向】AI技术应用、AI系统软件
-【岗位职责】
-AI技术应用：
-1、参与实际产品的AI大模型与AI算法在各类业务场景中的应用开发、集成与迭代优化；
-2、参与AI大模型与AI算法应用相关的需求分析、模型微调、RAG检索 ，提升模型在各类场景下的应用效果；
-3、参与产品、数据、业务等团队协作，建立AI大模型与AI应用相关的数据分析、效果评估、问题定位与持续优化，提升用户体验和业务价值。
-AI系统软件：
-1、参与AI领域系统软件（如分布式训练框架、推理引擎、模型服务化平台等）的工程化设计与开发，参与完成中间件、工具链等核心组件的软件设计与产品化开发；
-2、参与多个模块或特性的系统设计，需求分解，特性分析、代码编写、代码测试、资料编纂等工作；
-3、参与AI系统软件产品的性能调优、可扩展性、稳定性及安全性工作。
-【岗位要求】
-AI技术应用：
-1、人工智能、计算机、软件工程、电子信息、自动化等相关专业；
-2、熟悉主流大模型应用开发框架，掌握大模型原理（如Transformer架构、微调技术、向量数据库等）或AI算法原理（如神经网络、强化学习、树模型、知识图谱等）；或有大模型（如GPT、DeepSeek、Qwen系列等）应用或神经网络（CNN、RNN、GNN等）开发经验，熟悉NLP/知识图谱/智能问答/对话系统/文生图/文生视频等领域；
-3、具备扎实的编程能力，熟练掌握 Python、C++、Java 等至少一种编程语言。
-【AI系统软件】
-1、计算机或人工智能相关专业，参与过相关子模块的开发工作；
-2、熟练运用至少一门编程语言（C++ /Java /Python/Rust等）；
-3、熟悉Tensorflow/scikit-learn/xgboost/Caffe/MindSpore/pytorch等主流深度学习框架的使用，具备AI算法开发及应用经验者优先；
-4、熟悉计算机系统架构与操作系统，熟练掌握异构算力计算平台原理和典型硬件加速器的使用方法，熟练运用并发编程和底层调试，熟悉Linux/ROS；
-5、熟悉语言大模型、多模态大模型、深度神经网络、机器学习算法和知识图谱等的至少一种。",华为技术有限公司,薛先生,HR · 华为技术有限公司,,,,Java,南昌,2026-09-10 03:09
 上位机软件工程师,1-1.5万,苏州 昆山 周市,3-5年,本科,C++,"C++
 工作职责：
 1：精听上位机开发，能利用C语言、VB、VC、C++、C#、Java等编写上位机程序，有机器视觉开发经验。
@@ -141879,27 +140134,6 @@ IT工程师（智能制造方向）,9000-12000元,苏州 吴中 甪直,1-3年,�
 （2）了解MES基础架构与核心功能（生产追溯、工艺管控、设备集成等）；熟悉常见工业通信协议，有现场设备联网经验者优先。
 （3）熟练使用SQL（增删改查、多表关联、视图等），掌握至少一种BI报表工具，能独立完成从取数到可视化呈现的开发工作。
 （4）至少熟悉Python或C中的一种，能编写简单脚本用于数据处理、接口调试或自动化任务。",苏州新业电子股份有限公司,孙女士,HR · 苏州新业电子股份有限公司,在线,,今日回复1次,Python,南昌,2026-09-10 03:15
-AI开发工程师,,苏州 吴中 太湖,5-10年,本科,多模态算法|大模型算法||||||,"多模态算法
-大模型算法
-自然语言处理
-PyTorch
-Python
-工业自动化/机器人
-人工智能
-物联网
-岗位职责：
-1.AI 智能体设计与开发：负责集团研发领域 AI 智能体的架构设计、核心功能开发与持续迭代，涵盖需求理解、Prompt 工程、工具调用编排及多智能体协同等工作。
-2.大模型应用集成：基于主流大语言模型（LLM）进行二次开发与微调，完成 RAG 检索增强、知识库对接、插件 / MCP 工具集成等能力建设。
-3.业务场景落地：深入研发业务场景（如 PLM/ERP 数据查询、需求分析、文档生成、代码辅助等），将 AI 能力与业务流程深度融合，交付可落地的智能体应用。
-4.技术方案输出：撰写技术方案、接口文档与部署手册，参与 AI 应用的性能优化、安全管控及权限策略设计。
-5.前沿技术调研：跟踪 AI Agent、大模型、向量数据库等领域的技术动态，开展技术预研与原型验证，为集团 AI 能力建设提供技术储备。
-任职要求：
-1.学历与专业：本科及以上学历，计算机科学、人工智能、软件工程等相关专业。
-2.编程能力：熟练掌握 Python，具备良好的代码规范与工程化能力；熟悉 FastAPI/Flask 等后端框架者优先。
-3.AI 开发经验：有大模型应用开发或 AI 智能体项目经验，熟悉 LangChain、AutoGen、Dify 等主流框架，具备 Prompt 工程与 Function Calling 实践经验。
-4.技术栈：熟悉向量数据库（如 Milvus、Chroma）、RAG 架构、Embedding 模型及相关调优方法；了解微服务、Docker 部署及 API 接口开发。
-5.业务理解：具备研发领域（PLM/ERP/ 制造业数字化）业务背景或 To B 系统集成经验者优先。
-6.综合素质：具备较强的逻辑思维、问题分析与解决能力，良好的跨团队沟通协作能力，能独立推进项目落地。",中软国际,易青青,人事经理 · 中软国际,在线,,今日回复18次,Python,南昌,2026-09-10 03:15
 软件开发工程师（Java/C/C++/python/JS）,1.5-3万,苏州 工业园区,C,本科,C++|Python|软件/IT服务|人工智能,"C
 C++
 Python
@@ -142158,46 +140392,6 @@ Debug与调优：
 遵循 MISRA C 编码规范，确保代码的健壮性和安全性。
 工具链维护：
 维护 Git/SVN 代码仓库，管理不同版本的固件（Bootloader + App）。",苏州矽凯力科技有限公司,常蓝天,人事经理 · 苏州矽凯力科技有限公司,在线,,今日回复14次,Python,南昌,2026-09-10 03:16
-Production Engineering Specialist,,苏州 工业园区,5-10年,本科,测试设备|测试验证|变频器||||,"测试设备
-测试验证
-变频器
-伺服系统
-生产质量管理
-电气测试
-量产测试
-Reporting to:
-Engineering Manager
-Your role and responsibilities
-We are looking for EMS On-site Support Engineer in Production Testing & Support team, Product Engineering and Quality department, Drive Products in China BL.
-Production Testing and Support team supports manufacturing units in production technical issue resolution, drives product manufacturability improvements and leads production ramp up/ramp down project management in ABB Beijing factory and global EMS partners. As EMS On-site Support Engineer, you would be responsible for technical problem solving and driving production quality improvement at EMS factory. The position would be based in Suzhou苏州, China.
-Key Responsibilities
-1. Quality Management (≥50% of Working Time)
-● Monitor and improve DPPM and testing first pass yield targets
-● Track ABB complaints close rate and drive EMS reduce recurring issues
-● Driving improvement on ABB audit findings (SQP & self-routing inspection)
-● Lead quality improvement project in systematic management methodology
-● Improve EMS supplier quality from IQC perspective; define CTQs by category with product engineer and mechanical engineer
-2. Delivery Coordination
-● Coordinate EMS & ABB on complex process/testing issues for on-time delivery
-● Execute regular communication with EMS PJM to identify delivery risks and align with ABB responsible party
-3. Technical Support — PCBA & Box Build
-● New variant testing configuration and test sequence/limits change
-● Support EMS on complexed ad-hoc issue problem solving; product failure overview in production
-● ECN execution support including new F/W verification
-4. Project Support
-● New ICT fixture coverage review and supporting role in PCBA FCT and boxbuild testing issue resolution
-● PPAP review (SMT / Wave / Coating, etc.)
-Qualifications for the role
-· Bachelor or master’s degree in Control Engineering, Electrical Engineering or Automation
-· Minimum 3 years’ engineering experience in PCBA provider or Drives industry
-· Solid knowledge of SMT, Wave Soldering, Coating, ICT/FCT, PPAP, IPC standards
-· Knowledge of Variable speed drives, Servo drive or similar industrial products, and familiar with production testing language Python, LabVIEW, etc.
-· Strong problem-solving skills (8D, 5Why, Fishbone), LSS green belt preferred
-· Should have excellent communication skills and positive attitude
-· Fluent English and writing skills are must
-· Willingness to travel domestically and internationally as needed
-More about us
-ABB Drive Products serves the industries and infrastructure segments with world-class drives and programmable logic controllers (PLC). With its products, global scale and local presence, the Division helps customers to improve energy efficiency, productivity and safety.",ABB,查清,人事经理 · ABB,在线,,今日回复50+次,Python,南昌,2026-09-10 03:16
 AI辅助等离子体模拟,2-4万,苏州 太仓 城厢,Python,博士,C++|ORIGIN|物理|其他新能源,"Python
 C++
 ORIGIN
@@ -148813,25 +147007,6 @@ MySQL
 5. 接受长期欧洲驻外、高频出差，能适应海外独立办公、现场驻场工作模式，抗压能力强；
 6. 持有C1及以上驾照，驾驶平稳，有实车测试上路经验，无重大违章及事故记录；
 7. 工作严谨细心，具备独立问题排查、现场应急处理能力，沟通协调能力良好。",苏州申特蔚汽车技术服务有限公司,王欣艺,,在线,,今日回复9次,测试,南昌,2026-09-10 03:37
-质量工程师（后期）,,苏州,3-5年,本科,量产质量|CQ|PQ|||,"量产质量
-CQ
-PQ
-汽车行业质量管理体系
-新能源/燃油整车研发制造
-新能源/燃油车零部件
-岗位要求：
-1.大学本科以上学历，理工科专业背景，3年以上汽车零部件质量管理经验；
-2.良好的运用质量工具，例如：8D，PPAP，SPC，MSA等；
-3.良好的分析和问题解决能力，客户和内部制程质量管理经验；
-4.良好的中/英文听，说，写沟通能力，能够承受工作的压力；
-5.对结果与目标高度明确，高度关注细节，预防问题，快速反应；
-工作内容：
-1.处理客户抱怨，制定纠正措施，根本原因分析和纠正措施的验证；
-2.关注客户对质量的要求，以积极配合客户的期望；
-3.根据质量控制和客户要求,准备和更新质量文件；
-4.监控产品质量绩效，领导小组解决质量问题，纠正和预防措施的落实验证 ；
-5.分析质量数据（PPM和过程能力等）以建立必要的持续改进 ；
-6.培训QC人员和支持培训质量技术员 。",昆山麦格纳汽车系统有限公司,陈女士,HR · 昆山麦格纳汽车系统有限公司,在线,,今日回复33次,测试,南昌,2026-09-10 03:38
 质量管理类-新质专场-秋季招聘大会,1-2万,苏州 姑苏 金阊,,,,"（包括来料/制程/出货检验、品质工程、体系管理、客诉处理等）
 昆山市 – 苏州麦克邦 – 品质工程师 – 来料/制程/成品质量管控，客诉处理
 苏州高新区 – 苏州迈时光电 – 质量工程师 – 过程质量监控、客诉处理、新品质量策划
@@ -149084,33 +147259,6 @@ CNAS认证
 4、其他：工作负责严谨，有一定的抗压能力，学习能力较强，理解沟通表达能力较强。
 5、其他：特别优秀者薪资面议。
 入职缴纳五险一金、项目奖金、大额年终奖、节日福利、周末双休。",博科电测(苏州)科技有限公司,王丽娜,人事经理 · 博科电测(苏州)科技有限公司,在线,,今日回复50+次,测试,南昌,2026-09-10 03:38
-质量工程师（前期）,,苏州,3-5年,本科,前期质量|PPAP|APQP||,"前期质量
-PPAP
-APQP
-新能源/燃油车零部件
-职位需求：
-1) 理工科背景，大学本科以上学历；
-2) 3年以上汽车零配件相关的工作经验优先考虑；
-3) 具备优秀的沟通、组织技巧；
-4) 精通汽车主机厂的质量要求以及问题解决方法；
-5) 较强的产品、装配工艺以及模具知识；
-6) 具备相关的质量工具知识，如SPC、DOE、APQP、PFMEA等；
-7) 较强的GD&T形位公差相关的知识；
-8) 良好的计算机使用技巧及英文听说读写能力；
-工作内容：
-1)在项目小组内提供质量支持并开发初始的质量保证计划；
-2)在先期阶段理解产品在客户端的应用，定义客户接口的控制方法；
-3)制订检具规划，并提供检具报价给BD作成品报价。检具的验收，制定操作规范并向相关人员提供培训；
-4)制定关键特性追踪表并确保产品及生产过程的特殊特性在前期得到有效的控制和验证；
-5)制定控制计划并组织跨部门小组进行评审，参与项目其它控制文件的评审；
-6)审核、批准供应商SRCD，PPAP；
-7)追踪和讨论测试计划完成并跟踪测试进度，PV测试问题责任判定并负责测试问题及时关闭；
-8)向客户递交PPAP并获得批准；
-9)在先期阶段牵头解决客户问题；
-10)向检验员及作业人员提供相关质量方面的培训；
-11)在先期阶段牵头解决LCC和项目生产质量问题，并确认改善效果；
-12)ECN、新模具，制定零件和成品的测试验证计划，试装PTR，PPAP批准；
-13)项目Lesson Learnt制定和交接。",昆山麦格纳汽车系统有限公司,陈女士,HR · 昆山麦格纳汽车系统有限公司,在线,,今日回复33次,测试,南昌,2026-09-10 03:38
 质量工程师,8000-12000元,苏州 玉山,1-3年,本科,质量|PPAP|五险一金|绩效奖金||||||||,"质量
 PPAP
 岗位职责:
@@ -149616,32 +147764,6 @@ CANoe
 4、参与支付业务相关的测试分析与风险评估，保障系统上线质量
 5、探索并引入A辅助测试工具和方法，提升测试效率与覆盖率
 6、编写和维护测试相关文档(测试计划、测试报告、操作手册等",京北方,崔女士,人事经理 · 京北方,在线,,今日回复1次,测试,南昌,2026-09-10 03:40
-资深质量工程师,,苏州 工业园区,5-10年,本科,QE,"QE
-岗位职责：
-产品与过程质量控制
-主导过程质量异常的分析和处理，组织开展不合格品评审（MRB），并追踪纠正和预防措施（CAPA）的落实，避免质量问题重复发生。
-监督和指导现场检验活动（PQC、IPQC、FQC）的执行，优化检验标准和检验方法，提高检验有效性。
-组织或参与过程审核（LPA分层审核、Gemba现场审核、专项审核等），支持体系审核、客户审核及内部审核。
-根据SPC、审核结果、内部问题、过程能力指数等数据分析结果，识别并推动改进机会。
-客户投诉处理
-组织客户投诉调查，与相关部门协作分析并消除根本原因，验证纠正措施的有效性，主导8D报告的编制并提交客户。
-协调不良产品的返厂、维修整改及重新交付工作，为客户现场维修提供备件支持。
-定期分析客户质量数据，识别改善机会，推动同类问题的彻底解决和预防。
-新产品导入
-参与新产品过程开发和验证工作，主导建立有效的过程及产品质量控制体系。
-参与流程图（Flow Chart）和FMEA的开发与维护，制定控制计划（Control Plan）、检验指导书等文件，并根据需要完成PPAP文件编制。
-其他工作职责
-完成公司或部门要求的定期报告和专项报告，包括过程审核、质量绩效分析、改善项目、工程变更（ECR）、新产品导入等。
-指导初级工程师和技术员的日常工作，支持跨职能团队的质量知识及质量工具培训。
-完成QA主管、QA经理及以上管理层安排的其他工作任务。
-任职要求：
-本科及以上学历，机械工程、电子工程、质量工程或相关专业。
-5年以上质量管理经验，具有断路器或低压电器产品质量管理经验者优先。
-熟悉ISO 9001、IATF 16949（原TS16949）质量管理体系及其实际应用。
-熟练运用APQP、PPAP、FMEA、Control Plan、SPC、MSA及8D等质量工具。
-具备良好的问题分析与解决能力、沟通协调能力以及跨部门推动能力。
-具备较强的责任心、自我驱动力和团队领导能力。
-英语读写熟练，具备良好的英语听说能力者优先。",伊顿(中国)投资有限公司(EATON),林女士,,在线,,,测试,南昌,2026-09-10 03:40
 （软件测试培养）IT管培生,5000-7000元,苏州 吴中,计算机软件,本科,银行|软件/IT服务|可提供住宿||,"计算机软件
 银行
 软件/IT服务
@@ -150770,21 +148892,6 @@ Mintab for MSA and CPK Analysis.
 Microsoft Excel & PPT & Word.
 Project experience.
 Medical experience preferred.(ISO13485,FDA experience)",斯凯菲尔电子(苏州)有限公司,强先生,招聘经理 · 斯凯菲尔电子(苏州)有限公司,在线,,,测试,南昌,2026-09-10 03:43
-qe质量工程师,,苏州 昆山 玉山,3-5年,本科,汽车行业质量管理体系|,"汽车行业质量管理体系
-新能源/燃油车零部件
-工作职责：
-1.处理客户和内部质量问题。
-2.组织和监控客户及内部工厂的控制活动，确保质量控制的有效性。
-3.组织晨会，分析、跟踪和改进过程问题，提高生产效率和产品质量。
-4.准备PPAP文件，包括与客户沟通和执行产品及过程的审计工作。
-5.报告和沟通质量绩效指标，协调并执行持续的质量改进措施。
-6.与客户和供应商就质量相关话题进行有效沟通。
-7.编辑和审查相关的质量控制文件，确保文件的准确性和符合性。
-8.维护客户关系，确保客户满意度和忠诚度。
-工作要求：
-1. 工程类本科学历。
-2. 3年以上质量相关工作经验。
-3. 熟悉质量工程工具，如SPC、DOE、GD&T。",昆山麦格纳汽车系统有限公司,柏女士,,,,,测试,南昌,2026-09-10 03:43
 研发质量高级工程师（3C）,1.5-2.5万·13薪,苏州 相城 黄埭,3-5年,大专,QE|汽车行业质量管理体系|||,"QE
 汽车行业质量管理体系
 半导体/芯片
@@ -153489,19 +151596,6 @@ ITBP（苏州属地） (MJ017236),8000-10000元·13薪,苏州 吴中,1-3年,本�
 4、业务理解力强，学习能力强，适应能力好；
 5、具有较强的文档编写能力；
 6、软件工程或计算机科学技术相关专业优先；有养老行业信息化相关背景知识优先;",苏州福星医疗养老产业集团有限公司,王明锁,,在线,,今日回复5次,运维,南昌,2026-09-10 03:50
-Linux运维-24届专科起，4个月合同,,苏州 虎丘 通安,1-3年,大专,云计算运维|云存储|||,"云计算运维
-云存储
-通信运营商/电信增值服务
-产业互联网平台
-软件/IT服务
-岗位要求：
-1、负责云存储类产品日常变更及维护
-2、熟悉Linux等主流操作系统，能够快速处理系统常见问题
-3、熟悉分布式存储、对象存储等云存储技术
-任职资格：
-1、 学历及工作年限要求：统招大专以上学历
-2、 工作年限2年及以上云平台运维工作经验，有云计算、云存储技术者运维相关经验优先
-3、 有分布式存储、对象存储疑难问题定位和故障判断能力",中软国际,招聘专员 · 中软国际,,在线,,今日回复9次,运维,南昌,2026-09-10 03:50
 erp运维工程师,8000-13000元,苏州 吴中 城南,1-3年,大专,ERP开发|五险一金|年底双薪||||||,"ERP开发
 岗位职责：
 1.鼎捷ERP--T100系统开发，熟悉4GL语言
@@ -155485,13 +153579,6 @@ LES运维
 2. 负责项目运维团队的日常运营，对运维人力资源进行日常监控；
 3. 负责与客户沟通，及时了解客户需求和意见反馈，协调解决问题，提高客户满意度；
 4. 处理投诉调查，并制定解决方案；",杭州明讯软件技术有限公司,陈女士,,在线,,今日回复50+次,运维,南昌,2026-09-10 03:55
-弱电运维工程师,,苏州 昆山 巴城,1-3年,大专,弱电运维|文体活动|各类活动,"弱电运维
-1、负责对单位的电视系统、一卡通系统、视频监控系统、教学办公设备、互联网络等进行管理维护；
-2、负责对教学场地、文体活动场地进行管理，为各类活动提供技术服务保障。
-任职资格：
-1、大专及以上学历，具备相关经验3年及以上；
-2、具有较强的沟通能力、协作能力；
-3、有较强的责任心，及时响应部门工作需要。",融通人力资源开发有限公司,周女士,,在线,,今日回复2次,运维,南昌,2026-09-10 03:56
 agv运维工程师,6000-9000元,苏州 相城 黄埭,1-3年,大专,AGV运维|工业自动化/机器人||,"AGV运维
 工业自动化/机器人
 电气机械/电力设备
@@ -157404,24 +155491,6 @@ ERP
 3. 良好的逻辑思维能力和分析能力，抗压能力；
 4. 细心、耐心，对数据敏感；
 5. 良好的沟通能力，能与其他部门合作。",江苏宇彤智能科技有限公司,朱琳,人事经理 · 江苏宇彤智能科技有限公司,,,,数据分析,南昌,2026-09-10 04:00
-数据分析师,,苏州 工业园区,1-3年,本科,销售运营|软件/IT服务,"销售运营
-软件/IT服务
-1、在指导下，协助承担伙伴销售管理相关工作，包括但不限于客户/行业分类及选择、业绩归属与拆分、管理销售目及预测、规范项机会点管理、项目立项与运作、管理客户关系、客户接触与客户满意度等；
-2、基于业务相关数据，在指导下识别业务存在的风险和问题并给出应对方案建议；
-3、支撑方案的验证和落地，能解决相对简单问题；
-4、参与上述工作的运营。
-一、技能要求:
-1、熟练使用Office等常用办公软件，能够按照模板完成相应数据处理，输出销售数据报表或者PPT，并规范整理输出销售相关文档；
-2、熟练使用AI相关辅助办公工具，提升工作效率。
-二、知识要求:
-1、了解销售管理的基础概念和流程，比如客户/行业分类及选择；
-2、了解业绩归属与拆分、销售目标管理及预测、机会点管理、项目规范性管理等。
-三、能力要求：
-1、具备一定的执行力，能够按计划完成分配任务，具备基础的任务跟踪与闭环管理能力；
-2、具备基础的业务理解力，能够识别销售运营中的常见问题并提出基础性改进建议；
-3、具备基础的协作与沟通能力，能够与团队成员有效配合，推动简单事项落地；
-4、具备较强的学习能力，持续学习业务与销售管理的相关知识，并应用到日常工作中。
-四、教育背景要求：本科及以上学历。",华为技术有限公司,张新慧,,在线,,今日回复1次,数据分析,南昌,2026-09-10 04:00
 数据分析师,1-1.3万·14薪,苏州 吴中,3-5年,本科,数据仓库|Sql|Python|,"数据仓库
 Sql
 Python
@@ -159762,17 +157831,6 @@ Qualification Requirements
 具备良好的团队管理能力和跨部门沟通协作能力。
 · Strong sense of responsibility, safety awareness, integrity, and willingness to learn.
 责任心强，诚实可信。",诺维信(中国)投资有限公司,杨女士,人事经理 · 诺维信(中国)投资有限公司,在线,,,数据分析,南昌,2026-09-10 04:05
-0981EV-医疗服务岗,,苏州,1-3年,本科,五险一金|带薪年假|补充医疗保险|||,"工作职责要求：
-1、医疗服务新产品的调研、开发；
-2、医疗服务产品销售推动、数据分析追踪、收入达成；
-3、重点服务产品项目的跟进；
-4、服务产品的制度优化梳理、服务手册制作宣传、客户运营服务等；
-5、总部或机构重大项目的支持。
-任职资格：
-1、本科及以上学历，医学相关专业优先；
-2、熟悉健康险或医疗服务的基本业务流程，具备项目经验者或业务实操经验优先；
-3、具备产品思维，熟悉产品实现过程；
-4、善于发现问题解决问题，逻辑能力强，工作积极主动，协调能力强，具备优秀的团队合作精神。",平安健康保险股份有限公司,高兴兴,,在线,,,数据分析,南昌,2026-09-10 04:05
 制造工程师 机加工,1.2-2万·13薪,苏州 工业园区,5-10年,大专,热处理|机加工工艺|无损检测,"热处理
 机加工工艺
 无损检测
@@ -161118,21 +159176,6 @@ u 2年及以上统计编程相关工作经验。",斯丹姆,招聘 · 斯丹姆,
 5、具备较强的交流沟通表达能力和责任心；
 6、具备废水运行和调试经验，具备对各工艺段运行水质指标分析的计算能力，能对系统运行中的问题判断并提供解决方案；
 7、能够适应出差。",苏州博元兴电子设备有限公司,高叶宁,经理 · 苏州博元兴电子设备有限公司,在线,,,数据分析,南昌,2026-09-10 04:08
-新零售管培生,,苏州 工业园区,互联网新零售,本科,,"互联网新零售
-岗位职责：
-1、熟悉零售各模块的日常运作，掌握扎实的产品及业务知识，并能基于顾客和团队需求，给予专业的指导及建议
-2、根据公司整体规划，参与门店的策略制定及日常运营管理工作，发现并解决业务中存在的问题，并能够通过数据分析优化各个环节
-3、参与门店销售目标和计划的制定，并支撑门店各维度销售指标结果达成
-4、营造积极的门店内部学习氛围及良好的沟通环境，维护公司标准，积极推动零售文化和业务落地，确保顾客满意
-5、学习作为团队的指导者，如何通过观察与评估，及时给予专业的辅导和反馈，调整人员状态，提升团队士气，促进个人成长，进而达到顾客满意
-岗位要求：
-在这里，目标有多大，舞台就有多大！
-1、本科及以上学历，不限专业。只要你对这个行业充满热爱，一切皆有可能
-2、具备较强的学习能力和良好的人际沟通能力，富有创新精神
-3、拥有积极向上的态度及较强的自驱力和抗压能力
-4、对拥有多部门的工作经历感兴趣，愿意从事营销、销售、产品、服务等方面的管理工作
-5、能够接受岗位所需的跨区域调动
-签约公司为深圳慧通商务有限公司或其全资子公司",华为技术有限公司,常女士,人事经理 · 华为技术有限公司,在线,,今日回复1次,数据分析,南昌,2026-09-10 04:09
 工艺工程经理,1.2-2.4万,苏州 昆山 玉山,5-10年,本科,装配工艺|成型工艺|机加工工艺||||,"装配工艺
 成型工艺
 机加工工艺
@@ -161825,26 +159868,6 @@ SEM运营专员（百度/神马）,8000-10000元,苏州 虎丘 枫桥,1-3年,本
 【工作时间与地点】
 1.工作时间：9:00-18:00，午休 1小时，周末双休；
 2.工作地点：苏州市姑苏区信展财富大厦1101-2（临近地铁2号线平河路站）",苏州烨腾贸易有限公司,朱梦妍,人事经理 · 苏州烨腾贸易有限公司,在线,,今日回复2次,数据分析,南昌,2026-09-10 04:10
-医学信息专员,,苏州 吴中 金鸡湖,医药批发/零售,大专,医药制造|生物工程|医院||||,"医药批发/零售
-医药制造
-生物工程
-医院
-内科
-心血管内科
-神经内科
-内分泌科
-我们正在寻找一位专业的医学信息专员，负责为医疗机构提供准确、及时的信息支持。
-工作内容：
-1. 收集、整理和分析医学文献、药品和临床数据；
-2. 与医疗机构合作，确保其信息系统的准确性；
-3. 为医生、护士和其他医疗人员提供信息培训和支持；
-4. 参与医疗信息系统的优化和升级。
-岗位要求：
-1. 医学、信息学或相关专业本科及以上学历；
-2. 1-3年相关工作经验，优秀应届毕业生亦可；
-3. 良好的数据分析和信息整合能力；
-4. 出色的沟通和培训技巧；
-5. 对医疗行业有热情，具备团队协作精神。",瀚晖制药,谢敏,人事经理 · 瀚晖制药,在线,,今日回复12次,数据分析,南昌,2026-09-10 04:10
 qe品质工程师,8000-10000元,苏州 太仓 娄东,汽车行业质量管理体系,大专,QE|CPK|PPK||,"汽车行业质量管理体系
 QE
 CPK
