@@ -32,6 +32,10 @@ EXPERIENCE_ORDER = ["不限/应届", "1-3年", "3-5年", "5-10年", "10年以上
 EXP_COLORS = ["#91d5c1", "#5b8ff9", "#f6bd16", "#ff9845", "#e8684a", "#c2c8d5"]
 SALARY_BAR_COLOR = "#3182bd"
 
+# 词云需要剔除的词（福利类词不是技能，会让"技能需求热度"失真）
+# 规则：技能标签中只要包含下列任一关键词就整条剔除，例如 五险一金 / 五险 / 缴纳五险 / 有五险 / 五险齐全 等
+SKILL_EXCLUDE_KEYWORDS = ["五险"]
+
 # ---------------------------------------------------------------- 数据读取
 
 
@@ -390,10 +394,17 @@ def chart2_experience_stack(rows):
 def chart3_skill_wordcloud(rows, top_n=150):
     """03 核心技能需求热度图（词云）：技能标签词频"""
     cnt = Counter()
+    excluded = Counter()
     for r in rows:
         for t in split_tags(r.get("技能标签")):
+            if any(kw in t for kw in SKILL_EXCLUDE_KEYWORDS):
+                excluded[t] += 1          # 福利类词（含"五险"等）不计入技能热度
+                continue
             cnt[t] += 1
     top = cnt.most_common(top_n)
+    print("  词云剔除福利类词 %d 个，共 %d 次：%s" % (
+        len(excluded), sum(excluded.values()),
+        "、".join("%s(%d)" % (k, v) for k, v in excluded.most_common(6))))
     write_csv("03_核心技能需求热度_词云.csv",
               ["技能关键词", "出现岗位数", "占全部岗位比例(%)"],
               [[w, n, round(n / len(rows) * 100, 2)] for w, n in top])
@@ -402,7 +413,7 @@ def chart3_skill_wordcloud(rows, top_n=150):
   {
     title: {
       text: '核心技能需求热度词云',
-      subtext: '数据源：处理后数据 __TOTAL__ 条岗位的"技能标签"字段（共出现 __KINDS__ 个技能词，图中展示 Top__TOPN__）｜字越大表示需求该技能的岗位越多',
+      subtext: '数据源：处理后数据 __TOTAL__ 条岗位的"技能标签"字段（共出现 __KINDS__ 个技能词，图中展示 Top__TOPN__）｜已剔除福利类词（含"五险"的词共 __EXCLK__ 种）｜字越大表示需求该技能的岗位越多',
       left: 'center', top: 10,
       textStyle: {fontSize: 22, fontWeight: 'bold'},
       subtextStyle: {fontSize: 12, color: '#777'}
@@ -437,6 +448,7 @@ def chart3_skill_wordcloud(rows, top_n=150):
     option = (option.replace("__DATA__", js(data))
                     .replace("__TOTAL__", str(len(rows)))
                     .replace("__KINDS__", str(len(cnt)))
+                    .replace("__EXCLK__", str(len(excluded)))
                     .replace("__TOPN__", str(len(top))))
     html_page(os.path.join(OUT_DIR, "03_核心技能需求热度_词云.html"), 1400, 900, option,
               cdn_extra=WORDCLOUD_CDN)
