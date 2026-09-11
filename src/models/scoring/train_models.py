@@ -51,6 +51,20 @@ VALID_SIZE = 0.15
 LABEL = "标签"
 RESUME_ID, JOB_ID = "简历ID", "岗位ID"
 
+# XGBoost 基础参数与调参网格（在本版数据上重新调参）
+XGB_BASE = dict(subsample=0.8, colsample_bytree=0.8, min_child_weight=1, reg_lambda=1.0,
+                tree_method="hist", eval_metric="logloss", early_stopping_rounds=40,
+                random_state=SEED, n_jobs=-1)
+XGB_GRID = [
+    dict(max_depth=4, learning_rate=0.10, n_estimators=300),
+    dict(max_depth=6, learning_rate=0.10, n_estimators=300),
+    dict(max_depth=6, learning_rate=0.05, n_estimators=600),
+    dict(max_depth=8, learning_rate=0.10, n_estimators=300),
+    dict(max_depth=8, learning_rate=0.05, n_estimators=600),
+    dict(max_depth=10, learning_rate=0.10, n_estimators=400),
+    dict(max_depth=12, learning_rate=0.10, n_estimators=400),
+]
+
 # 新特征集：全部为"原始/间接信号"，不含任何门槛指示符（0/1、是否满足、命中率等）
 FEATURES = [
     "距离(km)",            # 原始距离，由模型自己学 300km 阈值
@@ -188,7 +202,7 @@ def evaluate(name, y_true, y_pred, y_score, fit_time, pred_time):
     }
 
 
-def train_all(train, valid, test, use_xgb, label_col):
+def train_all(train, valid, test, use_xgb, label_col, xgb_params=None):
     """训练 4 个模型并评估"""
     X_tr, y_tr = train[FEATURES], train[label_col]
     X_te, y_te = test[FEATURES], test[label_col]
@@ -203,10 +217,8 @@ def train_all(train, valid, test, use_xgb, label_col):
         rows.append(r); scores[name] = r.pop("_score"); fitted[name] = clf
     if use_xgb:
         from xgboost import XGBClassifier
-        clf = XGBClassifier(n_estimators=400, learning_rate=0.1, max_depth=6, subsample=0.8,
-                            colsample_bytree=0.8, min_child_weight=1, reg_lambda=1.0,
-                            tree_method="hist", eval_metric="logloss",
-                            early_stopping_rounds=40, random_state=SEED, n_jobs=-1)
+        params = dict(xgb_params or XGB_BASE)
+        clf = XGBClassifier(**params)
         t0 = time.time()
         clf.fit(X_tr, y_tr, eval_set=[(valid[FEATURES], valid[label_col])], verbose=False)
         ft = time.time() - t0
@@ -217,6 +229,35 @@ def train_all(train, valid, test, use_xgb, label_col):
         rows.append(r); scores["XGBoost（上线模型）"] = r.pop("_score")
         fitted["XGBoost（上线模型）"] = clf
     return rows, fitted, scores, y_te
+
+
+def tune_xgb(train, valid, label_col):
+    """在本版数据（v2 特征 + 含噪标签）上做 XGBoost 小网格调参，按验证集 F1→AUC 选最优"""
+    from sklearn.metrics import f1_score, roc_auc_score
+    from xgboost import XGBClassifier
+    records, best = [], None
+    for g in XGB_GRID:
+        params = dict(XGB_BASE)
+        params.update(g)
+        clf = XGBClassifier(**params)
+        t0 = time.time()
+        clf.fit(train[FEATURES], train[label_col],
+                eval_set=[(valid[FEATURES], valid[label_col])], verbose=False)
+        ft = time.time() - t0
+        p = clf.predict(valid[FEATURES])
+        s = clf.predict_proba(valid[FEATURES])[:, 1]
+        f1v, aucv = float(f1_score(valid[label_col], p)), float(roc_auc_score(valid[label_col], s))
+        rec = {"max_depth": g["max_depth"], "learning_rate": g["learning_rate"],
+               "n_estimators(上限)": g["n_estimators"],
+               "best_iteration": int(getattr(clf, "best_iteration", -1) or -1),
+               "验证集F1": round(f1v, 5), "验证集AUC": round(aucv, 6),
+               "训练耗时(s)": round(ft, 2)}
+        records.append(rec)
+        print("    depth=%2d lr=%.2f n=%3d → 验证 F1=%.5f AUC=%.6f（best_iter=%d）" % (
+            g["max_depth"], g["learning_rate"], g["n_estimators"], f1v, aucv, rec["best_iteration"]))
+        if best is None or (f1v, aucv) > best[0]:
+            best = ((f1v, aucv), dict(params), rec)
+    return pd.DataFrame(records), best[1], best[2]
 
 
 def main():
@@ -236,8 +277,20 @@ def main():
     print("严格划分：训练 %d ｜ 验证 %d ｜ 测试 %d ｜ 丢弃交叉配对 %d（简历/岗位重叠均为 0）" % (
         len(train), len(valid), len(test), dropped))
 
-    # ---------- 主实验（10% 标签噪声） ----------
-    rows, fitted, scores, y_te = train_all(train, valid, test, use_xgb, "y")
+    # ---------- 在 v2 数据上重新网格调参（按验证集 F1→AUC 选最优） ----------
+    print("\nXGBoost 网格调参（v2 特征 + %.0f%% 噪声标签）：" % (NOISE_RATE * 100))
+    tune_df, best_params, best_rec = tune_xgb(train, valid, "y")
+    print("  最优：depth=%d lr=%.2f n_est=%d（best_iter=%d，验证F1=%.5f）" % (
+        best_rec["max_depth"], best_rec["learning_rate"], best_rec["n_estimators(上限)"],
+        best_rec["best_iteration"], best_rec["验证集F1"]))
+    # v1 旧记录改名保留（历史可追溯），写入 v2 记录
+    old = os.path.join(OUT_DIR, "模型调参记录.csv")
+    if os.path.exists(old):
+        os.replace(old, os.path.join(OUT_DIR, "模型调参记录_v1.csv"))
+    tune_df.to_csv(old, index=False, encoding="utf-8-sig")
+
+    # ---------- 主实验（10% 标签噪声 + 调参后的 XGBoost） ----------
+    rows, fitted, scores, y_te = train_all(train, valid, test, use_xgb, "y", best_params)
     res = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in rows])
     print("\n【主实验】标签噪声 %.0f%% 下的测试集指标：" % (NOISE_RATE * 100))
     print(res.drop(columns=["best_iteration"], errors="ignore").to_string(index=False))
@@ -249,7 +302,7 @@ def main():
         d = df.copy(); d["y_s"] = y_n
         p2, t2, _ = split_strict(d)
         tr2, va2 = split_train_valid(p2)
-        rr, _, _, _ = train_all(tr2, va2, t2, use_xgb, "y_s")
+        rr, _, _, _ = train_all(tr2, va2, t2, use_xgb, "y_s", best_params)
         for r in rr:
             sweep.append({"噪声率": rate, "模型": r["模型"], "Accuracy": r["Accuracy"],
                           "F1": r["F1"], "ROC-AUC": r["ROC-AUC"]})
@@ -279,10 +332,9 @@ def main():
         from xgboost import XGBClassifier
         best_iter = next((r.get("best_iteration", -1) for r in rows
                           if str(r["模型"]).startswith("XGBoost")), -1)
-        full_params = dict(n_estimators=best_iter if best_iter and best_iter > 0 else 300,
-                           learning_rate=0.1, max_depth=6, subsample=0.8,
-                           colsample_bytree=0.8, tree_method="hist",
-                           random_state=SEED, n_jobs=-1)
+        # 用调参选出的最优配置（去掉早停，树数用验证集确定的最佳轮次）
+        full_params = {k: v for k, v in best_params.items() if k != "early_stopping_rounds"}
+        full_params["n_estimators"] = best_iter if best_iter and best_iter > 0 else full_params["n_estimators"]
         clf_full = XGBClassifier(**full_params)
         t0 = time.time()
         clf_full.fit(df[FEATURES], df["y"], verbose=False)

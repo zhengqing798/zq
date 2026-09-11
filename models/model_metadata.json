@@ -55,7 +55,7 @@
       "F1": 0.8727,
       "ROC-AUC": 0.8918,
       "训练耗时(s)": 0.09,
-      "预测耗时(s)": 0.004
+      "预测耗时(s)": 0.005
     },
     "随机森林": {
       "模型": "随机森林",
@@ -64,29 +64,32 @@
       "Recall": 0.902,
       "F1": 0.8972,
       "ROC-AUC": 0.8987,
-      "训练耗时(s)": 1.37,
-      "预测耗时(s)": 0.096
+      "训练耗时(s)": 1.58,
+      "预测耗时(s)": 0.186
     },
     "XGBoost（上线模型）": {
       "模型": "XGBoost（上线模型）",
-      "Accuracy": 0.897,
-      "Precision": 0.8904,
-      "Recall": 0.9026,
-      "F1": 0.8965,
-      "ROC-AUC": 0.8994,
-      "训练耗时(s)": 0.48,
-      "预测耗时(s)": 0.006
+      "Accuracy": 0.8974,
+      "Precision": 0.8909,
+      "Recall": 0.9029,
+      "F1": 0.8969,
+      "ROC-AUC": 0.902,
+      "训练耗时(s)": 1.05,
+      "预测耗时(s)": 0.014
     }
   },
   "xgb_params_full": {
-    "n_estimators": 78,
-    "learning_rate": 0.1,
-    "max_depth": 6,
     "subsample": 0.8,
     "colsample_bytree": 0.8,
+    "min_child_weight": 1,
+    "reg_lambda": 1.0,
     "tree_method": "hist",
+    "eval_metric": "logloss",
     "random_state": 42,
-    "n_jobs": -1
+    "n_jobs": -1,
+    "max_depth": 10,
+    "learning_rate": 0.1,
+    "n_estimators": 63
   },
   "model_file": "models/xgboost_scoring_model.json"
 }
