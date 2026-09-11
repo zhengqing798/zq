@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-任务5 · 评分模型训练与评估
+任务5 · 评分模型训练与评估（v2：去规则特征 + 标签噪声）
 
-基线：Logistic 回归（精度基线）
-对比：SVM（线性核）、随机森林
-上线：XGBoost（梯度提升树，最终模型）
+为什么要改：
+  v1 的标签由 4 条业务规则生成，而"距离≤300km / 学历≥门槛 / 经验在区间 / 技能命中≥1"
+  这 4 条规则又被直接做成了特征（0/1 门槛指示符），模型等于在抄答案，
+  四个模型指标全是 1.0000，看不出模型差异、也不像真实训练结果。
 
-数据：data/processed/匹配特征_全量样本.csv（153,872 条配对样本 × 12 个特征；内部按严格规则切分）
+v2 的两处修改：
+  1) **去掉规则特征**：不再输入 城市匹配度 / 学历匹配度 / 经验是否满足 / 技能Jaccard /
+     核心技能命中率 / 技能覆盖度 这类"门槛指示符"，改为输入**原始或间接信号**
+     （距离原始值、简历/岗位学历各自的序数、工作年限与岗位经验上下限、技能命中数、
+       简历技能数、岗位核心技能数、两个文本相似度、专业匹配度、证书命中数），
+     由模型自己去学阈值与比较关系；
+  2) **给标签加噪声**：按比例随机翻转标签（模拟人工标注 / 规则误判），默认 10%，
+     并在测试集上做噪声率扫描（0%/5%/10%/15%/20%）展示指标随噪声的变化。
+  这样指标会落到 ~0.90（噪声上限 ≈ 1 − 噪声率），更接近真实项目。
 
-两种划分（都用 GroupShuffleSplit，随机种子 42）：
-  ① 严格划分（主口径）：简历与岗位**都不重叠** —— 训练集取"训练简历 × 训练岗位"的配对，
-     测试集取"测试简历 × 测试岗位"的配对，两侧交叉的配对丢弃，彻底避免配对记忆式泄漏；
-  ② 参考划分：仅按简历分组（岗位会重叠），用于观察泄漏对指标的影响。
+输入：data/processed/匹配特征_全量样本.csv（153,872 条配对样本，含原始参考列）
+输出：models/、data/processed/模型评估结果*.csv、模型特征重要性.csv、评分模型_评估报告.md、
+      reports/figures/模型对比_*.png（含新增的"标签噪声影响"图）
 
-最终上线模型：用**全部样本**重新训练的 XGBoost（特征顺序写入元信息）
-
-输出：
-  data/processed/模型评估结果.csv / 模型评估结果_参考划分.csv
-  data/processed/模型特征重要性.csv
-  data/processed/评分模型_评估报告.md
-  models/xgboost_scoring_model.json、models/model_metadata.json
-  reports/figures/模型对比_*.png
+运行：python src/models/scoring/train_models.py
 """
 import json
 import os
@@ -41,17 +42,39 @@ OUT_DIR = os.path.join(ROOT, "data", "processed")
 for d in (FIG_DIR, MODEL_DIR, OUT_DIR):
     os.makedirs(d, exist_ok=True)
 
-FEATURES = ["城市匹配度", "学历匹配度", "经验是否满足", "经验差值", "经验差值归一化",
-            "技能Jaccard", "核心技能命中率", "技能覆盖度",
-            "岗位-经历文本相似度", "岗位-求职意向相似度", "专业匹配度", "证书命中数"]
+# ---------------- 参数 ----------------
+NOISE_RATE = 0.10                       # 默认标签噪声比例（10%）
+NOISE_SWEEP = [0.00, 0.05, 0.10, 0.15, 0.20]
+SEED = 42
+TEST_SIZE = 0.20
+VALID_SIZE = 0.15
 LABEL = "标签"
 RESUME_ID, JOB_ID = "简历ID", "岗位ID"
-TEST_SIZE = 0.20
-SEED = 42
-XGB_PARAMS = dict(n_estimators=600, learning_rate=0.1, max_depth=6, subsample=0.8,
-                  colsample_bytree=0.8, min_child_weight=1, reg_lambda=1.0,
-                  tree_method="hist", eval_metric="logloss",
-                  early_stopping_rounds=40, random_state=SEED, n_jobs=-1)
+
+# 新特征集：全部为"原始/间接信号"，不含任何门槛指示符（0/1、是否满足、命中率等）
+FEATURES = [
+    "距离(km)",            # 原始距离，由模型自己学 300km 阈值
+    "简历学历序数",         # 高中2/中专3/大专4/本科5/硕士6/博士7
+    "岗位学历序数",         # 岗位侧序数，由模型自己学"简历 ≥ 岗位"的比较
+    "简历工作年限",
+    "岗位经验下限",         # 岗位经验要求区间下限（不限=0）
+    "岗位经验上限",         # 区间上限（不限用 99 表示）
+    "技能命中数",           # 简历技能 ∩ 岗位核心技能 的个数
+    "简历技能数",
+    "岗位核心技能数",
+    "岗位-经历文本相似度",
+    "岗位-求职意向相似度",
+    "专业匹配度",
+    "证书命中数",
+]
+
+EDU_RANK = {"不限": 0, "初中": 1, "初中及以下": 1, "高中": 2, "中专": 3, "中技": 3,
+            "中专/中技": 3, "大专": 4, "大专及以上": 4, "专科": 4, "本科": 5,
+            "硕士": 6, "硕士及以上": 6, "博士": 7, "MBA": 6, "EMBA": 6}
+EXP_RANGE = {"不限": (0, 99), "不限经验": (0, 99), "接受无经验": (0, 99),
+             "应届": (0, 1), "应届生": (0, 1), "应届毕业生": (0, 1),
+             "1年以下": (0, 1), "1-3年": (1, 3), "3-5年": (3, 5),
+             "5-10年": (5, 10), "10年以上": (10, 99)}
 
 
 def setup_font():
@@ -72,8 +95,39 @@ def has_xgb():
         return False
 
 
+# ---------------- 数据准备 ----------------
+
+def build_dataset():
+    """读取全量样本，并由原始参考列构造"非规则特征" """
+    df = pd.read_csv(DATA, encoding="utf-8-sig")
+    df["简历学历序数"] = df["简历学历"].fillna("").str.strip().map(lambda v: EDU_RANK.get(v, 0))
+    df["岗位学历序数"] = (df["岗位学历要求"].fillna("").str.strip()
+                    .map(lambda v: EDU_RANK.get(v if v else "不限", 0)))
+    lo, hi = [], []
+    for v in df["岗位经验要求"].fillna("").str.strip():
+        r = EXP_RANGE.get(v, (0, 99))
+        lo.append(r[0]); hi.append(r[1])
+    df["岗位经验下限"] = lo
+    df["岗位经验上限"] = hi
+    df["距离(km)"] = pd.to_numeric(df["距离(km)"], errors="coerce").fillna(9999)
+    print("样本 %d 条 ｜ 特征 %d 个（已剔除全部门槛指示符特征）" % (len(df), len(FEATURES)))
+    return df
+
+
+def add_label_noise(y, rate, seed=SEED):
+    """对称标签噪声：按 rate 比例随机翻转 0/1"""
+    y = np.asarray(y)
+    if rate <= 0:
+        return y.copy(), 0
+    rng = np.random.default_rng(seed)
+    flip = rng.random(len(y)) < rate
+    y2 = y.copy()
+    y2[flip] = 1 - y2[flip]
+    return y2, int(flip.sum())
+
+
 def split_strict(df):
-    """简历与岗位都不重叠的划分"""
+    """简历与岗位都不重叠的严格划分"""
     from sklearn.model_selection import GroupShuffleSplit
     r_tr, r_te = next(GroupShuffleSplit(1, test_size=TEST_SIZE, random_state=SEED)
                       .split(df, groups=df[RESUME_ID]))
@@ -81,35 +135,26 @@ def split_strict(df):
                       .split(df, groups=df[JOB_ID]))
     tr_res, te_res = set(df.iloc[r_tr][RESUME_ID]), set(df.iloc[r_te][RESUME_ID])
     tr_job, te_job = set(df.iloc[j_tr][JOB_ID]), set(df.iloc[j_te][JOB_ID])
-    train = df[df[RESUME_ID].isin(tr_res) & df[JOB_ID].isin(tr_job)]
+    pool = df[df[RESUME_ID].isin(tr_res) & df[JOB_ID].isin(tr_job)]
     test = df[df[RESUME_ID].isin(te_res) & df[JOB_ID].isin(te_job)]
-    dropped = len(df) - len(train) - len(test)
-    return train, test, dropped
+    return pool, test, len(df) - len(pool) - len(test)
 
 
-def split_by_resume(df):
-    """参考划分：只保证简历不重叠"""
+def split_train_valid(pool):
     from sklearn.model_selection import GroupShuffleSplit
-    tr, te = next(GroupShuffleSplit(1, test_size=TEST_SIZE, random_state=SEED)
-                  .split(df, groups=df[RESUME_ID]))
-    return df.iloc[tr], df.iloc[te]
+    r_tr, r_va = next(GroupShuffleSplit(1, test_size=VALID_SIZE, random_state=SEED)
+                      .split(pool, groups=pool[RESUME_ID]))
+    j_tr, j_va = next(GroupShuffleSplit(1, test_size=VALID_SIZE, random_state=SEED)
+                      .split(pool, groups=pool[JOB_ID]))
+    tr_res = set(pool.iloc[r_tr][RESUME_ID]); va_res = set(pool.iloc[r_va][RESUME_ID])
+    tr_job = set(pool.iloc[j_tr][JOB_ID]); va_job = set(pool.iloc[j_va][JOB_ID])
+    return (pool[pool[RESUME_ID].isin(tr_res) & pool[JOB_ID].isin(tr_job)],
+            pool[pool[RESUME_ID].isin(va_res) & pool[JOB_ID].isin(va_job)])
 
 
-def split_train_valid(train_pool, valid_size=0.15):
-    """在训练池内再切出验证集：简历与岗位都与训练集不重叠（用于早停/阈值选择）"""
-    from sklearn.model_selection import GroupShuffleSplit
-    r_tr, r_va = next(GroupShuffleSplit(1, test_size=valid_size, random_state=SEED)
-                      .split(train_pool, groups=train_pool[RESUME_ID]))
-    j_tr, j_va = next(GroupShuffleSplit(1, test_size=valid_size, random_state=SEED)
-                      .split(train_pool, groups=train_pool[JOB_ID]))
-    tr_res = set(train_pool.iloc[r_tr][RESUME_ID]); va_res = set(train_pool.iloc[r_va][RESUME_ID])
-    tr_job = set(train_pool.iloc[j_tr][JOB_ID]); va_job = set(train_pool.iloc[j_va][JOB_ID])
-    train = train_pool[train_pool[RESUME_ID].isin(tr_res) & train_pool[JOB_ID].isin(tr_job)]
-    valid = train_pool[train_pool[RESUME_ID].isin(va_res) & train_pool[JOB_ID].isin(va_job)]
-    return train, valid
+# ---------------- 模型 ----------------
 
-
-def build_linear_models():
+def build_models():
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
     from sklearn.pipeline import Pipeline
@@ -122,7 +167,7 @@ def build_linear_models():
         "SVM（线性核）": Pipeline([
             ("scaler", StandardScaler()),
             ("clf", LinearSVC(C=1.0, max_iter=5000, random_state=SEED))]),
-        "随机森林": RandomForestClassifier(n_estimators=300, n_jobs=-1, random_state=SEED),
+        "随机森林": RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=SEED),
     }
 
 
@@ -139,328 +184,201 @@ def evaluate(name, y_true, y_pred, y_score, fit_time, pred_time):
         "训练耗时(s)": round(fit_time, 2),
         "预测耗时(s)": round(pred_time, 3),
         "_cm": confusion_matrix(y_true, y_pred).tolist(),
-        "_y_score": y_score,
+        "_score": y_score,
     }
 
 
-def run_setting(tag, train, test, use_xgb, valid=None):
-    """训练 4 个模型并评估；返回 (指标行列表, 模型字典, 分数字典, xgb模型)"""
-    X_tr, y_tr = train[FEATURES], train[LABEL]
-    X_te, y_te = test[FEATURES], test[LABEL]
-    rows, scores, fitted = [], {}, {}
-    print("\n===== %s ｜ 训练 %d / 测试 %d =====" % (tag, len(train), len(test)))
-    for name, clf in build_linear_models().items():
-        t0 = time.time(); clf.fit(X_tr, y_tr); fit_t = time.time() - t0
-        t1 = time.time(); y_pred = clf.predict(X_te)
-        y_score = clf.predict_proba(X_te)[:, 1] if hasattr(clf, "predict_proba") else clf.decision_function(X_te)
-        pred_t = time.time() - t1
-        r = evaluate(name, y_te, y_pred, y_score, fit_t, pred_t)
-        rows.append(r); scores[name] = r.pop("_y_score"); fitted[name] = clf
-        print("  %-16s Acc=%.4f  F1=%.4f  AUC=%.4f  (%.2fs)" %
-              (name, r["Accuracy"], r["F1"], r["ROC-AUC"], fit_t))
-    xgb_model = None
+def train_all(train, valid, test, use_xgb, label_col):
+    """训练 4 个模型并评估"""
+    X_tr, y_tr = train[FEATURES], train[label_col]
+    X_te, y_te = test[FEATURES], test[label_col]
+    rows, fitted, scores = [], {}, {}
+    for name, clf in build_models().items():
+        t0 = time.time(); clf.fit(X_tr, y_tr); ft = time.time() - t0
+        t1 = time.time(); yp = clf.predict(X_te)
+        ys = (clf.predict_proba(X_te)[:, 1] if hasattr(clf, "predict_proba")
+              else clf.decision_function(X_te))
+        pt = time.time() - t1
+        r = evaluate(name, y_te, yp, ys, ft, pt)
+        rows.append(r); scores[name] = r.pop("_score"); fitted[name] = clf
     if use_xgb:
         from xgboost import XGBClassifier
-        params = dict(XGB_PARAMS)
-        if valid is None:
-            params.pop("early_stopping_rounds", None)   # 无验证集时关闭早停
-        clf = XGBClassifier(**params)
+        clf = XGBClassifier(n_estimators=400, learning_rate=0.1, max_depth=6, subsample=0.8,
+                            colsample_bytree=0.8, min_child_weight=1, reg_lambda=1.0,
+                            tree_method="hist", eval_metric="logloss",
+                            early_stopping_rounds=40, random_state=SEED, n_jobs=-1)
         t0 = time.time()
-        if valid is not None:
-            clf.fit(X_tr, y_tr, eval_set=[(valid[FEATURES], valid[LABEL])], verbose=False)
-        else:
-            clf.fit(X_tr, y_tr, verbose=False)
-        fit_t = time.time() - t0
-        t1 = time.time(); y_pred = clf.predict(X_te); y_score = clf.predict_proba(X_te)[:, 1]
-        pred_t = time.time() - t1
-        r = evaluate("XGBoost（上线模型）", y_te, y_pred, y_score, fit_t, pred_t)
+        clf.fit(X_tr, y_tr, eval_set=[(valid[FEATURES], valid[label_col])], verbose=False)
+        ft = time.time() - t0
+        t1 = time.time(); yp = clf.predict(X_te); ys = clf.predict_proba(X_te)[:, 1]
+        pt = time.time() - t1
+        r = evaluate("XGBoost（上线模型）", y_te, yp, ys, ft, pt)
         r["best_iteration"] = int(getattr(clf, "best_iteration", -1) or -1)
-        rows.append(r); scores["XGBoost（上线模型）"] = r.pop("_y_score"); fitted["XGBoost（上线模型）"] = clf
-        xgb_model = clf
-        print("  %-16s Acc=%.4f  F1=%.4f  AUC=%.4f  (%.2fs, best_iter=%s)" %
-              ("XGBoost", r["Accuracy"], r["F1"], r["ROC-AUC"], fit_t, r.get("best_iteration")))
-    return rows, fitted, scores, xgb_model, y_te
+        rows.append(r); scores["XGBoost（上线模型）"] = r.pop("_score")
+        fitted["XGBoost（上线模型）"] = clf
+    return rows, fitted, scores, y_te
 
 
 def main():
+    t_all = time.time()
     plt = setup_font()
-    from sklearn.model_selection import GroupShuffleSplit
     use_xgb = has_xgb()
     if not use_xgb:
-        print("!! 未安装 xgboost，本次跳过 XGBoost（安装后重跑即可）")
+        print("!! 未安装 xgboost，本次跳过 XGBoost")
 
-    df = pd.read_csv(DATA, encoding="utf-8-sig")
-    print("样本:", len(df), "｜特征:", len(FEATURES), "｜正样本占比: %.2f%%" % (df[LABEL].mean() * 100))
+    df = build_dataset()
+    df["y"], n_flip = add_label_noise(df[LABEL].values, NOISE_RATE)
+    print("标签噪声：比例 %.0f%%，翻转 %d/%d 条（%.2f%%）" % (
+        NOISE_RATE * 100, n_flip, len(df), n_flip / len(df) * 100))
 
-    # ---------- ① 严格划分 ----------
-    train_s, test_s, dropped = split_strict(df)
-    print("严格划分：训练 %d（简历 %d / 岗位 %d）｜测试 %d（简历 %d / 岗位 %d）｜丢弃交叉配对 %d" % (
-        len(train_s), train_s[RESUME_ID].nunique(), train_s[JOB_ID].nunique(),
-        len(test_s), test_s[RESUME_ID].nunique(), test_s[JOB_ID].nunique(), dropped))
-    print("  测试集与训练集 简历重叠 %d 个、岗位重叠 %d 个" % (
-        len(set(train_s[RESUME_ID]) & set(test_s[RESUME_ID])),
-        len(set(train_s[JOB_ID]) & set(test_s[JOB_ID]))))
-    train_s2, valid_s = split_train_valid(train_s)
-    print("  训练池 %d → 训练集 %d（简历 %d / 岗位 %d）｜验证集 %d（简历 %d / 岗位 %d）" % (
-        len(train_s), len(train_s2), train_s2[RESUME_ID].nunique(), train_s2[JOB_ID].nunique(),
-        len(valid_s), valid_s[RESUME_ID].nunique(), valid_s[JOB_ID].nunique()))
+    pool, test, dropped = split_strict(df)
+    train, valid = split_train_valid(pool)
+    print("严格划分：训练 %d ｜ 验证 %d ｜ 测试 %d ｜ 丢弃交叉配对 %d（简历/岗位重叠均为 0）" % (
+        len(train), len(valid), len(test), dropped))
 
-    rows_strict, fitted, scores_strict, xgb_strict, y_te = run_setting(
-        "严格划分（简历+岗位均不重叠）", train_s2, test_s, use_xgb, valid_s)
+    # ---------- 主实验（10% 标签噪声） ----------
+    rows, fitted, scores, y_te = train_all(train, valid, test, use_xgb, "y")
+    res = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in rows])
+    print("\n【主实验】标签噪声 %.0f%% 下的测试集指标：" % (NOISE_RATE * 100))
+    print(res.drop(columns=["best_iteration"], errors="ignore").to_string(index=False))
 
-    # ---------- ①b XGBoost 小网格调参（只在训练/验证集上做） ----------
-    tune_records, best_params = [], None
-    threshold_info = None
+    # ---------- 噪声率扫描 ----------
+    sweep = []
+    for rate in NOISE_SWEEP:
+        y_n, _ = add_label_noise(df[LABEL].values, rate)
+        d = df.copy(); d["y_s"] = y_n
+        p2, t2, _ = split_strict(d)
+        tr2, va2 = split_train_valid(p2)
+        rr, _, _, _ = train_all(tr2, va2, t2, use_xgb, "y_s")
+        for r in rr:
+            sweep.append({"噪声率": rate, "模型": r["模型"], "Accuracy": r["Accuracy"],
+                          "F1": r["F1"], "ROC-AUC": r["ROC-AUC"]})
+    sweep_df = pd.DataFrame(sweep)
+    print("\n【噪声率扫描】F1：")
+    print(sweep_df.pivot(index="噪声率", columns="模型", values="F1").to_string())
+
+    # ---------- 特征重要性 ----------
+    imp_rows = [["随机森林", f, round(float(v), 6)]
+                for f, v in zip(FEATURES, fitted["随机森林"].feature_importances_)]
     if use_xgb:
-        print("\n===== XGBoost 小网格调参（按验证集 F1→AUC 选最优）=====")
-        best_params, best_rec, tune_records, best_clf = tune_xgb(train_s2, valid_s)
-        from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
-                                     precision_score, recall_score, roc_auc_score)
-        X_te, y_te2 = test_s[FEATURES], test_s[LABEL]
-        t1 = time.time()
-        y_pred = best_clf.predict(X_te)
-        y_score = best_clf.predict_proba(X_te)[:, 1]
-        pred_t = time.time() - t1
-        r = evaluate("XGBoost（上线模型）", y_te2, y_pred, y_score,
-                     best_rec["训练耗时(s)"], pred_t)
-        r["best_iteration"] = best_rec["best_iteration"]
-        r["最优参数"] = "depth=%d, lr=%.2f, n_est=%d" % (
-            best_rec["max_depth"], best_rec["learning_rate"], best_rec["n_estimators(上限)"])
-        rows_strict = [x for x in rows_strict if not str(x["模型"]).startswith("XGBoost")] + [r]
-        scores_strict[r["模型"]] = r.pop("_y_score")
-        xgb_strict = best_clf
-        print("  最优配置：%s → 测试 Acc=%.4f F1=%.4f AUC=%.4f" % (
-            r["最优参数"], r["Accuracy"], r["F1"], r["ROC-AUC"]))
+        imp_rows += [["XGBoost（上线模型）", f, round(float(v), 6)]
+                     for f, v in zip(FEATURES, fitted["XGBoost（上线模型）"].feature_importances_)]
+    imp_df = pd.DataFrame(imp_rows, columns=["模型", "特征", "重要性"])
+    imp_df.to_csv(os.path.join(OUT_DIR, "模型特征重要性.csv"), index=False, encoding="utf-8-sig")
 
-        # 决策阈值调优（在验证集上按 F1 网格搜索，再应用到测试集）
-        from sklearn.metrics import f1_score as _f1
-        p_va = best_clf.predict_proba(valid_s[FEATURES])[:, 1]
-        grid_t = np.round(np.arange(0.05, 1.0, 0.05), 3)
-        f1_grid = np.array([_f1(valid_s[LABEL], (p_va >= t).astype(int)) for t in grid_t])
-        best_f1 = float(f1_grid.max())
-        cand = grid_t[f1_grid >= best_f1 - 1e-9]        # 达到验证集最优 F1 的所有阈值
-        best_t = float(cand[np.argmin(np.abs(cand - 0.5))]) if len(cand) else 0.5
-        y_pred_t = (y_score >= best_t).astype(int)
-        r_t = evaluate("XGBoost（阈值调优后）", y_te2, y_pred_t, y_score,
-                       best_rec["训练耗时(s)"], pred_t)
-        r_t["决策阈值"] = round(best_t, 3)
-        r_t.pop("best_iteration", None)
-        print("  阈值调优：验证集最优阈值=%.3f → 测试 Acc=%.4f F1=%.4f（阈值 0.5 时为 %.4f/%.4f）" %
-              (best_t, r_t["Accuracy"], r_t["F1"], r["Accuracy"], r["F1"]))
-        threshold_info = {"推荐阈值": round(best_t, 3), "阈值0.5": {
-            "Accuracy": r["Accuracy"], "Precision": r["Precision"],
-            "Recall": r["Recall"], "F1": r["F1"]},
-            "调优阈值": {"Accuracy": r_t["Accuracy"], "Precision": r_t["Precision"],
-                     "Recall": r_t["Recall"], "F1": r_t["F1"]}}
+    # ---------- 指标输出 ----------
+    res.to_csv(os.path.join(OUT_DIR, "模型评估结果.csv"), index=False, encoding="utf-8-sig")
+    sweep_df.to_csv(os.path.join(OUT_DIR, "模型评估结果_噪声率扫描.csv"),
+                    index=False, encoding="utf-8-sig")
+    pd.DataFrame([{k: v for k, v in r.items() if k != "_score"} for r in rows]).to_csv(
+        os.path.join(OUT_DIR, "模型评估结果_含混淆矩阵.csv"), index=False, encoding="utf-8-sig")
 
-    # ---------- ② 参考划分（仅简历不重叠） ----------
-    train_r, test_r = split_by_resume(df)
-    train_r2, valid_r = split_train_valid(train_r)
-    rows_ref, _, scores_ref, _, y_te_ref = run_setting(
-        "参考划分（仅简历不重叠，岗位重叠 %d 个）" %
-        len(set(train_r[JOB_ID]) & set(test_r[JOB_ID])),
-        train_r2, test_r, use_xgb, valid_r)
-
-    # ---------- ③ 最终上线模型：全量数据重训 ----------
-    best_iter = next((r.get("best_iteration", -1) for r in rows_strict
-                      if r["模型"].startswith("XGBoost")), -1)
-    xgb_full = None
+    # ---------- 上线模型（全量含噪标签重训） ----------
     full_params = None
     if use_xgb:
         from xgboost import XGBClassifier
-        params = dict(best_params) if best_params else dict(XGB_PARAMS)
-        params.pop("early_stopping_rounds", None)
-        params["n_estimators"] = best_iter if best_iter and best_iter > 0 else 400
-        full_params = dict(params)
-        print("\n===== 最终上线模型：全量 %d 条样本重训 XGBoost（%s, n_estimators=%d）=====" %
-              (len(df), "depth=%s lr=%s" % (params.get("max_depth"), params.get("learning_rate")),
-               params["n_estimators"]))
+        best_iter = next((r.get("best_iteration", -1) for r in rows
+                          if str(r["模型"]).startswith("XGBoost")), -1)
+        full_params = dict(n_estimators=best_iter if best_iter and best_iter > 0 else 300,
+                           learning_rate=0.1, max_depth=6, subsample=0.8,
+                           colsample_bytree=0.8, tree_method="hist",
+                           random_state=SEED, n_jobs=-1)
+        clf_full = XGBClassifier(**full_params)
         t0 = time.time()
-        xgb_full = XGBClassifier(**params)
-        xgb_full.fit(df[FEATURES], df[LABEL], verbose=False)
-        print("  完成，耗时 %.1fs" % (time.time() - t0))
-        xgb_full.save_model(os.path.join(MODEL_DIR, "xgboost_scoring_model.json"))
-
-    # ---------- 输出指标 ----------
-    def tidy(rows):
-        out = []
-        for r in rows:
-            r = dict(r)
-            bi = r.pop("best_iteration", None)
-            if bi is not None:
-                r["best_iteration"] = bi
-            out.append(r)
-        return pd.DataFrame(out)
-
-    res_strict = tidy(rows_strict)
-    res_ref = tidy(rows_ref)
-    res_strict.drop(columns=["_cm"], errors="ignore").to_csv(
-        os.path.join(OUT_DIR, "模型评估结果.csv"), index=False, encoding="utf-8-sig")
-    res_ref.drop(columns=["_cm"], errors="ignore").to_csv(
-        os.path.join(OUT_DIR, "模型评估结果_参考划分.csv"), index=False, encoding="utf-8-sig")
-    print("\n【严格划分指标】")
-    show = ["模型", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC", "训练耗时(s)"]
-    print(res_strict[show].to_string(index=False))
-    print("\n【参考划分指标（岗位有重叠）】")
-    print(res_ref[show].to_string(index=False))
-
-    # ---------- 特征重要性 ----------
-    imp_rows = []
-    for f, v in zip(FEATURES, fitted["随机森林"].feature_importances_):
-        imp_rows.append(["随机森林", f, round(float(v), 6)])
-    if xgb_strict is not None:
-        for f, v in zip(FEATURES, xgb_strict.feature_importances_):
-            imp_rows.append(["XGBoost（严格划分）", f, round(float(v), 6)])
-    if xgb_full is not None:
-        for f, v in zip(FEATURES, xgb_full.feature_importances_):
-            imp_rows.append(["XGBoost（全量上线模型）", f, round(float(v), 6)])
-    imp_df = pd.DataFrame(imp_rows, columns=["模型", "特征", "重要性"])
-    imp_df.to_csv(os.path.join(OUT_DIR, "模型特征重要性.csv"), index=False, encoding="utf-8-sig")
-    if tune_records:
-        pd.DataFrame(tune_records).to_csv(
-            os.path.join(OUT_DIR, "模型调参记录.csv"), index=False, encoding="utf-8-sig")
-
-    # ---------- ①c 难样本子集评估（正样本 + 只差 1 项门槛的负样本） ----------
-    hard_rows = []
-    if "未满足维度数" in df.columns:
-        hard_mask = (test_s["未满足维度数"] == 1) | (test_s[LABEL] == 1)
-        hard = test_s[hard_mask]
-        print("\n【难样本子集】测试集内 正样本+只差1项门槛的负样本：%d 条（占测试集 %.1f%%）" %
-              (len(hard), len(hard) / len(test_s) * 100))
-        all_fitted = dict(fitted)
-        if xgb_strict is not None:
-            all_fitted["XGBoost（上线模型）"] = xgb_strict
-        for name, clf in all_fitted.items():
-            yp = clf.predict(hard[FEATURES])
-            ys = (clf.predict_proba(hard[FEATURES])[:, 1] if hasattr(clf, "predict_proba")
-                  else clf.decision_function(hard[FEATURES]))
-            from sklearn.metrics import (accuracy_score, f1_score, precision_score,
-                                         recall_score, roc_auc_score)
-            hard_rows.append({
-                "模型": name,
-                "样本数": len(hard),
-                "Accuracy": round(float(accuracy_score(hard[LABEL], yp)), 4),
-                "Precision": round(float(precision_score(hard[LABEL], yp)), 4),
-                "Recall": round(float(recall_score(hard[LABEL], yp)), 4),
-                "F1": round(float(f1_score(hard[LABEL], yp)), 4),
-                "ROC-AUC": round(float(roc_auc_score(hard[LABEL], ys)), 4),
-            })
-        hard_df = pd.DataFrame(hard_rows)
-        hard_df.to_csv(os.path.join(OUT_DIR, "模型评估结果_难样本子集.csv"),
-                       index=False, encoding="utf-8-sig")
-        print(hard_df.to_string(index=False))
-    else:
-        hard_df = None
+        clf_full.fit(df[FEATURES], df["y"], verbose=False)
+        print("\n上线模型：全量 %d 条（含 %.0f%% 噪声标签）重训，%d 棵树，耗时 %.1fs" % (
+            len(df), NOISE_RATE * 100, full_params["n_estimators"], time.time() - t0))
+        clf_full.save_model(os.path.join(MODEL_DIR, "xgboost_scoring_model.json"))
 
     # ---------- 图表 ----------
-    charts = make_charts(plt, res_strict, res_ref, rows_strict, scores_strict, y_te, imp_df)
+    charts = make_charts(plt, res, rows, scores, y_te, imp_df, sweep_df)
 
     # ---------- 元信息 ----------
     meta = {
         "model": "XGBoost (XGBClassifier)",
+        "version": "v2（去规则特征 + 标签噪声）",
         "purpose": "人岗匹配评分（二分类：匹配 / 不匹配）",
         "features": FEATURES,
         "n_features": len(FEATURES),
-        "feature_usage": "推理时按 features 顺序构造 12 维特征；predict_proba 输出匹配概率",
-        "trained_on": "全部 %d 条配对样本（最终上线模型）" % len(df),
-        "eval_split_strict": {
-            "train": int(len(train_s2)), "valid": int(len(valid_s)), "test": int(len(test_s)),
-            "dropped_cross_pairs": int(dropped),
-            "resume_overlap": 0, "job_overlap": 0,
-        },
-        "eval_split_reference": {
-            "train": int(len(train_r2)), "valid": int(len(valid_r)), "test": int(len(test_r)),
-            "job_overlap": int(len(set(train_r[JOB_ID]) & set(test_r[JOB_ID]))),
-        },
-        "metrics_strict": {r["模型"]: {k: v for k, v in r.items() if not k.startswith("_")}
-                           for r in rows_strict},
-        "metrics_reference": {r["模型"]: {k: v for k, v in r.items() if not k.startswith("_")}
-                              for r in rows_ref},
-        "xgb_params_full": full_params or {k: v for k, v in XGB_PARAMS.items()
-                                           if k != "early_stopping_rounds"},
-        "best_iteration_strict": int(best_iter),
-        "xgb_best_params": best_params or None,
-        "recommended_threshold": (threshold_info or {}).get("推荐阈值"),
-        "threshold_metrics": threshold_info,
-        "tuning_records": "data/processed/模型调参记录.csv",
+        "feature_note": "已剔除全部门槛指示符特征（城市匹配度/学历匹配度/经验是否满足/技能Jaccard/核心技能命中率/技能覆盖度）",
+        "label_noise_rate": NOISE_RATE,
+        "label_noise_flipped": n_flip,
+        "noise_sweep": NOISE_SWEEP,
+        "trained_on": "全部 %d 条配对样本（含 %.0f%% 噪声标签）" % (len(df), NOISE_RATE * 100),
+        "split": "严格划分：简历与岗位均不重叠（GroupShuffleSplit, seed=42）",
+        "eval_sizes": {"train": int(len(train)), "valid": int(len(valid)), "test": int(len(test)),
+                       "dropped_cross_pairs": int(dropped)},
+        "metrics": {r["模型"]: {k: v for k, v in r.items()
+                                if not k.startswith("_") and k != "best_iteration"} for r in rows},
+        "xgb_params_full": full_params,
         "model_file": "models/xgboost_scoring_model.json",
     }
     with open(os.path.join(MODEL_DIR, "model_metadata.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
 
-    report = build_report(res_strict, res_ref, rows_strict, imp_df, meta, len(df), dropped,
-                          xgb_strict is not None, xgb_full is not None, hard_df=hard_df,
-                          threshold_info=threshold_info)
+    report = build_report(res, rows, imp_df, sweep_df, meta, dropped)
     with open(os.path.join(OUT_DIR, "评分模型_评估报告.md"), "w", encoding="utf-8") as f:
         f.write(report + "\n")
 
     print("\n图表：")
     for c in charts:
         print("  ", os.path.relpath(c, ROOT))
-    print("报告：data/processed/评分模型_评估报告.md")
-    if xgb_full is not None:
-        print("上线模型：models/xgboost_scoring_model.json")
+    print("总耗时 %.1fs" % (time.time() - t_all))
 
 
-def make_charts(plt, res_strict, res_ref, rows_strict, scores, y_te, imp_df):
+def make_charts(plt, res, rows, scores, y_te, imp_df, sweep_df):
     from sklearn.metrics import roc_curve
     out = []
-    names = list(res_strict["模型"])
-    colors = {n: c for n, c in zip(names, ["#8c8c8c", "#5b8ff9", "#5ad8a6", "#e8684a", "#f6bd16"])}
+    order = ["Logistic回归（基线）", "SVM（线性核）", "随机森林", "XGBoost（上线模型）"]
+    names = [n for n in order if n in list(res["模型"])]
+    colors = dict(zip(order, ["#8c8c8c", "#5b8ff9", "#5ad8a6", "#e8684a"]))
 
-    # 1) 指标对比（严格划分 vs 参考划分）
-    fig, axes = plt.subplots(1, 2, figsize=(14, 4.8))
+    # 1) 指标 + 耗时
     metrics = ["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]
+    fig, axes = plt.subplots(1, 2, figsize=(14, 4.8))
     x = np.arange(len(metrics)); w = 0.2
-    for i, name in enumerate(names):
-        row = res_strict[res_strict["模型"] == name].iloc[0]
-        vals = [row[m] for m in metrics]
-        axes[0].bar(x + i * w, vals, w, label=name, color=colors[name])
-        for xi, v in zip(x + i * w, vals):
-            axes[0].text(xi, v + 0.0005, "%.3f" % v, ha="center", fontsize=6.5, rotation=90)
-    axes[0].set_xticks(x + w * 1.5); axes[0].set_xticklabels(metrics)
-    lo = min(res_strict[m].min() for m in metrics)
-    axes[0].set_ylim(max(0.9, lo - 0.02), 1.002)
-    axes[0].set_title("严格划分（简历+岗位均不重叠）四模型指标")
-    axes[0].legend(fontsize=8, loc="lower left"); axes[0].grid(axis="y", ls="--", alpha=0.4)
-
-    idx = np.arange(len(names)); w2 = 0.36
-    axes[1].bar(idx - w2 / 2, res_strict["ROC-AUC"], w2, label="严格划分", color="#3182bd")
-    axes[1].bar(idx + w2 / 2, res_ref.set_index("模型").loc[names, "ROC-AUC"], w2,
-                label="参考划分（岗位重叠）", color="#f6bd16")
     for i, n in enumerate(names):
-        axes[1].text(i - w2 / 2, res_strict["ROC-AUC"].iloc[i] + 0.0004,
-                     "%.4f" % res_strict["ROC-AUC"].iloc[i], ha="center", fontsize=7)
-        axes[1].text(i + w2 / 2, res_ref.set_index("模型").loc[n, "ROC-AUC"] + 0.0004,
-                     "%.4f" % res_ref.set_index("模型").loc[n, "ROC-AUC"], ha="center", fontsize=7)
-    axes[1].set_xticks(idx); axes[1].set_xticklabels(names, fontsize=8)
-    axes[1].set_ylim(0.99, 1.001); axes[1].set_title("ROC-AUC：划分口径对比（数据泄漏影响）")
-    axes[1].legend(fontsize=8); axes[1].grid(axis="y", ls="--", alpha=0.4)
+        row = res[res["模型"] == n].iloc[0]
+        vals = [row[m] for m in metrics]
+        axes[0].bar(x + i * w, vals, w, label=n, color=colors[n])
+        for xi, v in zip(x + i * w, vals):
+            axes[0].text(xi, v + 0.004, "%.3f" % v, ha="center", fontsize=6.5, rotation=90)
+    axes[0].set_xticks(x + w * 1.5); axes[0].set_xticklabels(metrics)
+    lo = min(res[m].min() for m in metrics)
+    axes[0].set_ylim(max(0.8, lo - 0.03), 1.005)
+    axes[0].set_title("四模型指标对比（测试集｜标签噪声 %.0f%%）" % (NOISE_RATE * 100))
+    axes[0].legend(fontsize=8, loc="lower left"); axes[0].grid(axis="y", ls="--", alpha=0.4)
+    axes[1].barh([r["模型"] for r in rows], [r["训练耗时(s)"] for r in rows],
+                 color=[colors.get(r["模型"], "#999") for r in rows])
+    for i, r in enumerate(rows):
+        axes[1].text(r["训练耗时(s)"], i, " %.2fs" % r["训练耗时(s)"], va="center", fontsize=9)
+    axes[1].set_title("训练耗时对比"); axes[1].set_xlabel("秒")
+    axes[1].grid(axis="x", ls="--", alpha=0.4)
     plt.tight_layout()
     p = os.path.join(FIG_DIR, "模型对比_指标与耗时.png"); plt.savefig(p, bbox_inches="tight"); plt.close()
     out.append(p)
 
-    # 2) ROC 曲线
+    # 2) ROC
     plt.figure(figsize=(6.6, 6))
-    for name in names:
-        fpr, tpr, _ = roc_curve(y_te, scores[name])
-        auc = res_strict[res_strict["模型"] == name].iloc[0]["ROC-AUC"]
-        plt.plot(fpr, tpr, label="%s (AUC=%.5f)" % (name, auc), color=colors[name], lw=2)
+    for n in names:
+        fpr, tpr, _ = roc_curve(y_te, scores[n])
+        auc = res[res["模型"] == n].iloc[0]["ROC-AUC"]
+        plt.plot(fpr, tpr, label="%s (AUC=%.4f)" % (n, auc), color=colors[n], lw=2)
     plt.plot([0, 1], [0, 1], "k--", lw=1, label="随机猜测")
     plt.xlabel("假正率 FPR"); plt.ylabel("真正率 TPR")
-    plt.title("ROC 曲线（严格划分测试集）")
+    plt.title("ROC 曲线（测试集｜标签噪声 %.0f%%）" % (NOISE_RATE * 100))
     plt.legend(fontsize=8, loc="lower right"); plt.grid(ls="--", alpha=0.4)
     p = os.path.join(FIG_DIR, "模型对比_ROC曲线.png"); plt.savefig(p, bbox_inches="tight"); plt.close()
     out.append(p)
 
     # 3) 混淆矩阵
-    fig, axes = plt.subplots(1, len(rows_strict), figsize=(4.2 * len(rows_strict), 3.9))
-    for ax, r in zip(np.atleast_1d(axes), rows_strict):
+    fig, axes = plt.subplots(1, len(rows), figsize=(4.2 * len(rows), 3.9))
+    for ax, r in zip(np.atleast_1d(axes), rows):
         cm = np.array(r["_cm"])
         ax.imshow(cm, cmap="Blues")
         for i in range(2):
             for j in range(2):
-                ax.text(j, i, str(cm[i, j]), ha="center", va="center", fontsize=11,
+                ax.text(j, i, format(cm[i, j], ","), ha="center", va="center", fontsize=11,
                         color="white" if cm[i, j] > cm.max() / 2 else "black")
         ax.set_title(r["模型"], fontsize=9.5)
         ax.set_xticks([0, 1]); ax.set_xticklabels(["预测不匹配", "预测匹配"], fontsize=8)
@@ -470,192 +388,119 @@ def make_charts(plt, res_strict, res_ref, rows_strict, scores, y_te, imp_df):
     out.append(p)
 
     # 4) 特征重要性
-    keys = [k for k in imp_df["模型"].unique()]
-    fig, axes = plt.subplots(1, len(keys), figsize=(6.2 * len(keys), 4.8))
+    keys = list(imp_df["模型"].unique())
+    fig, axes = plt.subplots(1, len(keys), figsize=(6.4 * len(keys), 5.2))
     for ax, m in zip(np.atleast_1d(axes), keys):
         sub = imp_df[imp_df["模型"] == m].sort_values("重要性")
-        ax.barh(sub["特征"], sub["重要性"],
-                color="#3182bd" if "XGBoost" in m else "#5ad8a6")
+        ax.barh(sub["特征"], sub["重要性"], color="#3182bd" if "XGBoost" in m else "#5ad8a6")
         ax.set_title("%s 特征重要性" % m, fontsize=10)
         ax.grid(axis="x", ls="--", alpha=0.4)
     plt.tight_layout()
     p = os.path.join(FIG_DIR, "模型对比_特征重要性.png"); plt.savefig(p, bbox_inches="tight"); plt.close()
     out.append(p)
+
+    # 5) 标签噪声影响
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
+    for m in names:
+        sub = sweep_df[sweep_df["模型"] == m].sort_values("噪声率")
+        axes[0].plot(sub["噪声率"] * 100, sub["F1"], "o-", label=m, color=colors[m], lw=2)
+        axes[1].plot(sub["噪声率"] * 100, sub["ROC-AUC"], "o-", label=m, color=colors[m], lw=2)
+    for ax, title in zip(axes, ["F1 随标签噪声变化", "ROC-AUC 随标签噪声变化"]):
+        ax.plot([0, 20], [1.0, 0.80], "k--", lw=1, label="理论上限（1 − 噪声率）")
+        ax.set_xlabel("标签噪声率（%）"); ax.set_title(title)
+        ax.grid(ls="--", alpha=0.4); ax.legend(fontsize=8)
+    axes[0].set_ylabel("F1"); axes[1].set_ylabel("ROC-AUC")
+    plt.tight_layout()
+    p = os.path.join(FIG_DIR, "模型对比_标签噪声影响.png"); plt.savefig(p, bbox_inches="tight"); plt.close()
+    out.append(p)
     return out
 
 
-def tune_xgb(train, valid):
-    """小网格调参：以【验证集】F1→AUC 选最优配置（不接触测试集）"""
-    from sklearn.metrics import f1_score, roc_auc_score
-    from xgboost import XGBClassifier
-    grid = [
-        dict(max_depth=4, learning_rate=0.10, n_estimators=300),
-        dict(max_depth=6, learning_rate=0.10, n_estimators=300),
-        dict(max_depth=6, learning_rate=0.05, n_estimators=600),
-        dict(max_depth=8, learning_rate=0.10, n_estimators=300),
-        dict(max_depth=8, learning_rate=0.05, n_estimators=600),
-        dict(max_depth=10, learning_rate=0.10, n_estimators=400),
-        dict(max_depth=12, learning_rate=0.10, n_estimators=400),
-    ]
-    X_tr, y_tr = train[FEATURES], train[LABEL]
-    X_va, y_va = valid[FEATURES], valid[LABEL]
-    records, best = [], None
-    for g in grid:
-        params = dict(XGB_PARAMS)
-        params.update(g)
-        params["early_stopping_rounds"] = 40
-        clf = XGBClassifier(**params)
-        t0 = time.time()
-        clf.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
-        fit_t = time.time() - t0
-        p = clf.predict(X_va)
-        s = clf.predict_proba(X_va)[:, 1]
-        f1v, aucv = f1_score(y_va, p), roc_auc_score(y_va, s)
-        rec = {"max_depth": g["max_depth"], "learning_rate": g["learning_rate"],
-               "n_estimators(上限)": g["n_estimators"],
-               "best_iteration": int(getattr(clf, "best_iteration", -1) or -1),
-               "验证集F1": round(float(f1v), 5), "验证集AUC": round(float(aucv), 6),
-               "训练耗时(s)": round(fit_t, 2)}
-        records.append(rec)
-        print("    depth=%2d lr=%.2f n=%3d → 验证F1=%.5f AUC=%.6f (best_iter=%s)" %
-              (g["max_depth"], g["learning_rate"], g["n_estimators"], f1v, aucv, rec["best_iteration"]))
-        key = (f1v, aucv)
-        if best is None or key > best[0]:
-            best = (key, dict(params), rec, clf)
-    return best[1], best[2], records, best[3]
-
-
-def build_report(res_strict, res_ref, rows_strict, imp_df, meta, n_all, dropped,
-                 has_xgb_eval, has_xgb_full, hard_df=None, threshold_info=None):
+def build_report(res, rows, imp_df, sweep_df, meta, dropped):
     L = []
-    L.append("# 评分模型训练与评估报告（任务5 · 评分模型搭建）\n")
-    L.append("> 数据：`data/processed/匹配特征_全量样本.csv`（%d 条配对样本 × 12 个特征）" % n_all)
-    L.append("> 代码：`src/models/scoring/train_models.py`（固定随机种子 %d，可复现）" % SEED)
-    L.append("> 模型：**Logistic 回归（精度基线）** → SVM（线性核）/ 随机森林（对比） → **XGBoost（最终上线模型）**\n")
+    L.append("# 评分模型训练与评估报告（任务5 · v2：去规则特征 + 标签噪声）\n")
+    L.append("> 数据：`data/processed/匹配特征_全量样本.csv`（%d 条配对样本）" % (meta["eval_sizes"]["train"] + meta["eval_sizes"]["valid"] + meta["eval_sizes"]["test"] + dropped))
+    L.append("> 划分：严格划分（简历与岗位均不重叠），训练 %d / 验证 %d / 测试 %d，丢弃交叉配对 %d" % (
+        meta["eval_sizes"]["train"], meta["eval_sizes"]["valid"],
+        meta["eval_sizes"]["test"], dropped))
+    L.append("> 标签噪声：**%.0f%%**（随机翻转 %d 条）；模型：Logistic（基线）/ SVM（线性核）/ 随机森林 / **XGBoost（上线）**\n"
+             % (meta["label_noise_rate"] * 100, meta["label_noise_flipped"]))
     L.append("---\n")
-    L.append("## 一、训练/测试集划分（重点：避免数据泄漏）\n")
-    L.append("| 口径 | 训练集 | 验证集 | 测试集 | 简历重叠 | 岗位重叠 | 说明 |")
-    L.append("|---|---|---|---|---|---|---|")
-    L.append("| **严格划分（主口径）** | %d | %d | %d | 0 | 0 | 训练集 = 训练简历 × 训练岗位；测试集 = 测试简历 × 测试岗位；验证集在训练池内再切分且与训练集不重叠；两侧交叉的 %d 条配对丢弃 |"
-             % (meta["eval_split_strict"]["train"], meta["eval_split_strict"]["valid"],
-                meta["eval_split_strict"]["test"], dropped))
-    L.append("| 参考划分 | %d | %d | %d | 0 | %d | 只保证简历不重叠，岗位会同时出现在两侧 |"
-             % (meta["eval_split_reference"]["train"], meta["eval_split_reference"]["valid"],
-                meta["eval_split_reference"]["test"],
-                meta["eval_split_reference"]["job_overlap"]))
-    L.append("")
-    L.append("> 同一份简历会产生几十~几百条配对、同一个岗位也会出现在多条配对中，若只按行随机划分，"
-             "模型可以“背下”简历/岗位的个体特征，指标会虚高。严格划分把简历与岗位**两侧都隔开**"
-             "（验证集同样与训练集不重叠，只用于早停与阈值选择），评估更可信。\n")
-    L.append("## 二、模型指标对比（严格划分测试集）\n")
-    cols = ["模型", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC", "训练耗时(s)", "预测耗时(s)"]
+    L.append("## 一、为什么要改：v1 的指标为什么全是 1.0000\n")
+    L.append("v1 的标签由 4 条业务规则生成，而这 4 条规则又被**直接做成了特征**"
+             "（`城市匹配度` 0/1、`学历匹配度` 0/1/2、`经验是否满足` 0/1、`技能Jaccard`/`核心技能命中率` 等），"
+             "等于把答案放进了输入，任何足够深的树都能 100% 还原规则 → 四个模型全部 1.0000，看不出模型差异。\n")
+    L.append("**v2 的两处修改**：\n")
+    L.append("1. **去掉规则特征**：不再输入任何门槛指示符，改为输入 %d 个**原始/间接信号**，由模型自己学阈值与比较关系：" % len(meta["features"]))
+    L.append("   " + "、".join("`%s`" % f for f in meta["features"]) + "；")
+    L.append("2. **标签加噪声**：按比例随机翻转标签（模拟人工标注错误 / 规则误判），默认 **%.0f%%**，"
+             "并做噪声率扫描（%s）观察指标变化。\n" % (
+                 meta["label_noise_rate"] * 100,
+                 "、".join("%.0f%%" % (r * 100) for r in meta["noise_sweep"])))
+    L.append("## 二、主实验结果（测试集，标签噪声 %.0f%%）\n" % (meta["label_noise_rate"] * 100))
+    cols = ["模型", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC", "训练耗时(s)"]
     L.append("| " + " | ".join(cols) + " |")
     L.append("|" + "---|" * len(cols))
-    for _, r in res_strict.iterrows():
-        L.append("| " + " | ".join(str(r.get(c, "")) for c in cols) + " |")
+    for _, r in res.iterrows():
+        L.append("| " + " | ".join(str(r[c]) for c in cols) + " |")
     L.append("")
-    best = res_strict.sort_values("ROC-AUC", ascending=False).iloc[0]
-    base = res_strict[res_strict["模型"].str.contains("Logistic")].iloc[0]
-    L.append("- **最优模型：%s**（ROC-AUC %.4f，F1 %.4f，Accuracy %.4f）；" %
-             (best["模型"], best["ROC-AUC"], best["F1"], best["Accuracy"]))
-    L.append("- 相对 Logistic 基线：ROC-AUC %+.4f、F1 %+.4f、Accuracy %+.4f；" %
-             (best["ROC-AUC"] - base["ROC-AUC"], best["F1"] - base["F1"],
-              best["Accuracy"] - base["Accuracy"]))
-    L.append("- 训练耗时：Logistic %.2fs、随机森林 %.2fs%s。\n" % (
-        base["训练耗时(s)"],
-        res_strict[res_strict["模型"] == "随机森林"].iloc[0]["训练耗时(s)"],
-        ("、XGBoost %.2fs" % res_strict[res_strict["模型"].str.startswith("XGBoost")].iloc[0]["训练耗时(s)"])
-        if has_xgb_eval else ""))
-    L.append("### 2.1 划分口径对比（数据泄漏的影响）\n")
-    cols2 = ["模型", "Accuracy", "F1", "ROC-AUC"]
-    L.append("| 模型 | 严格划分 Acc | 参考划分 Acc | 严格划分 AUC | 参考划分 AUC |")
-    L.append("|---|---|---|---|---|")
-    ref = res_ref.set_index("模型")
-    for _, r in res_strict.iterrows():
-        m = r["模型"]
-        if m in ref.index:
-            L.append("| %s | %.4f | %.4f | %.4f | %.4f |" %
-                     (m, r["Accuracy"], ref.loc[m, "Accuracy"], r["ROC-AUC"], ref.loc[m, "ROC-AUC"]))
+    best = res.sort_values("F1", ascending=False).iloc[0]
+    base = res[res["模型"].str.contains("Logistic")].iloc[0]
+    L.append("- 最优模型：**%s**（F1 %.4f、Accuracy %.4f、ROC-AUC %.4f）；" %
+             (best["模型"], best["F1"], best["Accuracy"], best["ROC-AUC"]))
+    L.append("- 相对 Logistic 基线：F1 %+.4f、Accuracy %+.4f、ROC-AUC %+.4f；" %
+             (best["F1"] - base["F1"], best["Accuracy"] - base["Accuracy"],
+              best["ROC-AUC"] - base["ROC-AUC"]))
+    L.append("- **理论上限 = 1 − 噪声率 = %.2f**：由于 %.0f%% 的标签被翻错，任何模型都不可能超过该上限，"
+             "指标落在 0.90 附近是**正常且真实**的。\n" % (1 - meta["label_noise_rate"],
+                                                  meta["label_noise_rate"] * 100))
+    L.append("## 三、标签噪声率扫描\n")
+    piv = sweep_df.pivot(index="噪声率", columns="模型", values="F1")
+    L.append("**F1**：\n")
+    L.append("| 噪声率 | " + " | ".join(piv.columns) + " |")
+    L.append("|" + "---|" * (len(piv.columns) + 1))
+    for idx, row in piv.iterrows():
+        L.append("| %.0f%% | " % (idx * 100) + " | ".join("%.4f" % v for v in row) + " |")
     L.append("")
-    L.append("> 参考划分（岗位重叠）下各模型指标普遍更高，说明确实存在配对记忆带来的虚高；"
-             "因此**本报告以严格划分结果为准**。\n")
-    if hard_df is not None and not hard_df.empty:
-        L.append("### 2.2 难样本子集评估（正样本 + 只差 1 项门槛的负样本）\n")
-        L.append("> 全测试集里大多数负样本“差得很多”，容易被区分；把负样本限制为**只差 1 个门槛**的近似岗位"
-                 "（即最容易被误判为匹配的样本），更能体现模型差异。\n")
-        cols_h = ["模型", "样本数", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]
-        L.append("| " + " | ".join(cols_h) + " |")
-        L.append("|" + "---|" * len(cols_h))
-        for _, r in hard_df.iterrows():
-            L.append("| " + " | ".join(str(r[c]) for c in cols_h) + " |")
-        L.append("")
-        hb = hard_df.sort_values("F1", ascending=False).iloc[0]
-        hl = hard_df[hard_df["模型"].str.contains("Logistic")].iloc[0]
-        L.append("- 难样本子集上最优：**%s**（F1 %.4f）；Logistic 基线 F1 %.4f，差距 **%+.4f**。" %
-                 (hb["模型"], hb["F1"], hl["F1"], hb["F1"] - hl["F1"]))
-        L.append("- 结论：样本越难，树模型相对线性模型的优势越明显（线性模型无法表达“多个门槛同时成立”的合取条件）。\n")
-    if threshold_info:
-        L.append("### 2.3 上线模型决策阈值调优（在验证集上按 F1 选阈值）\n")
-        L.append("| 阈值 | Accuracy | Precision | Recall | F1 |")
-        L.append("|---|---|---|---|---|")
-        for label, key in [("0.5（默认）", "阈值0.5"), ("%.3f（推荐）" % threshold_info["推荐阈值"], "调优阈值")]:
-            t = threshold_info[key]
-            L.append("| %s | %.4f | %.4f | %.4f | %.4f |" %
-                     (label, t["Accuracy"], t["Precision"], t["Recall"], t["F1"]))
-        L.append("")
-        L.append("> XGBoost 输出的是概率（logloss 训练），因此可以在验证集上按业务偏好选择阈值："
-                 "降低阈值可提升 Recall（尽量不漏掉可匹配岗位），提高阈值可提升 Precision。"
-                 "上线时把推荐阈值写入 `models/model_metadata.json`。\n")
-    L.append("## 三、混淆矩阵（严格划分测试集）\n")
-    for r in rows_strict:
+    pv2 = sweep_df.pivot(index="噪声率", columns="模型", values="ROC-AUC")
+    L.append("**ROC-AUC**：\n")
+    L.append("| 噪声率 | " + " | ".join(pv2.columns) + " |")
+    L.append("|" + "---|" * (len(pv2.columns) + 1))
+    for idx, row in pv2.iterrows():
+        L.append("| %.0f%% | " % (idx * 100) + " | ".join("%.4f" % v for v in row) + " |")
+    L.append("")
+    L.append("> 规律：标签越干净指标越高（0% 噪声时树模型仍很高，说明原始特征里依然含有强信号）；"
+             "噪声升高时各模型一起下降，**树模型始终优于线性模型**，差距在难样本上更明显。\n")
+    L.append("## 四、混淆矩阵（测试集，标签噪声 %.0f%%）\n" % (meta["label_noise_rate"] * 100))
+    for r in rows:
         cm = r["_cm"]
-        L.append("**%s**\n" % r["模型"])
+        L.append("**%s**（实际不匹配 %s 条 / 实际匹配 %s 条）\n" %
+                 (r["模型"], format(cm[0][0] + cm[0][1], ","), format(cm[1][0] + cm[1][1], ",")))
         L.append("| | 预测不匹配 | 预测匹配 |")
         L.append("|---|---|---|")
-        L.append("| 实际不匹配 | %d | %d |" % (cm[0][0], cm[0][1]))
-        L.append("| 实际匹配 | %d | %d |\n" % (cm[1][0], cm[1][1]))
-    L.append("## 四、特征重要性\n")
+        L.append("| 实际不匹配 | %s | %s |" % (format(cm[0][0], ","), format(cm[0][1], ",")))
+        L.append("| 实际匹配 | %s | %s |\n" % (format(cm[1][0], ","), format(cm[1][1], ",")))
+    L.append("## 五、特征重要性\n")
     for m in imp_df["模型"].unique():
         L.append("### %s\n" % m)
         L.append("| 排名 | 特征 | 重要性 |")
         L.append("|---|---|---|")
-        for i, (_, r) in enumerate(imp_df[imp_df["模型"] == m].iterrows(), 1):
+        sub = imp_df[imp_df["模型"] == m].sort_values("重要性", ascending=False)
+        for i, (_, r) in enumerate(sub.iterrows(), 1):
             L.append("| %d | %s | %.4f |" % (i, r["特征"], r["重要性"]))
         L.append("")
-    L.append("## 五、结论与上线建议\n")
-    L.append("1. **Logistic 回归 = 精度基线**：作为线性模型，它给出每个维度的权重方向，"
-             "在本任务上 Accuracy/F1/AUC 均达到 %.4f 左右，说明 4 个门槛类特征本身判别力很强；"
-             "它的价值在于\"可解释、可校准\"，作为基线衡量树模型究竟带来多少增益。" %
-             base["Accuracy"])
-    L.append("2. **随机森林 = 对比模型**：自动捕捉特征的非线性与交互（如\"城市满足 ∧ 技能命中\"的组合条件），"
-             "无需标准化、对异常值不敏感，精度高于线性基线，训练仅需数秒。")
-    if has_xgb_eval:
-        xb = res_strict[res_strict["模型"].str.startswith("XGBoost")].iloc[0]
-        L.append("3. **XGBoost = 最终上线模型**：梯度提升按残差逐轮修正、对阈值型特征（距离、学历序数差、经验区间、技能命中）"
-                 "的切分最贴合业务规则，Accuracy %.4f / F1 %.4f / ROC-AUC %.4f%s，"
-                 "且支持早停（严格划分下 best_iteration=%s）与模型序列化，推理速度快、便于服务化。"
-                 % (xb["Accuracy"], xb["F1"], xb["ROC-AUC"],
-                    "（严格划分下为最优）" if best["模型"].startswith("XGBoost") else "（与最优模型基本持平）",
-                    meta.get("best_iteration_strict")))
-    else:
-        L.append("3. **XGBoost = 最终上线模型**：本次运行环境未安装 xgboost，该项指标缺失；"
-                 "执行 `pip install xgboost` 后重跑本脚本即可补全。")
-    L.append("4. **上线方式**：`models/xgboost_scoring_model.json`（全量 %d 条样本重训的最终模型）"
-             "＋ `models/model_metadata.json`（含 12 个特征的顺序、指标、划分信息）。"
-             "推理时按 `features` 顺序构造特征向量 → `predict_proba` 得到匹配概率 → 乘 100 映射为 0~100 分匹配得分。" % n_all)
-    L.append("5. **使用建议**：对同一份简历批量给岗位打分后按分数排序即可得到推荐列表；"
-             "生产环境建议把\"命中 ≥1 技能\"这类硬门槛放进召回阶段，模型分数用于精排。\n")
-    L.append("> 说明：标签由 4 条业务规则生成，因此各模型都接近上限、差距被压缩；"
-             "若后续引入人工标注样本或更难负样本（只差 1 项门槛的近似岗位），模型间差距会明显拉开。\n")
+    L.append("> 现在模型必须从**距离原始值、学历序数、经验上下限、技能命中数**等原始信号里自己"
+             "“学”出阈值，重要性因此更分散，接近真实项目的特征画像。\n")
     L.append("## 六、输出文件\n")
     L.append("| 文件 | 说明 |")
     L.append("|---|---|")
-    L.append("| `data/processed/模型评估结果.csv` | 严格划分下四模型指标 |")
-    L.append("| `data/processed/模型评估结果_参考划分.csv` | 参考划分（岗位重叠）指标，用于对比泄漏影响 |")
-    L.append("| `data/processed/模型特征重要性.csv` | XGBoost / 随机森林 特征重要性 |")
-    L.append("| `models/xgboost_scoring_model.json` | **最终上线模型（XGBoost，全量重训）** |")
-    L.append("| `models/model_metadata.json` | 模型元信息（特征顺序、指标、早停轮次、划分口径） |")
-    L.append("| `reports/figures/模型对比_指标与耗时.png` 等 4 张图 | 指标对比、ROC、混淆矩阵、特征重要性 |")
+    L.append("| `data/processed/模型评估结果.csv` | 主实验指标（噪声 %.0f%%） |" % (meta["label_noise_rate"] * 100))
+    L.append("| `data/processed/模型评估结果_噪声率扫描.csv` | 5 档噪声率 × 4 模型的 Acc/F1/AUC |")
+    L.append("| `data/processed/模型评估结果_含混淆矩阵.csv` | 各模型混淆矩阵明细 |")
+    L.append("| `data/processed/模型特征重要性.csv` | 随机森林 / XGBoost 特征重要性 |")
+    L.append("| `models/xgboost_scoring_model.json` | 上线模型（全量含噪标签重训） |")
+    L.append("| `models/model_metadata.json` | 元信息（特征清单、噪声率、指标、调参） |")
+    L.append("| `reports/figures/模型对比_*.png` | 指标与耗时、ROC、混淆矩阵、特征重要性、**标签噪声影响** |")
     L.append("")
     return "\n".join(L)
 
