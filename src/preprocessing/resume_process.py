@@ -5,15 +5,18 @@
 输入：data/raw/随机简历500份.csv（原始 500 份 × 13 列，未改动）
 输出（全部写入 data/processed/）：
   1. 简历数据_cleaned.csv        —— 清洗 + 结构化后的简历数据（原 13 列 + 派生列）
-  2. 简历技能与证书词频统计.csv   —— 技能 / 证书词频
-  3. 简历数据_分布统计.csv       —— 各维度分布（维度, 取值, 数量, 占比）
-  4. 简历数据统计.md             —— 统计报告（Markdown）
+  2. 简历数据_分布统计.csv       —— 各维度分布（维度, 取值, 数量, 占比）
+  3. 简历数据统计.md             —— 统计报告（Markdown）
+
+  （技能 / 证书词频由 `resume_seg.py` 输出为 `简历技能词频统计.csv`，本脚本不重复产出）
 
 处理规则（与岗位数据处理思路一致，原文件不动，全部输出到新文件）：
   ① 缺失值：13 列均无空值 → 0 行删除
   ② 去重：按 姓名+手机号+邮箱 判定重复（唯一标识）→ 0 条重复
   ③ 类型标准化：性别、手机号、邮箱、学历（专科→大专），并把复合文本字段拆成结构化列
-  ④ 异常值：只检测、记录、不改动数据（写入统计报告）
+  ④ 期望薪资：沿用岗位侧 `normalize_salary.parse_salary()` 解析为 `下限/上限(元/月)`；
+     "面议" 不参与数值比对（标记为 `期望薪资是否面议=是`）
+  ⑤ 异常值：只检测、记录、不改动数据（写入统计报告）
 """
 import csv
 import os
@@ -22,6 +25,8 @@ import sys
 from collections import Counter
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from normalize_salary import parse_salary          # 与岗位薪资同一套解析口径
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SRC_CSV = os.path.join(ROOT, "data", "raw", "随机简历500份.csv")
@@ -73,6 +78,13 @@ def parse_row(r):
     o["期望城市"] = m.group(2).strip() if m else ""
     o["期望行业"] = m.group(3).strip() if m else ""
     o["期望薪资"] = m.group(4).strip() if m else ""
+    # 期望薪资 → 数值区间（"面议" 不参与数值比对）
+    o["期望薪资是否面议"] = "是" if o["期望薪资"] in ("面议", "") else "否"
+    sp = None if o["期望薪资是否面议"] == "是" else parse_salary(o["期望薪资"])
+    if sp and sp["lo"] != "":
+        o["期望薪资下限(元/月)"], o["期望薪资上限(元/月)"] = sp["lo"], sp["hi"]
+    else:
+        o["期望薪资下限(元/月)"], o["期望薪资上限(元/月)"] = "", ""
 
     # 教育经历 → 学校/专业/学历/毕业年月/核心课程
     lines = [x.strip() for x in norm_text(r["教育经历"]).split("\n") if x.strip()]
@@ -170,6 +182,8 @@ def process(rows):
     # 同名不同人（手机号/邮箱不同）
     name_cnt = Counter(norm_text(o["姓名"]) for o in keep)
     info["dup_names"] = {n: c for n, c in name_cnt.items() if c > 1}
+    info["uniq_phone"] = len({o["手机号"] for o in keep})
+    info["uniq_mail"] = len({o["邮箱"] for o in keep})
 
     # ④ 异常检测（只记录）
     info["salary_all_mianshi"] = all(o["期望薪资"] == "面议" for o in keep)
@@ -200,6 +214,7 @@ def process(rows):
         "毕业年月": sum(1 for o in keep if not o["毕业年月"]),
         "技能列表": sum(1 for o in keep if not o["技能列表"]),
         "最近公司": sum(1 for o in keep if not o["最近公司"]),
+        "期望薪资区间": sum(1 for o in keep if o["期望薪资是否面议"] == "否" and o["期望薪资下限(元/月)"] == ""),
     }
     return keep, info
 
@@ -218,6 +233,25 @@ def work_year_bucket(y, fresh):
     if y <= 5:
         return "3-5年"
     return "5年以上"
+
+
+SALARY_BUCKETS = ["6000 元以下", "6000-8000 元", "8000-10000 元",
+                  "10000-15000 元", "15000-20000 元", "20000 元以上"]
+
+
+def salary_bucket(lo):
+    """按期望薪资下限分档"""
+    if lo < 6000:
+        return SALARY_BUCKETS[0]
+    if lo < 8000:
+        return SALARY_BUCKETS[1]
+    if lo < 10000:
+        return SALARY_BUCKETS[2]
+    if lo < 15000:
+        return SALARY_BUCKETS[3]
+    if lo < 20000:
+        return SALARY_BUCKETS[4]
+    return SALARY_BUCKETS[5]
 
 
 def build_stats(rows, info):
@@ -239,6 +273,10 @@ def build_stats(rows, info):
     job = add("期望岗位", Counter(o["期望岗位"] for o in rows))
     industry = add("期望行业", Counter(o["期望行业"] for o in rows))
     salary = add("期望薪资", Counter(o["期望薪资"] for o in rows))
+    salary_bkt = add("期望薪资区间(按下限)",
+                     Counter("面议/未填写" if o["期望薪资下限(元/月)"] == ""
+                             else salary_bucket(o["期望薪资下限(元/月)"]) for o in rows),
+                     order=SALARY_BUCKETS + ["面议/未填写"])
     grad = add("毕业年份", Counter(o["毕业年份"] for o in rows))
     wyb = add("工作年限区间", Counter(work_year_bucket(o["工作年限"], o["是否应届"]) for o in rows),
               order=["应届/无经验", "1年以内", "1-3年", "3-5年", "5年以上", "未标注"])
@@ -269,10 +307,28 @@ def build_stats(rows, info):
         dist.append(["证书", k, v, round(v / n * 100, 2)])
 
     avg = lambda key: round(sum(o[key] for o in rows) / n, 1)
+
+    def med(xs):
+        xs = sorted(xs)
+        if not xs:
+            return 0
+        h = len(xs) // 2
+        return round(xs[h] if len(xs) % 2 else (xs[h - 1] + xs[h]) / 2)
+
+    sal_pairs = [(int(o["期望薪资下限(元/月)"]), int(o["期望薪资上限(元/月)"]))
+                 for o in rows if o["期望薪资下限(元/月)"] != ""]
+    sal_mids = [(a + b) / 2 for a, b in sal_pairs]
+
     summary = {
         "n": n,
         "gender": gender, "degree": degree, "city": city, "job": job,
-        "industry": industry, "salary": salary, "grad": grad, "wyb": wyb,
+        "industry": industry, "salary": salary, "salary_bkt": salary_bkt,
+        "grad": grad, "wyb": wyb,
+        "sal_n": len(sal_pairs), "sal_mianshi": sum(1 for o in rows if o["期望薪资是否面议"] == "是"),
+        "sal_lo_med": med([a for a, _ in sal_pairs]), "sal_hi_med": med([b for _, b in sal_pairs]),
+        "sal_mid_med": med(sal_mids), "sal_mid_avg": round(sum(sal_mids) / len(sal_mids)) if sal_mids else 0,
+        "sal_lo_min": min([a for a, _ in sal_pairs]) if sal_pairs else 0,
+        "sal_hi_max": max([b for _, b in sal_pairs]) if sal_pairs else 0,
         "fresh": fresh, "sk_cnt": sk_cnt, "cert_cnt": cert_cnt, "proj": proj,
         "work_seg": work_seg, "inwork": inwork, "mail": mail,
         "school": school, "major": major, "live": live,
@@ -322,8 +378,9 @@ def build_report(s, info):
         ["删除（重复：姓名+手机号+邮箱）", info["dropped_dup"], "—"],
     ], ["项目", "数量", "占比"]))
     L.append("")
-    L.append("- 13 个原始字段**全部无缺失**（0 个空单元格），未删除任何行；")
-    L.append("- 按 `姓名+手机号+邮箱` 去重：**0 条重复**（手机号、邮箱各自 500 个唯一值）；")
+    L.append("- 13 个原始字段**全部无缺失**（%d 个空单元格），未删除任何行；" % sum(info["empty_cells"].values()))
+    L.append("- 按 `姓名+手机号+邮箱` 去重：**%d 条重复**（手机号、邮箱各自 %d / %d 个唯一值）；" %
+             (info["dropped_dup"], info["uniq_phone"], info["uniq_mail"]))
     L.append("- 有 **%d 组同名**（手机号/邮箱不同，视为不同人，保留）：%s。" %
              (len(info["dup_names"]), "、".join(list(info["dup_names"])[:8])))
     L.append("- 派生字段解析成功率：%s。" %
@@ -367,8 +424,20 @@ def build_report(s, info):
     L.append("\n### 4.2 期望行业与期望薪资\n")
     L.append(md_table([[k, v, "%.2f%%" % p] for k, v, p in s["industry"]], ["期望行业", "简历数", "占比"]))
     L.append("")
-    L.append(md_table([[k, v, "%.2f%%" % p] for k, v, p in s["salary"]], ["期望薪资", "简历数", "占比"]))
-    L.append("\n> 期望行业 100% 为“互联网/信息技术/软件服务”，期望薪资 **全部为“面议”**，该字段无可比性（见第七部分异常说明）。")
+    L.append(md_table([[k, v, "%.2f%%" % p] for k, v, p in s["salary_bkt"]],
+                      ["期望薪资区间（按下限分档）", "简历数", "占比"]))
+    L.append("")
+    L.append("- 期望薪资共 **%d 种写法**：**面议 %d 份（%.1f%%）**，明确区间 **%d 份（%.1f%%）**，"
+             "明确区间全部可按岗位侧同一口径解析为 `下限-上限元`。" %
+             (len(s["salary"]), s["sal_mianshi"], s["sal_mianshi"] / n * 100,
+              s["sal_n"], s["sal_n"] / n * 100))
+    L.append("- 明确区间的期望月薪：**区间中位数 %s 元**（下限中位数 %s 元 / 上限中位数 %s 元），"
+             "整体跨度 %s~%s 元（平均区间中点 %s 元）。" %
+             ("{:,}".format(s["sal_mid_med"]), "{:,}".format(s["sal_lo_med"]), "{:,}".format(s["sal_hi_med"]),
+              "{:,}".format(s["sal_lo_min"]), "{:,}".format(s["sal_hi_max"]), "{:,}".format(s["sal_mid_avg"])))
+    L.append("- 出现最多的 5 种写法：%s。" % "、".join("%s（%d）" % (k, v) for k, v, _ in s["salary"][:5]))
+    L.append("\n> 期望行业 100% 为“互联网/信息技术/软件服务”，无行业分布差异（见第七部分 R2）；"
+             "“面议”不参与薪资维度的数值比对，匹配时按“无偏好”处理。")
     L.append("")
 
     L.append("## 五、能力与经历\n")
@@ -406,7 +475,8 @@ def build_report(s, info):
     L.append("## 七、异常与数据局限（仅记录，未改动数据）\n")
     L.append("| # | 现象 | 数量 | 说明 |")
     L.append("|---|---|---|---|")
-    L.append("| R1 | 期望薪资全部为“面议” | %d/%d | 该字段无区分度，无法用于薪资期望建模 |" % (n, n))
+    L.append("| R1 | 期望薪资部分为“面议” | %d/%d（%.1f%%） | 该部分无法参与薪资维度数值比对，匹配时按“无偏好”处理 |" %
+             (s["sal_mianshi"], n, s["sal_mianshi"] / n * 100))
     L.append("| R2 | 期望行业全部为同一值 | %d 种 | 无行业分布差异 |" % info["industry_kinds"])
     L.append("| R3 | 学历只有本科/专科 | %d 种 | 无硕士及以上样本 |" % len(info["degree_kinds"]))
     L.append("| R4 | 姓名重复（手机号不同） | %d 组 | 视为不同人，保留 |" % len(info["dup_names"]))
@@ -425,8 +495,9 @@ def build_report(s, info):
     L.append("| 文件 | 说明 |")
     L.append("|---|---|")
     L.append("| `data/raw/随机简历500份.csv` | 原始简历数据（500 份 × 13 列，未改动） |")
+    L.append("| `data/processed/简历数据_seg.csv` | **分词结果**（13 列 + `技能特长_分词`/`技能词`/`证书` 等，由 `resume_seg.py` 产出） |")
     L.append("| `data/processed/简历数据_cleaned.csv` | **清洗+结构化结果**（%d 份 × %d 列） |" % (n, len(CSV_FIELDS)))
-    L.append("| `data/processed/简历技能与证书词频统计.csv` | 技能 / 证书词频（%d + %d 条） |" %
+    L.append("| `data/processed/简历技能词频统计.csv` | 技能 / 证书词频（%d + %d 条，由 `resume_seg.py` 产出） |" %
              (s["skill_kinds"], s["cert_kinds"]))
     L.append("| `data/processed/简历数据_分布统计.csv` | 全部维度分布明细（维度/取值/数量/占比，%d 行） |" % len(dist_holder))
     L.append("| `data/processed/简历数据统计.md` | 本报告 |")
@@ -457,23 +528,20 @@ def main():
     write_csv(os.path.join(OUT_DIR, "简历数据_分布统计.csv"),
               ["维度", "取值", "数量", "占比(%)"], dist)
 
-    write_csv(os.path.join(OUT_DIR, "简历技能与证书词频统计.csv"),
-              ["类型", "关键词", "出现简历数", "占比(%)"],
-              [["技能", k, v, round(v / len(keep) * 100, 2)] for k, v in s["sk_freq"].most_common()] +
-              [["证书", k, v, round(v / len(keep) * 100, 2)] for k, v in s["cert_freq"].most_common()])
-
     report = build_report(s, info)
     with open(os.path.join(OUT_DIR, "简历数据统计.md"), "w", encoding="utf-8") as f:
         f.write(report + "\n")
 
     print("统计输出：")
-    for name in ["简历数据_cleaned.csv", "简历技能与证书词频统计.csv",
-                 "简历数据_分布统计.csv", "简历数据统计.md"]:
+    for name in ["简历数据_cleaned.csv", "简历数据_分布统计.csv", "简历数据统计.md"]:
         p = os.path.join(OUT_DIR, name)
         print("  %-32s %8d 字节" % (name, os.path.getsize(p)))
     print("输出目录:", OUT_DIR)
     print("要点：项目数分布 %s｜工作段数 %s｜技能 %d 种｜证书 %d 种｜应届 %s" % (
         s["proj"], s["work_seg"], s["skill_kinds"], s["cert_kinds"], s["fresh"]))
+    print("期望薪资：面议 %d 份（%.1f%%）｜明确区间 %d 份｜区间中位数 %s 元｜城市 %d 个" % (
+        s["sal_mianshi"], s["sal_mianshi"] / len(keep) * 100, s["sal_n"],
+        "{:,}".format(s["sal_mid_med"]), s["city_kinds"]))
 
 
 if __name__ == "__main__":

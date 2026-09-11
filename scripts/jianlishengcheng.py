@@ -18,8 +18,17 @@ FEMALE_NAMES = ["芳", "娜", "敏", "静", "丽", "艳", "娟", "莉", "玲", "
                 "琳", "丹", "雪", "璐", "颖", "佳", "妍", "茜", "悦", "雯", "瑶", "欣", "语桐", "梓涵", "思琪", "雨萱",
                 "一诺", "紫涵", "佳怡", "若曦", "雨桐", "梦瑶", "安然"]
 
-CITIES = ["厦门", "福州", "泉州", "漳州", "莆田", "宁德", "南平", "三明", "龙岩", "深圳", "广州", "东莞", "佛山",
-          "珠海", "杭州", "宁波", "苏州", "南京", "南昌"]
+# 四省城市池：福建省、浙江省、安徽省、江苏省
+CITIES = [
+    # 福建省（9个）
+    "厦门", "福州", "泉州", "漳州", "莆田", "宁德", "南平", "三明", "龙岩",
+    # 浙江省（7个）
+    "杭州", "宁波", "温州", "绍兴", "嘉兴", "金华", "台州",
+    # 安徽省（8个）
+    "合肥", "芜湖", "蚌埠", "马鞍山", "安庆", "黄山", "滁州", "阜阳",
+    # 江苏省（8个）
+    "南京", "苏州", "无锡", "常州", "徐州", "南通", "扬州", "镇江",
+]
 
 JOB_POSITIONS = [
     "Java开发工程师", "Python开发工程师", "前端开发工程师", "后端开发工程师",
@@ -384,7 +393,27 @@ def generate_single_resume():
         self_evaluation = f"拥有{exp_years}年行业经验，技术视野开阔，具备方案设计与项目把控能力；逻辑清晰，善于定位并解决复杂技术问题；具备良好的团队管理与跨部门沟通能力，能够推动技术优化与业务落地；责任心强，追求技术与业务的平衡发展。"
 
     # 10. 求职意向
-    job_intention = f"期望岗位：{target_job}\n期望城市：{city}\n期望行业：互联网/信息技术/软件服务\n期望薪资：面议"
+    # 期望薪资：20%概率"面议"，80%按经验分层随机生成区间（元/月）
+    if random.random() < 0.2:
+        expected_salary = "面议"
+    else:
+        if exp_label == "应届生（无经验）":
+            salary_min, salary_max = 3000, 6000
+        elif exp_label == "应届生（有实习）":
+            salary_min, salary_max = 4000, 8000
+        elif exp_label == "1-3年经验":
+            salary_min, salary_max = 6000, 12000
+        elif exp_label == "3-5年经验":
+            salary_min, salary_max = 10000, 20000
+        else:  # 5年以上经验
+            salary_min, salary_max = 15000, 35000
+        # 按500元为步长随机生成区间
+        step = 500
+        low = random.randrange(salary_min, salary_max, step)
+        high = random.randrange(low + step, salary_max + step, step)
+        expected_salary = f"{low}-{high}元"
+
+    job_intention = f"期望岗位：{target_job}\n期望城市：{city}\n期望行业：互联网/信息技术/软件服务\n期望薪资：{expected_salary}"
 
     return {
         "姓名": name,
