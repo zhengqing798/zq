@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>10_回复积极企业TOP20_横向柱状图.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1500px;height:940px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '回复积极企业 TOP20（按回复积极度得分）',
+      subtext: '数据源：处理后数据 8836 条岗位的"公司名称 + 今日回复数"｜仅统计在招岗位 ≥ 5 个的公司（共 360 家）｜得分 = 50%×活跃岗位占比 + 30%×回复数据覆盖率 + 20%×平均回复强度，并按样本量平滑 n/(n+5)｜注："回复时效"字段 99.8% 为空，故以"今日回复数"为准',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 11, color: '#777'}
+    },
+    tooltip: {
+      trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var i = ps[0].dataIndex, m = [{"n": 8, "cov": 100.0, "avg": 50.0, "hot": 100.0, "nd": 8}, {"n": 23, "cov": 69.6, "avg": 18.0, "hot": 93.8, "nd": 16}, {"n": 9, "cov": 100.0, "avg": 40.4, "hot": 100.0, "nd": 9}, {"n": 20, "cov": 65.0, "avg": 20.3, "hot": 100.0, "nd": 13}, {"n": 9, "cov": 88.9, "avg": 50.0, "hot": 100.0, "nd": 8}, {"n": 15, "cov": 53.3, "avg": 50.0, "hot": 100.0, "nd": 8}, {"n": 13, "cov": 84.6, "avg": 35.9, "hot": 100.0, "nd": 11}, {"n": 72, "cov": 72.2, "avg": 20.8, "hot": 78.8, "nd": 52}, {"n": 23, "cov": 73.9, "avg": 25.4, "hot": 94.1, "nd": 17}, {"n": 20, "cov": 100.0, "avg": 6.0, "hot": 100.0, "nd": 20}, {"n": 15, "cov": 93.3, "avg": 26.4, "hot": 100.0, "nd": 14}, {"n": 23, "cov": 82.6, "avg": 29.9, "hot": 89.5, "nd": 19}, {"n": 22, "cov": 81.8, "avg": 23.9, "hot": 100.0, "nd": 18}, {"n": 14, "cov": 78.6, "avg": 50.0, "hot": 100.0, "nd": 11}, {"n": 14, "cov": 92.9, "avg": 40.5, "hot": 100.0, "nd": 13}, {"n": 27, "cov": 88.9, "avg": 35.5, "hot": 83.3, "nd": 24}, {"n": 24, "cov": 83.3, "avg": 28.0, "hot": 100.0, "nd": 20}, {"n": 86, "cov": 82.6, "avg": 41.8, "hot": 88.7, "nd": 71}, {"n": 36, "cov": 88.9, "avg": 45.1, "hot": 96.9, "nd": 32}, {"n": 33, "cov": 100.0, "avg": 43.9, "hot": 100.0, "nd": 33}][i];
+        return '<b>' + ps[0].name + '</b><br/>回复积极度得分：' + ps[0].value
+             + '<br/>在招岗位：' + m.n + ' 个（其中有回复数据 ' + m.nd + ' 个，覆盖率 ' + m.cov + '%）'
+             + '<br/>活跃岗位（今日回复≥5次）占比：' + m.hot + '%'
+             + '<br/>平均今日回复次数：' + m.avg;
+      }
+    },
+    grid: {left: 300, right: 130, top: 140, bottom: 50},
+    xAxis: {type: 'value', max: 100, name: '回复积极度得分', nameTextStyle: {fontSize: 12},
+            axisLabel: {fontSize: 12},
+            splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+    yAxis: {type: 'category', data: ["清华苏州环境创新研究院", "福建圣农集团", "江苏北人", "康龙化成", "福州九州联创通信科技有限公司", "京东集团", "锐仕方达人才科技集团有限公司", "三一集团有限公司", "科锐尔人力资源服务(苏州)有限公司", "福建汉特云智能科技有限公司", "天津艾迪智绘网络科技有限公司", "宁德时代新能源科技股份有限公司", "天阳科技", "跨越速运", "广东轻上生物科技有限公司", "鑫锡软件(朝阳)有限公司", "福州云之景科技有限公司", "软通动力信息技术(集团)股份有限公司", "外企德科数字技术有限公司", "厦门睿云联创新科技股份有限公司"],
+            axisLabel: {fontSize: 12, width: 280, overflow: 'truncate'},
+            axisTick: {show: false}},
+    series: [{
+      name: '回复积极度得分', type: 'bar', barMaxWidth: 20,
+      data: [61.5, 61.6, 61.8, 62.1, 62.1, 64.5, 64.8, 64.9, 65.2, 65.9, 66.4, 66.9, 68.5, 68.9, 69.3, 69.6, 71.3, 81.1, 81.8, 84.7],
+      itemStyle: {borderRadius: [0, 4, 4, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+          {offset: 0, color: '#95de64'}, {offset: 1, color: '#237804'}])},
+      label: {show: true, position: 'right', fontSize: 11,
+              formatter: function(p) { return p.value + '（' + [{"n": 8, "cov": 100.0, "avg": 50.0, "hot": 100.0, "nd": 8}, {"n": 23, "cov": 69.6, "avg": 18.0, "hot": 93.8, "nd": 16}, {"n": 9, "cov": 100.0, "avg": 40.4, "hot": 100.0, "nd": 9}, {"n": 20, "cov": 65.0, "avg": 20.3, "hot": 100.0, "nd": 13}, {"n": 9, "cov": 88.9, "avg": 50.0, "hot": 100.0, "nd": 8}, {"n": 15, "cov": 53.3, "avg": 50.0, "hot": 100.0, "nd": 8}, {"n": 13, "cov": 84.6, "avg": 35.9, "hot": 100.0, "nd": 11}, {"n": 72, "cov": 72.2, "avg": 20.8, "hot": 78.8, "nd": 52}, {"n": 23, "cov": 73.9, "avg": 25.4, "hot": 94.1, "nd": 17}, {"n": 20, "cov": 100.0, "avg": 6.0, "hot": 100.0, "nd": 20}, {"n": 15, "cov": 93.3, "avg": 26.4, "hot": 100.0, "nd": 14}, {"n": 23, "cov": 82.6, "avg": 29.9, "hot": 89.5, "nd": 19}, {"n": 22, "cov": 81.8, "avg": 23.9, "hot": 100.0, "nd": 18}, {"n": 14, "cov": 78.6, "avg": 50.0, "hot": 100.0, "nd": 11}, {"n": 14, "cov": 92.9, "avg": 40.5, "hot": 100.0, "nd": 13}, {"n": 27, "cov": 88.9, "avg": 35.5, "hot": 83.3, "nd": 24}, {"n": 24, "cov": 83.3, "avg": 28.0, "hot": 100.0, "nd": 20}, {"n": 86, "cov": 82.6, "avg": 41.8, "hot": 88.7, "nd": 71}, {"n": 36, "cov": 88.9, "avg": 45.1, "hot": 96.9, "nd": 32}, {"n": 33, "cov": 100.0, "avg": 43.9, "hot": 100.0, "nd": 33}][p.dataIndex].n + ' 个岗位）'; }}
+    }]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>

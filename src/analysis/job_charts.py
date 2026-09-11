@@ -205,6 +205,8 @@ CHART_FILES = [
     "05_经验薪资增长曲线_多折线图",
     "06_招聘活跃企业TOP榜_横向柱状图",
     "07_岗位分布_横向柱状图",
+    "10_回复积极企业TOP20_横向柱状图",
+    "11_薪资统计_直方图与分位数",
 ]
 
 EXPORT_SNIPPET = """
@@ -829,6 +831,212 @@ def chart7_job_distribution(rows, top_titles=10):
     return cats_sorted
 
 
+def parse_reply_count(text):
+    """'今日回复50+次' → 50；'今日回复3次' → 3；空 → None"""
+    t = (text or "").strip()
+    if not t:
+        return None
+    m = re.search(r"(\d+)\+?", t)
+    return int(m.group(1)) if m else None
+
+
+def chart10_company_reply(rows, min_jobs=5, top_n=20, smooth_k=5.0):
+    """10 回复积极企业 TOP20（横向柱状图）
+
+    口径：`回复时效` 字段 99.8% 为空，因此"回复积极度"以 `今日回复数` 为主：
+      原始分 = 50%×活跃岗位占比(今日回复≥5次) + 30%×回复数据覆盖率 + 20%×min(平均今日回复,50)/50
+      平滑得分 = 原始分 × n/(n+5)   ← 避免只有 5 个岗位的小公司刷到满分
+    只统计在招岗位 ≥ min_jobs 的公司。
+    """
+    comp = defaultdict(lambda: {"n": 0, "vals": []})
+    for r in rows:
+        c = (r.get("公司名称") or "").strip() or "(未填写)"
+        comp[c]["n"] += 1
+        v = parse_reply_count(r.get("今日回复数"))
+        if v is not None:
+            comp[c]["vals"].append(v)
+
+    scored = []
+    for c, d in comp.items():
+        n, vals = d["n"], d["vals"]
+        if n < min_jobs:
+            continue
+        cov = len(vals) / n
+        avg = sum(vals) / len(vals) if vals else 0.0
+        hot = (sum(1 for v in vals if v >= 5) / len(vals)) if vals else 0.0
+        raw = 0.5 * hot * 100 + 0.3 * cov * 100 + 0.2 * min(avg, 50) / 50 * 100
+        scored.append({"公司": c, "岗位数": n, "有回复数据": len(vals), "覆盖率": cov,
+                       "平均今日回复": avg, "活跃岗位数": sum(1 for v in vals if v >= 5),
+                       "活跃占比": hot, "原始分": raw, "得分": raw * n / (n + smooth_k)})
+    scored.sort(key=lambda x: -x["得分"])
+    top = scored[:top_n]
+
+    write_csv("10_回复积极企业TOP20_横向柱状图.csv",
+              ["排名", "公司名称", "在招岗位数", "有回复数据岗位数", "回复数据覆盖率(%)",
+               "活跃岗位数(今日回复≥5次)", "活跃岗位占比(%)", "平均今日回复次数", "回复积极度得分"],
+              [[i + 1, s["公司"], s["岗位数"], s["有回复数据"], round(s["覆盖率"] * 100, 1),
+                s["活跃岗位数"], round(s["活跃占比"] * 100, 1), round(s["平均今日回复"], 1),
+                round(s["得分"], 1)] for i, s in enumerate(top)])
+
+    names = [s["公司"] for s in top][::-1]
+    vals = [round(s["得分"], 1) for s in top][::-1]
+    meta_arr = [{"n": s["岗位数"], "cov": round(s["覆盖率"] * 100, 1),
+                 "avg": round(s["平均今日回复"], 1), "hot": round(s["活跃占比"] * 100, 1),
+                 "nd": s["有回复数据"]} for s in top][::-1]
+    option = """
+  {
+    title: {
+      text: '回复积极企业 TOP__TOPN__（按回复积极度得分）',
+      subtext: '数据源：处理后数据 __TOTAL__ 条岗位的"公司名称 + 今日回复数"｜仅统计在招岗位 ≥ __MINJOBS__ 个的公司（共 __NC__ 家）｜得分 = 50%×活跃岗位占比 + 30%×回复数据覆盖率 + 20%×平均回复强度，并按样本量平滑 n/(n+5)｜注："回复时效"字段 99.8% 为空，故以"今日回复数"为准',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 11, color: '#777'}
+    },
+    tooltip: {
+      trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var i = ps[0].dataIndex, m = __META__[i];
+        return '<b>' + ps[0].name + '</b><br/>回复积极度得分：' + ps[0].value
+             + '<br/>在招岗位：' + m.n + ' 个（其中有回复数据 ' + m.nd + ' 个，覆盖率 ' + m.cov + '%）'
+             + '<br/>活跃岗位（今日回复≥5次）占比：' + m.hot + '%'
+             + '<br/>平均今日回复次数：' + m.avg;
+      }
+    },
+    grid: {left: 300, right: 130, top: 140, bottom: 50},
+    xAxis: {type: 'value', max: 100, name: '回复积极度得分', nameTextStyle: {fontSize: 12},
+            axisLabel: {fontSize: 12},
+            splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+    yAxis: {type: 'category', data: __NAMES__,
+            axisLabel: {fontSize: 12, width: 280, overflow: 'truncate'},
+            axisTick: {show: false}},
+    series: [{
+      name: '回复积极度得分', type: 'bar', barMaxWidth: 20,
+      data: __VALS__,
+      itemStyle: {borderRadius: [0, 4, 4, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+          {offset: 0, color: '#95de64'}, {offset: 1, color: '#237804'}])},
+      label: {show: true, position: 'right', fontSize: 11,
+              formatter: function(p) { return p.value + '（' + __META__[p.dataIndex].n + ' 个岗位）'; }}
+    }]
+  }
+"""
+    option = (option.replace("__NAMES__", js(names))
+                    .replace("__VALS__", js(vals))
+                    .replace("__META__", js(meta_arr))
+                    .replace("__TOTAL__", str(len(rows)))
+                    .replace("__TOPN__", str(len(top)))
+                    .replace("__MINJOBS__", str(min_jobs))
+                    .replace("__NC__", str(len(scored))))
+    html_page(os.path.join(OUT_DIR, "10_回复积极企业TOP20_横向柱状图.html"), 1500, 940, option)
+    return top
+
+
+def chart11_salary_stats(rows, bin_size=1000, upper=20000):
+    """11 薪资统计（直方图 + 累计占比曲线 + 关键分位数）"""
+    vals = sorted(v for v in (parse_salary(r.get("岗位薪资")) for r in rows) if v)
+    n = len(vals)
+
+    def pct(p):
+        return vals[min(int(n * p / 100), n - 1)]
+
+    stats = [("最小值", vals[0]), ("P10", pct(10)), ("P25", pct(25)), ("中位数", pct(50)),
+             ("平均数", sum(vals) / n), ("P75", pct(75)), ("P90", pct(90)), ("最大值", vals[-1])]
+
+    labels, counts = [], []
+    for lo in range(0, upper, bin_size):
+        labels.append("%d-%dk" % (lo // 1000, (lo + bin_size) // 1000))
+        counts.append(sum(1 for v in vals if lo <= v < lo + bin_size))
+    labels.append("≥%dk" % (upper // 1000))
+    counts.append(sum(1 for v in vals if v >= upper))
+    cum, acc = [], 0
+    for c in counts:
+        acc += c
+        cum.append(round(acc / n * 100, 2))
+
+    write_csv("11_薪资统计_直方图与分位数.csv",
+              ["类型", "项目", "数值"],
+              [["统计量", k, round(v)] for k, v in stats] +
+              [["分箱岗位数(元/月)", lb, c] for lb, c in zip(labels, counts)] +
+              [["分箱累计占比(%)", lb, c] for lb, c in zip(labels, cum)])
+
+    mean, med = sum(vals) / n, pct(50)
+
+    def idx_of(v):
+        return min(int(v // bin_size), len(labels) - 1)
+
+    option = """
+  {
+    title: {
+      text: '全部岗位薪资统计（直方图 + 累计分布 + 关键分位数）',
+      subtext: '数据源：处理后数据 __TOTAL__ 条岗位中薪资可解析的 __N__ 条（__PCT__%）｜直方图按 1000 元/月分箱（≥__UPPER__ 元并入末档），折线为累计占比（右轴），红色虚线标出中位数与平均数',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var s = ps[0].name + '<br/>';
+        for (var i = 0; i < ps.length; i++) {
+          s += ps[i].marker + ps[i].seriesName + '：' + ps[i].value + (i === 0 ? ' 个岗位' : '%') + '<br/>';
+        }
+        return s;
+      }},
+    grid: [{left: 80, right: '52%', top: 130, bottom: 100},
+           {left: '56%', right: 120, top: 130, bottom: 60}],
+    xAxis: [
+      {type: 'category', gridIndex: 0, data: __LABELS__,
+       axisLabel: {fontSize: 10, rotate: 45, interval: 0}, name: '月薪区间', nameGap: 66,
+       nameLocation: 'middle', nameTextStyle: {fontSize: 12}},
+      {type: 'value', gridIndex: 1, name: '元/月', nameTextStyle: {fontSize: 12},
+       axisLabel: {fontSize: 11}, splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}}
+    ],
+    yAxis: [
+      {type: 'value', gridIndex: 0, name: '岗位数', nameTextStyle: {fontSize: 12},
+       axisLabel: {fontSize: 11}, splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+      {type: 'value', gridIndex: 0, name: '累计占比(%)', max: 100, nameTextStyle: {fontSize: 12},
+       axisLabel: {fontSize: 11, formatter: '{value}%'}, splitLine: {show: false}},
+      {type: 'category', gridIndex: 1, data: __SNAMES__, axisTick: {show: false},
+       axisLabel: {fontSize: 12}}
+    ],
+    series: [
+      {name: '岗位数', type: 'bar', xAxisIndex: 0, yAxisIndex: 0, data: __COUNTS__,
+       itemStyle: {borderRadius: [3, 3, 0, 0],
+         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+           {offset: 0, color: '#9ecae1'}, {offset: 1, color: '#3182bd'}])},
+       markLine: {symbol: 'none', label: {fontSize: 11, position: 'insideEndTop'},
+         data: [{name: '中位数 __MED__ 元', xAxis: __MEDIDX__},
+                {name: '平均数 __MEAN__ 元', xAxis: __MEANIDX__}],
+         lineStyle: {type: 'dashed', color: '#e8684a', width: 1.5}}},
+      {name: '累计占比', type: 'line', xAxisIndex: 0, yAxisIndex: 1, data: __CUM__,
+       smooth: true, symbolSize: 5, lineStyle: {width: 2, color: '#fa8c16'},
+       itemStyle: {color: '#fa8c16'}},
+      {name: '统计量', type: 'bar', xAxisIndex: 1, yAxisIndex: 2, data: __SVALS__,
+       barMaxWidth: 22,
+       itemStyle: {borderRadius: [0, 4, 4, 0],
+         color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+           {offset: 0, color: '#ffd591'}, {offset: 1, color: '#d46b08'}])},
+       label: {show: true, position: 'right', fontSize: 11,
+               formatter: function(p) { return p.value.toLocaleString() + ' 元'; }}}
+    ]
+  }
+"""
+    option = (option.replace("__LABELS__", js(labels))
+                    .replace("__COUNTS__", js(counts))
+                    .replace("__CUM__", js(cum))
+                    .replace("__SNAMES__", js([k for k, _ in stats][::-1]))
+                    .replace("__SVALS__", js([round(v) for _, v in stats][::-1]))
+                    .replace("__MED__", "{:,}".format(int(med)))
+                    .replace("__MEAN__", "{:,}".format(int(mean)))
+                    .replace("__MEDIDX__", str(idx_of(med)))
+                    .replace("__MEANIDX__", str(idx_of(mean)))
+                    .replace("__TOTAL__", str(len(rows)))
+                    .replace("__N__", str(n))
+                    .replace("__PCT__", "%.2f" % (n / len(rows) * 100))
+                    .replace("__UPPER__", "{:,}".format(upper)))
+    html_page(os.path.join(OUT_DIR, "11_薪资统计_直方图与分位数.html"), 1500, 840, option)
+    return stats
+
+
 def main():
     src = pick_source()
     rows = load_rows(src)
@@ -845,6 +1053,11 @@ def main():
     cats = chart7_job_distribution(rows)
     print("  岗位大类分布:", ", ".join("%s %d(%.1f%%)" % (c, n, n / len(rows) * 100)
                                        for c, n in cats))
+    top_rep = chart10_company_reply(rows)
+    print("  回复积极企业 Top5:", "、".join("%s %.1f分(%d岗)" % (s["公司"][:12], s["得分"], s["岗位数"])
+                                          for s in top_rep[:5]))
+    st = chart11_salary_stats(rows)
+    print("  薪资统计:", "、".join("%s %s" % (k, format(int(v), ",")) for k, v in st))
     print("输出目录:", OUT_DIR)
 
     if "--no-png" not in sys.argv:

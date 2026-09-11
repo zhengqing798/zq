@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>11_薪资统计_直方图与分位数.html</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;overflow:hidden;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  #chart{width:1500px;height:840px;}
+</style>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+  var chart = echarts.init(document.getElementById('chart'), null, {devicePixelRatio: 2});
+  var option = 
+  {
+    title: {
+      text: '全部岗位薪资统计（直方图 + 累计分布 + 关键分位数）',
+      subtext: '数据源：处理后数据 8836 条岗位中薪资可解析的 8833 条（99.97%）｜直方图按 1000 元/月分箱（≥20,000 元并入末档），折线为累计占比（右轴），红色虚线标出中位数与平均数',
+      left: 'center', top: 12,
+      textStyle: {fontSize: 22, fontWeight: 'bold'},
+      subtextStyle: {fontSize: 12, color: '#777'}
+    },
+    tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'},
+      formatter: function(ps) {
+        var s = ps[0].name + '<br/>';
+        for (var i = 0; i < ps.length; i++) {
+          s += ps[i].marker + ps[i].seriesName + '：' + ps[i].value + (i === 0 ? ' 个岗位' : '%') + '<br/>';
+        }
+        return s;
+      }},
+    grid: [{left: 80, right: '52%', top: 130, bottom: 100},
+           {left: '56%', right: 120, top: 130, bottom: 60}],
+    xAxis: [
+      {type: 'category', gridIndex: 0, data: ["0-1k", "1-2k", "2-3k", "3-4k", "4-5k", "5-6k", "6-7k", "7-8k", "8-9k", "9-10k", "10-11k", "11-12k", "12-13k", "13-14k", "14-15k", "15-16k", "16-17k", "17-18k", "18-19k", "19-20k", "≥20k"],
+       axisLabel: {fontSize: 10, rotate: 45, interval: 0}, name: '月薪区间', nameGap: 66,
+       nameLocation: 'middle', nameTextStyle: {fontSize: 12}},
+      {type: 'value', gridIndex: 1, name: '元/月', nameTextStyle: {fontSize: 12},
+       axisLabel: {fontSize: 11}, splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}}
+    ],
+    yAxis: [
+      {type: 'value', gridIndex: 0, name: '岗位数', nameTextStyle: {fontSize: 12},
+       axisLabel: {fontSize: 11}, splitLine: {lineStyle: {type: 'dashed', color: '#e8e8e8'}}},
+      {type: 'value', gridIndex: 0, name: '累计占比(%)', max: 100, nameTextStyle: {fontSize: 12},
+       axisLabel: {fontSize: 11, formatter: '{value}%'}, splitLine: {show: false}},
+      {type: 'category', gridIndex: 1, data: ["最大值", "P90", "P75", "平均数", "中位数", "P25", "P10", "最小值"], axisTick: {show: false},
+       axisLabel: {fontSize: 12}}
+    ],
+    series: [
+      {name: '岗位数', type: 'bar', xAxisIndex: 0, yAxisIndex: 0, data: [0, 11, 77, 179, 481, 880, 1421, 1480, 935, 781, 1164, 401, 439, 105, 20, 220, 10, 57, 3, 0, 169],
+       itemStyle: {borderRadius: [3, 3, 0, 0],
+         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+           {offset: 0, color: '#9ecae1'}, {offset: 1, color: '#3182bd'}])},
+       markLine: {symbol: 'none', label: {fontSize: 11, position: 'insideEndTop'},
+         data: [{name: '中位数 7,671 元', xAxis: 7},
+                {name: '平均数 8,392 元', xAxis: 8}],
+         lineStyle: {type: 'dashed', color: '#e8684a', width: 1.5}}},
+      {name: '累计占比', type: 'line', xAxisIndex: 0, yAxisIndex: 1, data: [0.0, 0.12, 1.0, 3.02, 8.47, 18.43, 34.52, 51.27, 61.86, 70.7, 83.88, 88.42, 93.39, 94.58, 94.8, 97.29, 97.41, 98.05, 98.09, 98.09, 100.0],
+       smooth: true, symbolSize: 5, lineStyle: {width: 2, color: '#fa8c16'},
+       itemStyle: {color: '#fa8c16'}},
+      {name: '统计量', type: 'bar', xAxisIndex: 1, yAxisIndex: 2, data: [80004, 12000, 10000, 8392, 7671, 6006, 5000, 1000],
+       barMaxWidth: 22,
+       itemStyle: {borderRadius: [0, 4, 4, 0],
+         color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+           {offset: 0, color: '#ffd591'}, {offset: 1, color: '#d46b08'}])},
+       label: {show: true, position: 'right', fontSize: 11,
+               formatter: function(p) { return p.value.toLocaleString() + ' 元'; }}}
+    ]
+  }
+;
+  chart.setOption(option);
+  window.addEventListener('resize', function(){ chart.resize(); });
+</script>
+</body>
+</html>
