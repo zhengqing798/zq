@@ -64,7 +64,9 @@ zq/
 ├── tests/                     # 任务12：pytest 测试
 ├── scripts/                   # 一键脚本（初始化/运行/部署）
 ├── notebooks/                 # 探索性分析 notebook（可选）
-├── reports/figures/           # 图表输出目录
+├── reports/                   # 可视化输出目录
+│   ├── 数据看板.html           # ★ 数据看板：16 张图 + 逐图解释（任务3–5 汇总，双击可看）
+│   └── figures/               # 图表三件套（交互 HTML + 高清 PNG + 数据 CSV）
 ├── docker/                    # 任务12：Dockerfile + docker-compose.yml
 └── .github/workflows/         # CI 配置（可选）
 ```
