@@ -283,10 +283,11 @@ def main():
     print("  最优：depth=%d lr=%.2f n_est=%d（best_iter=%d，验证F1=%.5f）" % (
         best_rec["max_depth"], best_rec["learning_rate"], best_rec["n_estimators(上限)"],
         best_rec["best_iteration"], best_rec["验证集F1"]))
-    # v1 旧记录改名保留（历史可追溯），写入 v2 记录
+    # v1 旧记录改名保留（历史可追溯），写入 v2 记录；已存在 _v1 则不再覆盖
     old = os.path.join(OUT_DIR, "模型调参记录.csv")
-    if os.path.exists(old):
-        os.replace(old, os.path.join(OUT_DIR, "模型调参记录_v1.csv"))
+    v1 = os.path.join(OUT_DIR, "模型调参记录_v1.csv")
+    if os.path.exists(old) and not os.path.exists(v1):
+        os.replace(old, v1)
     tune_df.to_csv(old, index=False, encoding="utf-8-sig")
 
     # ---------- 主实验（10% 标签噪声 + 调参后的 XGBoost） ----------
