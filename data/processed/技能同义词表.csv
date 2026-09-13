@@ -1,0 +1,68 @@
+规范名,同义词变体,档位,说明
+kubernetes,K8s|K8S|k8s|Kubernetes|k8s集群,保守,缩写与大小写
+springboot,SpringBoot|Spring Boot|springboot|SpringBoot2|SpringBoot2.x|Spring Boot 2,保守,中间空格与版本号
+springcloud,SpringCloud|Spring Cloud|springcloud,保守,中间空格
+mybatis,MyBatis|Mybatis|mybatis|iBatis,保守,大小写
+mysql,MySQL|mysql|Mysql|MySQL5.7|MySQL8,保守,大小写与版本号
+redis,Redis|redis|Redis集群,保守,大小写
+mongodb,MongoDB|mongodb|Mongo|Mongo DB,保守,中间空格
+postgresql,PostgreSQL|postgresql|PostgreSQL数据库,保守,大小写
+oracle,Oracle|oracle|Oracle数据库,保守,大小写
+nginx,Nginx|nginx|NGINX,保守,大小写
+linux,Linux|linux|LINUX|Linux系统,保守,大小写
+docker,Docker|docker|DOCKER,保守,大小写
+python,Python|python|Python3|Python2|Python3.x,保守,大小写与版本号
+java,Java|java|JAVA,保守,大小写
+javascript,JavaScript|javascript|JS|js|JavaScript ES6,保守,大小写与通行缩写
+typescript,TypeScript|typescript|TS|ts,保守,大小写与通行缩写
+vue,Vue|vue|Vue.js|Vue2|Vue3|Vuejs,保守,版本与后缀
+react,React|react|React.js|ReactJS,保守,后缀
+html,HTML|html|HTML5|html5,保守,版本号
+css,CSS|css|CSS3|css3,保守,版本号
+cplusplus,C++|c++|CPP|cpp,保守,符号与大小写
+csharp,C#|c#|CSharp,保守,符号与大小写
+golang,Go|Golang|golang|GO,保守,大小写
+kafka,Kafka|kafka|KAFKA,保守,大小写
+rabbitmq,RabbitMQ|rabbitmq|Rabbit MQ,保守,中间空格
+hive,Hive|hive|HiveSQL,保守,大小写
+tensorflow,TensorFlow|tensorflow|TensorFlow2,保守,大小写
+pytorch,PyTorch|pytorch|Torch|torch,保守,大小写
+shell,Shell|shell|Shell脚本|Linux Shell,保守,大小写
+git,Git|git|GIT,保守,大小写
+jenkins,Jenkins|jenkins,保守,大小写
+jmeter,JMeter|jmeter|Jmeter,保守,大小写
+selenium,Selenium|selenium,保守,大小写
+testng,TestNG|testng|TestNg,保守,大小写
+postman,Postman|postman,保守,大小写
+appium,Appium|appium,保守,大小写
+prometheus,Prometheus|prometheus,保守,大小写
+zabbix,Zabbix|zabbix,保守,大小写
+ansible,Ansible|ansible,保守,大小写
+pandas,Pandas|pandas,保守,大小写
+numpy,NumPy|numpy|Numpy,保守,大小写
+excel,Excel|excel|EXCEL|Microsoft Excel,保守,大小写
+powerbi,Power BI|PowerBI|powerbi|Power BI Desktop,保守,中间空格
+tableau,Tableau|tableau,保守,大小写
+django,Django|django,保守,大小写
+flask,Flask|flask,保守,大小写
+fastapi,FastAPI|fastapi,保守,大小写
+celery,Celery|celery,保守,大小写
+sql,SQL|sql|Sql|SQL语句,保守,仅大小写（不与具体数据库产品合并）
+微服务,微服务|微服务架构|Microservice|Microservices,保守,同一概念不同写法
+功能测试,功能测试|功能测试用例,保守,同一概念不同粒度写法
+性能测试,性能测试|性能压测,保守,同一概念不同写法
+接口测试,接口测试|API接口测试,保守,同一概念不同写法
+测试用例设计,测试用例设计|用例设计|测试用例,保守,同一概念不同写法
+缺陷管理,缺陷管理|bug管理|Bug管理,保守,同一概念不同写法
+数据结构,数据结构|数据结构与算法,保守,同一概念不同写法
+机器学习,机器学习|Machine Learning,保守,中英文
+深度学习,深度学习|Deep Learning,保守,中英文
+计算机视觉,计算机视觉|Computer Vision,保守,中英文
+数据可视化,数据可视化|数据可视化分析,保守,同一概念不同写法
+网络运维,网络运维|网络维护,保守,同一概念不同写法
+数据库,数据库|MySQL|Oracle|SQL Server|PostgreSQL,宽松,上位词合并会误判（默认不应用）
+自动化测试,自动化测试|Selenium|Appium|JMeter,宽松,方向词与工具合并会误判（默认不应用）
+云计算,云计算|阿里云|华为云|腾讯云,宽松,上位词合并（默认不应用）
+大数据,大数据|Hadoop|Spark|Hive,宽松,上位词合并（默认不应用）
+前端,前端|前端开发|Web前端,宽松,与直接命名技能不同粒度（默认不应用）
+后端,后端|后端开发|服务端,宽松,与直接命名技能不同粒度（默认不应用）

@@ -40,3 +40,7 @@ htmlcov/
 
 # ÄäÃûÌ½²â/²¹ÁĞÓÃÅäÖÃ
 .zhaopin_anon/
+
+# Large derived tables (regenerable by scripts; kept out of git)
+data/processed/åŒ¹é…æ ·æœ¬_æ ‡ç­¾æ•°æ®.csv
+data/processed/åŒ¹é…ç‰¹å¾_å…¨é‡æ ·æœ¬.csv
