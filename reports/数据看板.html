@@ -51,7 +51,8 @@
 <div class="kpi"><div class="kpi-label">覆盖城市 / 省份</div><div class="kpi-value">16 / 4</div><div class="kpi-sub">福建·浙江·江苏·安徽</div></div>
 <div class="kpi"><div class="kpi-label">月薪中位数 / 平均</div><div class="kpi-value">7,671 / 8,392</div><div class="kpi-sub">元/月（P25-P75：6,006-10,000）</div></div>
 <div class="kpi"><div class="kpi-label">技能词 / 企业数</div><div class="kpi-value">4,327 / 4,096</div><div class="kpi-sub">词云已剔除福利与行业词</div></div>
-<div class="kpi"><div class="kpi-label">可用简历</div><div class="kpi-value">500</div><div class="kpi-sub">份（结构化 44 列，供人岗匹配）</div></div></div>
+<div class="kpi"><div class="kpi-label">可用简历</div><div class="kpi-value">500</div><div class="kpi-sub">份（结构化 47 列 + 分词 20 列）</div></div>
+<div class="kpi"><div class="kpi-label">匹配评分模型</div><div class="kpi-value">XGBoost</div><div class="kpi-sub">T1 MAE 0.827 ｜ T2 NDCG@10 0.867（主口径）</div></div></div>
 </header>
 <main>
     <section>
@@ -213,11 +214,80 @@
         <div class="links">交互版（可悬浮查看明细）：<a href="figures/福建省地图_岗位数量分布.html" target="_blank">打开 福建省地图_岗位数量分布.html</a></div>
       </div>
     </section>
+    <section>
+      <h2>五、评分模型（任务5）</h2>
+      <p class="sec-sub">分：匹配分怎么算、模型学到什么、可信到什么程度</p>
+      <div class="card">
+        <div class="card-head">
+          <span class="badge">图 12</span>
+          <h3>模型指标对比（2 口径 × 2 任务 × 各对照实验）</h3>
+          <span class="hl">四个面板里，XGBoost 全胜</span>
+        </div>
+        <img src="figures/12_模型对比_柱状图.png" alt="模型指标对比（2 口径 × 2 任务 × 各对照实验）" loading="lazy">
+        <div class="explain">
+          <div class="col"><h4>数据结论</h4><ul><li>**T1 回归**（主口径测试集 MAE，越低越好）：XGBoost **0.827**、随机森林 1.175、SVR 2.057、线性回归 4.755、均值基线 8.711</li><li>**T2 二分类**（阈值 ≥65，正样本 16.6%，PR-AUC 越高越好）：XGBoost **0.965**、随机森林 0.949、逻辑回归/LinearSVC 0.746、随机基线 0.181</li><li>两个任务 × 两个划分口径，最优模型都是 **XGBoost**（按验证集指标选出，测试集不参与选择）</li></ul></div>
+          <div class="col"><h4>对匹配/推荐系统的启示</h4><ul><li>线上打分直接用 XGBoost；线性模型只适合做可解释性对照</li><li>规则里含阈值与比值关系（经验缺口比例、距离分档、薪资比）→ **强非线性**，必须用树模型</li><li>正样本仅 16.6%，**不报准确率**，用 PR-AUC 与排序指标（P@10 / MRR@10 / NDCG@10）衡量</li></ul></div>
+        </div>
+        
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="badge">图 13</span>
+          <h3>预测值 vs 真实值（纯净标签 / 噪声标签）</h3>
+          <span class="hl">特征几乎能还原规则；模型已打到噪声下限</span>
+        </div>
+        <img src="figures/13_预测vs真实_散点图.png" alt="预测值 vs 真实值（纯净标签 / 噪声标签）" loading="lazy">
+        <div class="explain">
+          <div class="col"><h4>数据结论</h4><ul><li>左图**纯净标签**（无噪声）：MAE **0.370**、R² **0.997** —— 这是「特征充分性上界」，说明特征足以还原六维规则</li><li>右图**噪声标签**（最终标签，10% 配对加噪）：MAE **0.827**</li><li>0.827 ≈ 0.370（模型残差）+ **0.48**（噪声贡献 = 10%×E|N(0,6)|），即模型已达噪声天花板</li></ul></div>
+          <div class="col"><h4>对匹配/推荐系统的启示</h4><ul><li>不要再靠调参把 MAE 往下压：那 0.48 分是标签自带的噪声，不是模型能力问题</li><li>标签由六维加权规则生成（蒸馏），指标反映**对规则的拟合程度**，不等于对真实人岗匹配的判断力</li><li>模型泛化能力要看「仅 3 个文本相似度特征」那组对照（MAE 7.906、PR-AUC 0.380）</li></ul></div>
+        </div>
+        
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="badge">图 14</span>
+          <h3>残差分布（4 个回归模型）</h3>
+          <span class="hl">线性回归的长尾会把 65 分判定线两侧搞混</span>
+        </div>
+        <img src="figures/14_残差分布_直方图.png" alt="残差分布（4 个回归模型）" loading="lazy">
+        <div class="explain">
+          <div class="col"><h4>数据结论</h4><ul><li>XGBoost 残差集中在 **±1 分**内；随机森林 ±3 分；SVR 与线性回归尾部拖到 **±10 分以上**（纵轴对数）</li><li>**65 分是匹配/不匹配的判定线**，残差大的模型在这条线附近误判率显著更高</li><li>排序指标印证：NDCG@10 XGBoost **0.867** vs 线性回归 0.568</li></ul></div>
+          <div class="col"><h4>对匹配/推荐系统的启示</h4><ul><li>推荐列表排序对残差敏感，**选模型要看排序指标**，不能只看 MAE</li><li>对 60–70 分区间（临界带）的候选，产品上建议标注「临界」并提示人工复核</li></ul></div>
+        </div>
+        
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="badge">图 15</span>
+          <h3>特征重要性 Top15（XGBoost 回归）</h3>
+          <span class="hl">经验与地域主导，技能只排第 10</span>
+        </div>
+        <img src="figures/15_特征重要性Top15_横向柱状图.png" alt="特征重要性 Top15（XGBoost 回归）" loading="lazy">
+        <div class="explain">
+          <div class="col"><h4>数据结论</h4><ul><li>Top4：**是否应届 0.217**、**是否同城 0.189**、**简历工作年限 0.132**、距离km 0.089</li><li>「岗位经验缺失」（A2 字段错位标记）排第 5（0.073）—— 有 **2,182 个岗位（24.69%）** 的经验要求不可用</li><li>**技能命中数只排第 10（0.022）**；技能分均值 4.13/100，对总分平均贡献约 **1.2 分**（名义权重 0.30）</li></ul></div>
+          <div class="col"><h4>对匹配/推荐系统的启示</h4><ul><li>⚠ **更正**：本看板前面「技能是区分力最强的维度」的说法，在任务5 实测中**不成立** —— 合成简历只有 74 个技能词，与真实岗位标签重叠极低，且岗位技能标签质量差</li><li>要让技能真正起作用，需先**扩充简历技能词表**或启用技能同义词库（宽松档已备好、默认未启用）</li><li>地域维度区分度有限（简历居住地与期望城市 100% 一致），方差只来自岗位城市</li></ul></div>
+        </div>
+        
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="badge">图 16</span>
+          <h3>分类 PR 曲线（4 个分类模型）</h3>
+          <span class="hl">推荐列表前几名几乎不推错，但覆盖有限</span>
+        </div>
+        <img src="figures/16_分类PR曲线_折线图.png" alt="分类 PR 曲线（4 个分类模型）" loading="lazy">
+        <div class="explain">
+          <div class="col"><h4>数据结论</h4><ul><li>主口径测试集（正样本 18.1%）：XGBoost AP **0.965**、随机森林 0.949、逻辑回归/LinearSVC 0.746、随机基线 0.181</li><li>排序质量：**P@10 = 0.671**、R@10 = 0.525、**MRR@10 = 0.911**、**NDCG@10 = 0.867**</li><li>按岗位口径（冷启动）NDCG@10 达 0.952，但该口径下简历在训练集出现过 → 属乐观偏差</li></ul></div>
+          <div class="col"><h4>对匹配/推荐系统的启示</h4><ul><li>首页给 **5–10 个推荐位**最合适（P@10 0.671）；要覆盖更多正样本就得牺牲精确率（R@10 仅 0.525）</li><li>对外汇报统一用**主口径**（测试集是完全陌生的简历），指标更保守可信</li><li>模型文件：<code>models/按简历_T1回归_best_XGBoost.joblib</code>、<code>models/按简历_T2分类_best_XGBoost.joblib</code></li></ul></div>
+        </div>
+        
+      </div>
+    </section>
 </main>
 <footer>
   <p><b>数据口径</b>：地域以 <code>岗位地区</code> 首个城市词为准；薪资为月薪（区间取中值，日薪×21.75、时薪×8×21.75），可解析率 99.97%；技能 = <code>技能标签</code> ∪ 职位描述分词中命中技能词典（74 项技术词）的词汇。</p>
-  <p><b>生成方式</b>：<code>python src/analysis/job_charts.py</code>（图1~7、10、11）｜<code>python src/analysis/map_job_distribution.py</code>（图8、9）｜本看板 <code>python src/analysis/build_dashboard.py</code>。</p>
-  <p><b>数据文件</b>：<code>reports/figures/*.csv</code>（每张图的数据）｜<code>data/processed/</code>（清洗、分词与薪资规范化数据）｜<code>docs/可视化分析报告.md</code>（详细文字版）。</p>
+  <p><b>生成方式</b>：<code>python src/analysis/job_charts.py</code>（图1~7、10、11）｜<code>python src/analysis/map_job_distribution.py</code>（图8、9）｜<code>python src/models/scoring/model_charts.py</code>（图12~16 模型评估图）｜本看板 <code>python src/analysis/build_dashboard.py</code>。</p>
+  <p><b>数据文件</b>：<code>reports/figures/*.csv</code>（每张图的数据）｜<code>data/processed/</code>（清洗、分词、薪资规范化数据与模型评估结果）｜<code>docs/可视化分析报告.md</code>（业务图文字版）｜<code>docs/评分模型文档.md</code>（任务5 模型文字版：标签口径、36 特征、划分、全部指标与局限）。</p>
 </footer>
 </body>
 </html>
