@@ -1,0 +1,17 @@
+﻿工具调用序列,问题数
+search_kb → search_kb,5
+city_list → search_jobs,3
+search_kb → cluster_profile,3
+search_kb → filter_jobs,3
+search_jobs → city_list,2
+filter_jobs → city_list,2
+cluster_profile,2
+search_kb → kb_stats,2
+search_jobs,1
+search_jobs → filter_jobs,1
+search_jobs → city_list → filter_jobs,1
+salary_stats,1
+salary_rank,1
+salary_stats → search_kb,1
+（未调用工具）,1
+city_list,1

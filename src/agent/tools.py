@@ -68,6 +68,13 @@ TOOLS = [
         "description": "返回岗位库覆盖的城市列表与各省岗位数（回答「覆盖哪些城市」「有没有某城市」时先调它）。",
         "parameters": {"type": "object", "properties": {}, "required": []}}},
     {"type": "function", "function": {
+        "name": "search_kb",
+        "description": "检索**结论卡**（项目报告里的统计结论与口径）：问「中位数多少」「占比多少」「岗位分几类」"
+                       "「评分模型和匹配规则哪个好」「某指标怎么算」这类**统计/口径/方法论**问题必须先调它。",
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string", "description": "检索语句，尽量复述用户的统计意图"},
+            "k": {"type": "integer", "description": "返回条数，默认 4"}}, "required": ["query"]}}},
+    {"type": "function", "function": {
         "name": "kb_stats",
         "description": "返回知识库自身的构成与检索评估指标（卡片数、Embedding 模型、召回 P@5 等）。",
         "parameters": {"type": "object", "properties": {}, "required": []}}},
@@ -171,6 +178,16 @@ def t_city_list():
             "来源": ["zhaopin_jobs_cleaned_seg.csv"]}
 
 
+def t_search_kb(query, k=4):
+    """检索结论卡（统计结论与口径）——Agent 回答"中位数/占比/口径/模型对比"这类问题的依据"""
+    from query import get_retriever
+    hits = get_retriever().search(query, k=int(k), mode="conclusions", fallback=False)
+    data = [{"结论": h["文本"], "来源": h.get("来源") or "", "类型": h["类型"], "相似度": h["score"]}
+            for h in hits]
+    return {"ok": bool(data), "summary": "检索到 %d 条结论卡" % len(data), "data": data,
+            "来源": list(dict.fromkeys(h["来源"] for h in hits if h.get("来源")))}
+
+
 def t_kb_stats():
     import json
     cards = json.load(open(os.path.join(ROOT, "data", "rag", "jobs_kb_cards.json"), encoding="utf-8"))
@@ -196,7 +213,7 @@ def t_kb_stats():
 
 DISPATCH = {"search_jobs": t_search_jobs, "filter_jobs": t_filter_jobs, "salary_stats": t_salary_stats,
             "salary_rank": t_salary_rank, "city_list": t_city_list, "match_resume": t_match_resume,
-            "cluster_profile": t_cluster_profile, "kb_stats": t_kb_stats}
+            "cluster_profile": t_cluster_profile, "search_kb": t_search_kb, "kb_stats": t_kb_stats}
 
 
 def call_tool(name, args):

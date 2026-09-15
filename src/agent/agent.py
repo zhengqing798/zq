@@ -114,8 +114,18 @@ class Agent:
                 except json.JSONDecodeError:
                     args = {}
                 res = call_tool(name, args)
+                payload = res.get("data")
+                ids, nms = [], []
+                if isinstance(payload, list):
+                    for d in payload:
+                        if isinstance(d, dict):
+                            if d.get("岗位ID"):
+                                ids.append(d["岗位ID"])
+                            if d.get("岗位名称") or d.get("簇名"):
+                                nms.append(d.get("岗位名称") or d.get("簇名"))
                 tool_log.append({"工具": name, "参数": args, "结果摘要": res.get("summary"),
-                                 "ok": res.get("ok")})
+                                 "ok": res.get("ok"), "来源": res.get("来源") or [],
+                                 "岗位样本": ids[:5], "名称样本": nms[:3]})
                 if self.verbose:
                     print("   [轮 %d] 调用 %s(%s) → %s" %
                           (rnd + 1, name, json.dumps(args, ensure_ascii=False)[:80], res.get("summary")), flush=True)
