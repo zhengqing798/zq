@@ -44,3 +44,8 @@ htmlcov/
 # Large derived tables (regenerable by scripts; kept out of git)
 data/processed/匹配样本_标签数据.csv
 data/processed/匹配特征_全量样本.csv
+
+# RAG vectors (regenerable by src/rag/build_kb.py; ~18MB each)
+data/rag/*.npy
+# RAG card metadata (content is also in data/processed/RAG_知识卡.csv)
+data/rag/jobs_kb_cards.json
