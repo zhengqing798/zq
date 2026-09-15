@@ -47,6 +47,18 @@ def git(*args):
     return r.stdout.strip() if r.returncode == 0 else ""
 
 
+def git_raw(*args):
+    """保留输出原样的 git 调用。
+
+    注意：`git status --porcelain` 的首行前面有一个空格（形如 ` M 路径`），
+    若整体 strip() 会把首行的这个空格吃掉、导致按 `line[3:]` 取路径时错位一格。
+    凡是要逐行解析固定列宽的输出（porcelain），必须用本函数。
+    """
+    r = subprocess.run(["git"] + list(args), capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
+    return r.stdout if r.returncode == 0 else ""
+
+
 def repo_root():
     root = git("rev-parse", "--show-toplevel")
     if not root:
@@ -75,9 +87,19 @@ def collect():
     info["ahead"] = [l for l in ahead.splitlines() if l.strip()]
     info["behind"] = [l for l in behind.splitlines() if l.strip()]
 
-    porcelain = git("status", "--porcelain")
-    info["dirty"] = [l for l in porcelain.splitlines() if l.strip()]
-    info["clean"] = not info["dirty"]
+    porcelain = git_raw("status", "--porcelain")
+    # 排除台账文件自身：脚本马上就会改写它，把它算成"未提交"会产生噪音
+    self_rel = DOC_REL.replace(os.sep, "/")
+    dirty = []
+    for line in porcelain.splitlines():
+        if len(line) < 4:
+            continue
+        path = line[3:].strip().strip('"').replace("\\", "/")
+        if path == self_rel:
+            continue
+        dirty.append(line)
+    info["dirty"] = dirty
+    info["clean"] = not dirty
 
     reachable = is_ancestor_set(REMOTE_REF)
     info["reachable"] = reachable
