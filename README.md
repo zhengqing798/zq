@@ -87,6 +87,11 @@ python src/rag/build_kb.py                    # RAG 向量+卡片（43MB，首�
 # 跑起来
 python src/agent/agent.py --ask "福州市的Java岗位有多少个？"
 python src/models/matching/match.py --text "大专 3 年软件测试 Selenium JMeter Python MySQL 期望苏州" --top 5
+
+# 前后端（任务11）：后端 + 前端各开一个终端
+powershell -ExecutionPolicy Bypass -File scripts/run_api.ps1   # 后端 http://127.0.0.1:8000/docs
+powershell -ExecutionPolicy Bypass -File scripts/run_web.ps1   # 前端 http://127.0.0.1:8501
+pytest -q tests/test_api.py -m "not slow"                      # 接口测试
 ```
 
 - **只跑 Agent 问答 / 人岗匹配** → 只需 `build_kb.py` 一条命令
