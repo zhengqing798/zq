@@ -267,9 +267,9 @@ def cluster_donut(rows):
 inject_css()
 
 if "page" not in st.session_state:
-    st.session_state["page"] = "resume"
+    st.session_state["page"] = "home"
 
-NAV = [("📄 简历", "resume"), ("🎯 职位推荐", "match"),
+NAV = [("🏠 首页", "home"), ("📄 简历", "resume"), ("🎯 职位推荐", "match"),
        ("🏢 岗位聚类", "cluster"), ("💬 智能问答", "chat")]
 if LOGGED():
     NAV.append(("👤 个人中心", "me"))
@@ -343,10 +343,81 @@ h = st.session_state.get("health") or {}
 if not h.get("ok"):
     st.error("后端未就绪，请先启动 FastAPI（`scripts/run_api.ps1`）")
 
+# ================================================================ 🏠 首页（全部岗位浏览）
+if page == "home":
+    st_data = api("GET", "/api/jobs/stats", token=TOKEN())
+    if st_data:
+        o = st_data["总体"]
+        cols = st.columns(5)
+        for c, (v, l) in zip(cols, [("{:,}".format(o["岗位总数"]), "岗位总数"),
+                                    ("{:,}".format(o["公司数"]), "招聘公司"),
+                                    (o["城市数"], "覆盖城市"),
+                                    ("{:,}".format(o["薪资上限中位数"]), "薪资上限中位数（元/月）"),
+                                    ("{:,}".format(o["在线岗位数"]), "招聘方在线岗位")]):
+            kpi(c, v, l)
+        st.write("")
+
+        # 搜索 + 筛选
+        c1, c2, c3, c4 = st.columns([3, 1.2, 1.2, 1.2])
+        kw = c1.text_input("搜索岗位 / 公司 / 技能", value=st.session_state.get("home_kw", ""),
+                           label_visibility="collapsed", placeholder="搜索岗位名称 / 公司 / 技能，如 Java、测试")
+        city = c2.selectbox("城市", ["全部"] + st_data["筛选项"]["城市"], label_visibility="collapsed")
+        edu = c3.selectbox("学历", ["不限"] + st_data["筛选项"]["学历"], label_visibility="collapsed")
+        sort = c4.selectbox("排序", [x["label"] for x in st_data["筛选项"]["排序"]],
+                            label_visibility="collapsed")
+
+        st.markdown("**岗位分类**")
+        cats = st_data["按大类"]
+        cat_names = ["全部"] + [x["名称"] for x in cats]
+        pick = st.radio("分类", cat_names, horizontal=True, label_visibility="collapsed",
+                        format_func=lambda x: x if x == "全部" else
+                        "%s %s" % (x, next((c["数量"] for c in cats if c["名称"] == x), "")))
+
+        c5, c6 = st.columns([2, 1])
+        pg = c5.number_input("页码", min_value=1, value=1, step=1, label_visibility="collapsed")
+        size = c6.selectbox("每页", [20, 50, 100], label_visibility="collapsed")
+
+        q = {"page": int(pg), "size": int(size), "keyword": kw,
+             "city": "" if city == "全部" else city,
+             "edu": "" if edu == "不限" else edu,
+             "category": "" if pick == "全部" else pick,
+             "sort": next((x["value"] for x in st_data["筛选项"]["排序"] if x["label"] == sort),
+                          "default")}
+        jl = api("GET", "/api/jobs", token=TOKEN(), params=q)
+        if jl:
+            st.caption("共 %s 个岗位 ｜ 第 %d / %d 页" % ("{:,}".format(jl["总数"]), jl["页码"], jl["总页数"]))
+            for x in jl["岗位"]:
+                st.markdown('<div class="job">', unsafe_allow_html=True)
+                a, b = st.columns([3, 1.2])
+                with a:
+                    st.markdown('<div style="display:flex;justify-content:space-between;align-items:baseline">'
+                                '<div class="title">%s</div><div class="salary">%s</div></div>'
+                                % (x["岗位名称"], x["薪资"] or "薪资面议"), unsafe_allow_html=True)
+                    st.markdown('<div class="co">%s</div><div class="meta">%s</div>'
+                                % (x["公司"], " ｜ ".join(
+                                    [x["地区"] or x["城市"], x["经验要求"] or "经验不限",
+                                     x["学历要求"] or "学历不限"] +
+                                    (["今日回复 %s" % x["今日回复数"]] if x["今日回复数"] else []))),
+                                unsafe_allow_html=True)
+                    st.markdown(" ".join([pill(x["岗位大类"], "teal")] +
+                                         [pill(s, "gray") for s in x["技能标签"][:6]]),
+                                unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        st.divider()
+        c7, c8 = st.columns(2)
+        with c7:
+            st.markdown("**各岗位大类分布**")
+            df = pd.DataFrame(cats).set_index("名称")
+            st.bar_chart(df, height=260, color="#00a6a7")
+        with c8:
+            st.markdown("**热门技能 Top12**")
+            df2 = pd.DataFrame(st_data["热门技能"][:12]).set_index("名称")
+            st.bar_chart(df2, height=260, color="#ffb020")
+
 # ================================================================ 📄 简历
 if page == "resume":
-    sec("简历输入：粘贴文本 或 上传 PDF")
-    st.caption("两条通路**共用同一个解析器**，结果可验证——这是任务6 的设计契约。")
+    sec("简历输入")
     c1, c2 = st.columns([3, 2], gap="large")
     with c1:
         text = st.text_area("粘贴简历正文", value=st.session_state.get("resume_text", SAMPLE),
@@ -373,8 +444,7 @@ if page == "resume":
             if j:
                 st.session_state.update({"resume_id": j["resume_id"], "parsed": j, "matched": False})
                 st.success("PDF 解析完成，会话 ID：`%s`" % j["resume_id"])
-        st.info("PDF 通路会做**文本质量检测**：可打印字符占比 <60% 时告警"
-                "（扫描件或字体缺 ToUnicode 映射），提示改用粘贴文本。")
+        st.caption("支持拖拽上传，一份 PDF = 一份简历")
 
     p = st.session_state.get("parsed")
     if p:
@@ -406,7 +476,7 @@ if page == "resume":
 
 # ================================================================ 🎯 职位推荐
 elif page == "match":
-    sec("职位推荐：对全量 8,836 个岗位逐对打分，返回 Top-N")
+    sec("职位推荐")
     saved = []
     if LOGGED():
         jr = api("GET", "/api/user/resumes", token=TOKEN())
@@ -492,7 +562,7 @@ elif page == "match":
 
 # ================================================================ 🏢 岗位聚类
 elif page == "cluster":
-    sec("岗位聚类画像（任务7：K-Means 定 K=9）")
+    sec("岗位聚类")
     j = api("GET", "/api/cluster/list", token=TOKEN())
     if j:
         cols = st.columns(4)
@@ -501,8 +571,6 @@ elif page == "cluster":
                                     ("%d 个" % sum(x["岗位数"] for x in j["簇"]), "覆盖岗位"),
                                     ("0.6735 / 1.0000", "轮廓系数 / ARI")]):
             kpi(c, v, l)
-        st.caption("定 K 依据：轮廓系数峰值 **0.6735**（K=9），肘部法指向 K=5（已在文档说明取舍）；"
-                   "ARI = **1.0000**（换随机种子结果一致）。")
         a, b = st.columns([1.25, 1], gap="large")
         with a:
             st.altair_chart(cluster_donut(j["簇"]), width="stretch")
@@ -536,13 +604,10 @@ elif page == "cluster":
                     st.caption("高频技能：" + str(d["高频技能Top8"])[:160])
                 st.markdown('</div>', unsafe_allow_html=True)
             sources(r.get("来源"))
-        st.warning("簇名是**统计推断**（主导大类 + 特征技能 lift + 关键词规则），未做人工逐簇确认；"
-                   "最大簇占 51.45%，已做二阶细分（K=8）。")
 
 # ================================================================ 💬 智能问答
 elif page == "chat":
-    sec("智能问答（Agent · Function Calling + 9 工具）")
-    st.caption("问题 → DeepSeek 选工具 → 本地工具执行 → 带来源的中文回答；最多 6 轮、12 次工具调用。")
+    sec("智能问答")
     c1, c2, c3 = st.columns([4, 1.1, 1.4])
     q = c1.text_input("问点什么", value="福州市的Java岗位有多少个？", label_visibility="collapsed")
     nocache = c2.checkbox("忽略缓存", value=False, help="勾选则强制真实调用（较慢）")

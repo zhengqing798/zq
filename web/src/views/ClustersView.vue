@@ -1,9 +1,6 @@
 <template>
   <div>
     <div class="zq-page-title">岗位聚类画像</div>
-    <div class="zq-page-desc">
-      任务7 K-Means 聚类结果：定 K=9（轮廓系数峰值 0.6735，ARI=1.0000），最大簇已做二阶细分
-    </div>
 
     <div v-if="list" class="kpi-row">
       <div class="kpi"><div class="v">{{ list.主方案 }}</div><div class="l">主方案</div></div>
@@ -60,8 +57,6 @@
           </el-collapse-item>
         </el-collapse>
       </div>
-      <el-alert type="warning" :closable="false" style="margin-top:12px"
-                title="簇名是统计推断（主导大类 + 特征技能 lift + 关键词规则），未做人工逐簇确认；最大簇占 51.45%，已做二阶细分（K=8）" />
     </div>
   </div>
 </template>

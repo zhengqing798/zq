@@ -107,6 +107,48 @@ def health():
     return SVC.health()
 
 
+# ================================================================ 岗位浏览（首页）
+@app.get("/api/jobs/stats", response_model=schemas.JobStatsResponse, tags=["⓪ 首页"])
+def jobs_stats():
+    """全部 8,836 个清洗后岗位的分类统计（城市 / 大类 / 学历 / 经验 / 簇 / 热门技能）"""
+    try:
+        from src.api.jobs import get_store
+        s = get_store().stats()
+        return {"ok": True, **s}
+    except Exception as e:
+        _err(e)
+
+
+@app.get("/api/jobs", response_model=schemas.JobListResponse, tags=["⓪ 首页"])
+def jobs_list(page: int = 1, size: int = 20, city: str = "", category: str = "",
+              keyword: str = "", salary_min: int = 0, edu: str = "", cluster: str = "",
+              sort: str = "default"):
+    """分页浏览全部岗位，支持城市/大类/学历/关键词/薪资下限/簇筛选与排序"""
+    try:
+        from src.api.jobs import get_store
+        r = get_store().query(page=page, size=size, city=city or None,
+                              category=category or None, keyword=keyword or None,
+                              salary_min=salary_min or None, edu=edu or None,
+                              cluster=cluster or None, sort=sort)
+        r["来源"] = ["zhaopin_jobs_cleaned_seg.csv（清洗后 %d 个岗位）" % r["总数"]]
+        return {"ok": True, **r}
+    except Exception as e:
+        _err(e, "筛选参数拼错时会忽略该条件；size 上限 100")
+
+
+@app.get("/api/jobs/{job_id}", tags=["⓪ 首页"])
+def job_detail(job_id: str):
+    """单个岗位详情（含职位描述全文与所属簇）"""
+    try:
+        from src.api.jobs import get_store
+        x = get_store().get(job_id)
+        if not x:
+            raise ValueError("岗位不存在：%s（有效范围 J0001 ~ J8836）" % job_id)
+        return {"ok": True, **x}
+    except Exception as e:
+        _err(e)
+
+
 # ---------------------------------------------------------------- ① 简历解析
 @app.post("/api/resume/parse", response_model=schemas.ParseResponse, tags=["① 简历"])
 async def resume_parse(

@@ -3,8 +3,28 @@ import type {
   ChatHistoryRow, ChatResp, ClusterListResp, ClusterRow, FavoriteRow, HealthResp,
   JobRec, MatchHistoryRow, MatchResp, ParsedResume, ResumeRow, ScoreResp, TokenResp, ApiUser,
 } from './types'
+import type { JobListResp, JobStatsResp } from './jobs'
 
-/** 后端 27 个接口的前端封装（与 src/api/schemas.py 一一对应） */
+/** 后端 30 个接口的前端封装（与 src/api/schemas.py 一一对应） */
+
+// ---------------- 首页：岗位浏览
+export interface JobQuery {
+  page?: number
+  size?: number
+  city?: string
+  category?: string
+  keyword?: string
+  salary_min?: number
+  edu?: string
+  cluster?: string
+  sort?: string
+}
+export const listJobs = (q: JobQuery = {}) =>
+  client.get<JobListResp>('/api/jobs', { params: q }).then((r) => r.data)
+export const jobStats = () =>
+  client.get<JobStatsResp>('/api/jobs/stats').then((r) => r.data)
+export const jobDetail = (jobId: string) =>
+  client.get('/api/jobs/' + jobId).then((r) => r.data)
 
 // ---------------- 健康检查
 export const getHealth = () => client.get<HealthResp>('/api/health').then((r) => r.data)

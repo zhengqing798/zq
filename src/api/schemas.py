@@ -173,3 +173,27 @@ class StatsResponse(BaseModel):
     ok: bool = True
     统计: Dict[str, int]
     用户: Dict[str, Any]
+
+
+# ================================================================ 岗位浏览（首页）
+class JobListResponse(BaseModel):
+    ok: bool = True
+    总数: int
+    页码: int
+    每页: int
+    总页数: int
+    岗位: List[Dict[str, Any]]
+    来源: List[str] = []
+
+
+class JobStatsResponse(BaseModel):
+    ok: bool = True
+    总体: Dict[str, Any]
+    按城市: List[Dict[str, Any]]
+    按大类: List[Dict[str, Any]]
+    按学历: List[Dict[str, Any]]
+    按经验: List[Dict[str, Any]]
+    按簇: List[Dict[str, Any]]
+    热门技能: List[Dict[str, Any]]
+    筛选项: Dict[str, Any]
+    来源: List[str] = []

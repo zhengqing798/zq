@@ -13,7 +13,9 @@ const router = createRouter({
       path: '/',
       component: () => import('../layouts/AppLayout.vue'),
       children: [
-        { path: '', redirect: '/jobs' },
+        { path: '', redirect: '/home' },
+        { path: 'home', name: 'home', component: () => import('../views/HomeView.vue'),
+          meta: { title: '首页' } },
         { path: 'resume', name: 'resume', component: () => import('../views/ResumeView.vue'),
           meta: { title: '简历' } },
         { path: 'jobs', name: 'jobs', component: () => import('../views/JobsView.vue'),
@@ -26,7 +28,7 @@ const router = createRouter({
           meta: { title: '个人中心', requiresAuth: true } },
       ],
     },
-    { path: '/:pathMatch(.*)*', redirect: '/jobs' },
+    { path: '/:pathMatch(.*)*', redirect: '/home' },
   ],
 })
 

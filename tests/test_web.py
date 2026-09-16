@@ -33,7 +33,7 @@ if ROOT not in sys.path:
 APP = os.path.join(ROOT, "src", "web", "app.py")
 API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000")
 
-NAV = ["📄 简历", "🎯 职位推荐", "🏢 岗位聚类", "💬 智能问答"]
+NAV = ["🏠 首页", "📄 简历", "🎯 职位推荐", "🏢 岗位聚类", "💬 智能问答"]
 
 
 def backend_alive():
@@ -97,19 +97,20 @@ def app():
 
 # ================================================================ 顶部导航 / 游客态
 def test_top_nav_layout(app):
-    """正常：顶部导航渲染出四个功能入口（无侧边栏、无 Hero 大标题）"""
+    """正常：顶部导航渲染出五个功能入口（含首页；无侧边栏、无 Hero 大标题）"""
     assert not app.exception, [e.value for e in app.exception]
     assert nav_buttons(app) == NAV
     assert "👤 个人中心" not in [b.label for b in app.button]   # 未登录不显示
-    assert app.session_state.get("page") == "resume"            # 默认落在简历页
+    assert app.session_state.get("page") == "home"              # 默认落在首页
     md = all_text(app)
     assert "人岗匹配推荐" in md                                  # 左上角品牌
     assert "全部结论可溯源" not in md                            # 已删除的副标题不应存在
-    assert "8836" in md or "8,836" in md
+    assert "8,836" in md or "8836" in md          # 首页显示岗位总数
 
 
 def test_guest_cannot_save_resume(app):
-    """边界：游客的「保存到我的简历」按钮应为禁用态"""
+    """边界：游客的「保存到我的简历」按钮应为禁用态（需先切到简历页）"""
+    goto(app, "📄 简历")
     btns = {b.label: b for b in app.button}
     assert "💾 保存到我的简历" in btns
     assert btns["💾 保存到我的简历"].disabled is True
@@ -176,12 +177,13 @@ def test_match_and_favorite(app):
 
 
 def test_cluster_page(app):
-    """正常：岗位聚类页渲染主方案、簇数、定 K 依据与局限声明"""
+    """正常：岗位聚类页渲染主方案、簇数与定 K 指标"""
     goto(app, "🏢 岗位聚类")
     md = all_text(app)
     assert "K=9" in md
     assert "0.6735" in md and "1.0000" in md          # 轮廓系数 / ARI
-    assert "统计推断" in md                            # 局限说明必须在
+    assert "岗位聚类" in md                            # 页面标题
+    assert app.dataframe, "簇明细表应渲染为 dataframe"   # 表格内容不在 markdown 里
 
 
 def test_chat_page_renders(app):

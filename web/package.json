@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 4173",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "check:render": "node scripts/render-check.mjs",
+    "check:api": "node scripts/api-check.mjs"
   },
   "keywords": [],
   "author": "",

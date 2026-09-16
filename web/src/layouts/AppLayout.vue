@@ -68,6 +68,7 @@ const auth = useAuthStore()
 
 const menus = computed(() => {
   const base = [
+    { path: '/home', label: '🏠 首页' },
     { path: '/resume', label: '📄 简历' },
     { path: '/jobs', label: '🎯 职位推荐' },
     { path: '/clusters', label: '🏢 岗位聚类' },

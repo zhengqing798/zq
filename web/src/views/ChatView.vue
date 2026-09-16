@@ -1,9 +1,6 @@
 <template>
   <div>
     <div class="zq-page-title">智能问答</div>
-    <div class="zq-page-desc">
-      Agent · Function Calling + 9 个工具：问题 → DeepSeek 选工具 → 本地执行 → 带来源的中文回答
-    </div>
 
     <div class="zq-card pad">
       <div style="display:flex;gap:10px">
@@ -59,16 +56,6 @@
     </div>
 
     <el-empty v-else description="问一句试试，例如「福州市的Java岗位有多少个？」" />
-
-    <div class="zq-card pad" style="margin-top:16px">
-      <div class="zq-section" style="margin-top:0">这个问答系统怎么做的</div>
-      <div class="muted" style="line-height:1.95">
-        8,852 张知识卡片（岗位卡 8,836 + 结论卡 16）用本地 <b>BGE-small-zh-v1.5</b>（512 维）向量化，
-        存 FAISS 用<b>余弦检索</b>；统计/口径类问句走<b>分类型路由</b>只查结论卡，避免被 8,836 张岗位卡淹没
-        （召回评估 P@5 <b>0.147 → 0.353</b>）。Agent 最多 6 轮、12 次工具调用，
-        <b>30 问「问题—答案—来源」三元组有来源标注 30/30（100%）</b>。
-      </div>
-    </div>
   </div>
 </template>
 

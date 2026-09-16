@@ -1,9 +1,6 @@
 <template>
   <div>
     <div class="zq-page-title">职位推荐</div>
-    <div class="zq-page-desc">
-      对全量 <b>8,836</b> 个岗位逐对打分（六维加权），返回 Top-N —— 点任意岗位查看<b>六维雷达 + 双口径评分</b>
-    </div>
 
     <!-- 匹配控制条 -->
     <div class="zq-card pad">

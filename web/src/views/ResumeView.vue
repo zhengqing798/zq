@@ -1,9 +1,6 @@
 <template>
   <div>
     <div class="zq-page-title">简历输入</div>
-    <div class="zq-page-desc">
-      粘贴文本 或 上传 PDF —— 两条通路<b>共用同一个解析器</b>，结果可验证（任务6 设计契约）
-    </div>
 
     <div class="grid">
       <!-- 左：输入 -->
@@ -34,14 +31,6 @@
               <div class="muted">一份 PDF = 一份简历（多页视为续页）</div>
             </template>
           </el-upload>
-        </div>
-        <div class="zq-card pad" style="margin-top:12px">
-          <div class="zq-section">解析质量守卫</div>
-          <ul class="muted" style="line-height:1.9;padding-left:18px;margin:0">
-            <li>文本层可打印字符占比 &lt;60% → 判定为扫描件/字体缺映射并告警</li>
-            <li>检测到 ≥2 个手机号或姓名字段 → 提示"一份 PDF 应只有一份简历"</li>
-            <li>同义词归一口径：CSS3 与 CSS、K8s 与 Kubernetes 视为同一技能</li>
-          </ul>
         </div>
       </div>
     </div>
