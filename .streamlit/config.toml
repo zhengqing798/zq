@@ -1,0 +1,20 @@
+# 任务11 · Streamlit 主题与运行配置
+# 说明：这是 Streamlit 官方的主题配置，比在代码里注入 CSS 更稳（不受前端版本变动影响）
+
+[theme]
+primaryColor = "#2E6BE6"              # 主色：科技蓝（按钮/滑块/强调元素）
+backgroundColor = "#FFFFFF"           # 主背景
+secondaryBackgroundColor = "#F4F7FB"  # 次级背景（侧边栏/卡片底）
+textColor = "#1F2937"                 # 正文色（深灰，比纯黑柔）
+font = "sans serif"
+
+[server]
+headless = true
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"               # 隐藏右上角开发者工具，页面更干净
+showErrorDetails = true               # 报错时仍显示细节（答辩排错用）

@@ -49,3 +49,8 @@ data/processed/匹配特征_全量样本.csv
 data/rag/*.npy
 # RAG card metadata (content is also in data/processed/RAG_知识卡.csv)
 data/rag/jobs_kb_cards.json
+
+# 任务11 · 用户体系数据库（SQLite 单文件，含用户口令哈希，绝不入库）
+data/app.db
+data/*.db-journal
+data/*.db-wal

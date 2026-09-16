@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 class MatchRequest(BaseModel):
     resume_id: Optional[str] = Field(None, description="上传/粘贴简历后返回的会话 ID")
     resume_text: Optional[str] = Field(None, description="直接粘贴简历正文（与 resume_id 二选一）")
+    saved_resume_id: Optional[int] = Field(None, description="已登录用户：用个人中心保存的简历（其 id）")
     top_n: int = Field(10, ge=1, le=50, description="返回岗位数，1~50")
 
 
@@ -53,6 +54,7 @@ class MatchResponse(BaseModel):
     耗时秒: float
     推荐: List[Dict[str, Any]]
     来源: List[str]
+    已存历史: Optional[bool] = Field(None, description="已登录时：本次推荐是否已写入匹配历史")
 
 
 class ScoreResponse(BaseModel):
@@ -88,6 +90,7 @@ class ChatResponse(BaseModel):
     模型: str
     缓存命中: bool
     服务耗时秒: float
+    已存历史: Optional[bool] = Field(None, description="已登录时：本次问答是否已写入问答记录")
 
 
 class HealthResponse(BaseModel):
@@ -105,3 +108,68 @@ class ErrorResponse(BaseModel):
     ok: bool = False
     error: str
     hint: str = ""
+
+
+# ================================================================ 用户体系（任务11 新增）
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=24, description="3~24 位字母/数字/下划线")
+    password: str = Field(..., min_length=6, max_length=64, description="至少 6 位")
+    role: str = Field("jobseeker", description="角色：jobseeker(求职者) / employer(企业，预留) / admin")
+    nickname: str = Field("", max_length=24)
+    phone: str = Field("", max_length=20)
+    email: str = Field("", max_length=64)
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=1)
+
+
+class TokenResponse(BaseModel):
+    ok: bool = True
+    token: str
+    expires_at: str
+    用户: Dict[str, Any]
+
+
+class UserResponse(BaseModel):
+    ok: bool = True
+    用户: Dict[str, Any]
+
+
+class UpdateProfileRequest(BaseModel):
+    nickname: Optional[str] = Field(None, max_length=24)
+    phone: Optional[str] = Field(None, max_length=20)
+    email: Optional[str] = Field(None, max_length=64)
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=6, max_length=64)
+
+
+class ResumeCreateRequest(BaseModel):
+    title: str = Field("", max_length=40)
+    text: str = Field(..., min_length=1, description="简历正文")
+    is_default: Optional[bool] = None
+
+
+class ResumeUpdateRequest(BaseModel):
+    title: Optional[str] = Field(None, max_length=40)
+    text: Optional[str] = Field(None, min_length=1)
+
+
+class ResumeListResponse(BaseModel):
+    ok: bool = True
+    简历: List[Dict[str, Any]]
+
+
+class FavoriteRequest(BaseModel):
+    job_id: str = Field(..., description="岗位ID，如 J0123")
+    note: str = Field("", max_length=200)
+
+
+class StatsResponse(BaseModel):
+    ok: bool = True
+    统计: Dict[str, int]
+    用户: Dict[str, Any]
