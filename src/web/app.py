@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-"""任务11 · Streamlit 前端（美化版）：登录注册 → 简历输入 → 匹配推荐 → 岗位聚类 → 智能问答 → 个人中心
+"""任务11 · Streamlit 前端：顶部导航式布局（参考 BOSS直聘 / 智联招聘）
+
+布局说明
+--------
+┌──────────────────────────────────────────────────────────────────┐
+│ 🎯 系统名        [简历][职位推荐][岗位聚类][智能问答][个人中心]     登录/注册 │  ← 顶部导航
+├──────────────────────────────────────────────────────────────────┤
+│  页面内容（招聘网站风格：岗位卡片 + 橙色薪资 + 标签徽章）             │
+└──────────────────────────────────────────────────────────────────┘
 
 设计要点
 --------
 1. **通过 HTTP 调 FastAPI**（不 import 任何业务模块）——本进程不加载 BGE/torch/FAISS/模型，
    镜像可以做得很小；"前后端集成"是**真链路**（可用 Swagger / 接口测试验证）。
 2. 后端地址用环境变量：本地 `http://127.0.0.1:8000`，Docker 里给 `API_BASE=http://api:8000`。
-3. 美化与功能分层：
-   · 主题与配色 → `.streamlit/config.toml`（官方机制，最稳）
-   · 卡片/渐变/徽章 → 少量 CSS 注入（`inject_css()`）
-   · 六维分/簇占比 → **Altair** 交互图表（Streamlit 自带，不新增依赖）
-   · 六维雷达图 → matplotlib（已配中文字体）
-4. 用户体系：登录后可用「个人中心」（简历管理 / 收藏 / 匹配历史 / 问答记录 / 账号设置），
-   未登录也能体验四项核心功能（游客模式），只是不保存数据。
+3. 无侧边栏：导航用顶部按钮，当前页用 `type="primary"` 高亮；页面切换靠 `st.session_state["page"]`。
+4. 视觉：主题配置（`.streamlit/config.toml`）+ 少量 CSS（卡片/徽章/橙色薪资/导航条）。
+   配色参考招聘网站：主色蓝 + **薪资橙**，岗位卡呈"标题＋薪资右对齐＋公司＋标签＋理由"。
 
 启动：streamlit run src/web/app.py --server.port 8501
 """
@@ -30,7 +34,6 @@ API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000").rstrip("/")
 DIMS = ["技能", "经验", "学历", "地域", "薪资", "专业证书"]
 DIM_WEIGHT_HINT = {"技能": 0.38, "经验": 0.18, "学历": 0.12,
                    "地域": 0.16, "薪资": 0.10, "专业证书": 0.06}
-PALETTE = ["#2E6BE6", "#7C4DFF", "#00B8A9", "#FF8A3D", "#F2545B", "#5B8DEF"]
 
 for _f in ("Microsoft YaHei", "SimHei", "SimSun"):
     try:
@@ -42,7 +45,7 @@ for _f in ("Microsoft YaHei", "SimHei", "SimSun"):
 plt.rcParams["axes.unicode_minus"] = False
 
 st.set_page_config(page_title="岗位-简历人岗匹配推荐系统", page_icon="🎯",
-                   layout="wide", initial_sidebar_state="expanded")
+                   layout="wide", initial_sidebar_state="collapsed")
 
 SAMPLE = """姓名：张伟
 期望岗位：测试开发工程师
@@ -57,7 +60,7 @@ SAMPLE = """姓名：张伟
 熟练掌握 Selenium、JMeter、Python、MySQL、Linux，了解 Postman 与 Git
 
 【工作经历】
-2022.07-2025.06 某软件公司 测试工程师，负责接口自动化测试与性能压测
+2022.07-2025.06 某软件公司 测试工程师，负责接口自动化测试与压力测试
 
 【项目经验】
 使用 Python + Selenium 搭建 UI 自动化框架，覆盖 300 条用例
@@ -68,88 +71,92 @@ SAMPLE = """姓名：张伟
 def inject_css():
     st.markdown("""
 <style>
-/* 收窄容器、加大留白 */
-.block-container { padding-top: 2.2rem; padding-bottom: 3rem; max-width: 1350px; }
+/* 容器与留白 */
+.block-container { padding-top: 3.2rem; padding-bottom: 3rem; max-width: 1400px; }
+header[data-testid="stHeader"] { background: transparent; height: 0; }
+#MainMenu, footer { visibility: hidden; }
 
-/* 顶部渐变 Hero */
-.hero {
-  background: linear-gradient(120deg, #2E6BE6 0%, #7C4DFF 55%, #00B8A9 100%);
-  border-radius: 18px; padding: 26px 32px; color: #fff; margin-bottom: 22px;
-  box-shadow: 0 10px 28px rgba(46,107,230,.28);
+/* ---------- 顶部导航条 ---------- */
+.navbar {
+  display:flex; align-items:center; gap:10px;
+  background:#fff; border:1px solid #E6EDF7; border-bottom:2px solid #EAF0FA;
+  border-radius:12px; padding:10px 16px; margin-bottom:14px;
+  box-shadow:0 2px 10px rgba(31,41,55,.05);
 }
-.hero h1 { color:#fff; margin:0 0 6px 0; font-size:30px; letter-spacing:.5px; }
-.hero p  { color:rgba(255,255,255,.92); margin:0; font-size:14.5px; }
+.brand { display:flex; align-items:center; gap:8px; }
+.brand .logo {
+  width:34px; height:34px; border-radius:9px; display:flex; align-items:center;
+  justify-content:center; font-size:18px;
+  background:linear-gradient(135deg,#2E6BE6,#00A6A7); color:#fff;
+}
+.brand .name { font-size:16.5px; font-weight:800; color:#16233A; line-height:1.15; }
+.brand .sub  { font-size:11px; color:#8896AB; }
+/* 导航按钮：扁平化，当前页高亮 */
+div[data-testid="stHorizontalBlock"] .stButton > button[kind="secondary"] {
+  background:transparent; border:none; color:#41506B; font-weight:600;
+  padding:4px 6px; box-shadow:none;
+}
+div[data-testid="stHorizontalBlock"] .stButton > button[kind="secondary"]:hover {
+  color:#2E6BE6; background:#F2F6FE;
+}
+div[data-testid="stHorizontalBlock"] .stButton > button[kind="primary"] {
+  border-radius:8px; font-weight:700;
+}
 
-/* 通用卡片 */
+/* ---------- 卡片 ---------- */
 .card {
   background:#fff; border:1px solid #E6EDF7; border-radius:14px; padding:16px 18px;
-  box-shadow:0 2px 10px rgba(31,41,55,.05); transition:.18s; height:100%;
+  box-shadow:0 2px 10px rgba(31,41,55,.05); transition:.18s;
 }
-.card:hover { box-shadow:0 8px 22px rgba(46,107,230,.16); transform:translateY(-2px); }
+.card:hover { box-shadow:0 10px 24px rgba(46,107,230,.14); transform:translateY(-2px); }
+
+/* 岗位卡（招聘网站风格） */
+.job { background:#fff; border:1px solid #E6EDF7; border-radius:14px; padding:16px 20px;
+  box-shadow:0 2px 10px rgba(31,41,55,.05); transition:.18s; }
+.job:hover { box-shadow:0 10px 24px rgba(46,107,230,.16); transform:translateY(-2px); }
+.job .title { font-size:18px; font-weight:700; color:#16233A; }
+.job .salary { font-size:19px; font-weight:800; color:#FF6A00; white-space:nowrap; }
+.job .co { font-size:13.5px; color:#41506B; margin-top:6px; }
+.job .meta { font-size:12.5px; color:#8896AB; margin-top:4px; }
 
 /* 指标卡 */
-.kpi {
-  background:linear-gradient(160deg,#F7FAFF 0%,#EEF4FF 100%);
-  border:1px solid #DCE7FA; border-radius:14px; padding:14px 16px;
-}
-.kpi .v { font-size:26px; font-weight:700; color:#1B3E8F; line-height:1.25; }
+.kpi { background:linear-gradient(160deg,#F7FAFF 0%,#EEF4FF 100%);
+  border:1px solid #DCE7FA; border-radius:14px; padding:14px 16px; }
+.kpi .v { font-size:25px; font-weight:800; color:#1B3E8F; line-height:1.25; }
 .kpi .l { font-size:12.5px; color:#6B7A90; margin-top:2px; }
 
-/* 徽章 / 药丸标签 */
-.pill {
-  display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px;
-  margin:2px 6px 2px 0; border:1px solid transparent; white-space:nowrap;
-}
+/* 药丸标签 */
+.pill { display:inline-block; padding:2px 10px; border-radius:6px; font-size:12px;
+  margin:3px 6px 0 0; border:1px solid transparent; white-space:nowrap; }
 .pill-blue   { background:#EAF1FF; color:#2E6BE6; border-color:#D3E2FF; }
 .pill-green  { background:#E7F8F2; color:#0E9F6E; border-color:#CBEFE1; }
 .pill-orange { background:#FFF3E6; color:#D97706; border-color:#FFE2C2; }
 .pill-purple { background:#F3EDFF; color:#7C4DFF; border-color:#E4D8FF; }
 .pill-gray   { background:#F1F5F9; color:#5B6B7F; border-color:#E2E8F0; }
+.pill-teal   { background:#E6F8F8; color:#00807F; border-color:#C7EEEE; }
 
 /* 排名圆标 */
-.rank {
-  display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center;
-  border-radius:50%; color:#fff; font-weight:700; font-size:14px;
-  background:linear-gradient(135deg,#2E6BE6,#7C4DFF); margin-right:10px;
-}
-.rank.gold   { background:linear-gradient(135deg,#F7B733,#FC4A1A); }
-.rank.silver { background:linear-gradient(135deg,#8E9EAB,#5B6B7F); }
+.rank { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center;
+  border-radius:8px; color:#fff; font-weight:800; font-size:13.5px; margin-right:10px;
+  background:linear-gradient(135deg,#2E6BE6,#7C4DFF); }
+.rank.gold   { background:linear-gradient(135deg,#FF9A2E,#FF6A00); }
+.rank.silver { background:linear-gradient(135deg,#9AA8B8,#64748B); }
 
-/* 大分数 */
-.score { font-size:26px; font-weight:800; color:#1B3E8F; }
-.score small { font-size:12px; color:#8896AB; font-weight:500; }
-
-/* 小节标题 */
-.section-title { font-size:16px; font-weight:700; color:#16233A; margin:6px 0 10px 0;
+.sec-title { font-size:16px; font-weight:800; color:#16233A; margin:4px 0 12px 0;
   border-left:4px solid #2E6BE6; padding-left:10px; }
+.score-big { font-size:22px; font-weight:800; color:#1B3E8F; }
+.score-big small { font-size:12px; color:#8896AB; font-weight:500; }
 
-/* 侧边栏品牌块 */
-.brand { background:linear-gradient(135deg,#2E6BE6,#7C4DFF); color:#fff;
-  border-radius:14px; padding:14px 16px; margin-bottom:12px; }
-.brand b { font-size:16px; } .brand div { font-size:12px; opacity:.9; }
-
-/* 登录卡 */
-.authcard { background:#fff; border:1px solid #E6EDF7; border-radius:16px;
-  padding:20px 22px; box-shadow:0 6px 24px rgba(31,41,55,.07); }
-
-/* 按钮圆角 */
-.stButton > button { border-radius:10px; font-weight:600; }
-.stDownloadButton > button { border-radius:10px; }
-/* 表格圆角 */
+/* 表格 */
 [data-testid="stDataFrame"] { border-radius:12px; overflow:hidden; border:1px solid #E6EDF7; }
-/* 提示条圆角 */
 [data-testid="stAlert"] { border-radius:12px; }
+.stButton > button { border-radius:9px; font-weight:600; }
 </style>
 """, unsafe_allow_html=True)
 
 
-def hero(title, subtitle):
-    st.markdown('<div class="hero"><h1>%s</h1><p>%s</p></div>' % (title, subtitle),
-                unsafe_allow_html=True)
-
-
 def sec(title):
-    st.markdown('<div class="section-title">%s</div>' % title, unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">%s</div>' % title, unsafe_allow_html=True)
 
 
 def kpi(col, value, label):
@@ -209,12 +216,6 @@ USER = lambda: st.session_state.get("user") or {}                               
 LOGGED = lambda: bool(st.session_state.get("token"))                            # noqa: E731
 
 
-def refresh_me():
-    j = api("GET", "/api/auth/me", token=TOKEN())
-    if j:
-        st.session_state["user"] = j["用户"]
-
-
 # ================================================================ 图表
 def radar(dims, title="六维得分"):
     labels = DIMS
@@ -222,7 +223,7 @@ def radar(dims, title="六维得分"):
     ang = [i / len(labels) * 2 * 3.1415926 for i in range(len(labels))]
     ang += ang[:1]
     vals += vals[:1]
-    fig = plt.figure(figsize=(3.5, 3.5), dpi=120)
+    fig = plt.figure(figsize=(3.4, 3.4), dpi=120)
     ax = fig.add_subplot(111, polar=True)
     ax.plot(ang, vals, "o-", linewidth=2.2, color="#2E6BE6", markersize=4)
     ax.fill(ang, vals, alpha=0.20, color="#2E6BE6")
@@ -238,18 +239,17 @@ def radar(dims, title="六维得分"):
     return fig
 
 
-def dim_bar_altair(dims, title=""):
-    df = pd.DataFrame({"维度": DIMS, "分数": [float(dims.get(d, 0)) for d in DIMS],
-                       "权重": [DIM_WEIGHT_HINT.get(d, 0) for d in DIMS]})
+def dim_bar_altair(dims):
+    df = pd.DataFrame({"维度": DIMS, "分数": [float(dims.get(d, 0)) for d in DIMS]})
     base = alt.Chart(df).encode(
         y=alt.Y("维度:N", sort=DIMS, axis=alt.Axis(title=None, labelFontSize=12)),
         x=alt.X("分数:Q", scale=alt.Scale(domain=[0, 100]), axis=alt.Axis(title=None)),
     )
-    bars = base.mark_bar(cornerRadius=6, height=20).encode(
+    bars = base.mark_bar(cornerRadius=6, height=18).encode(
         color=alt.Color("分数:Q", scale=alt.Scale(scheme="blues"), legend=None))
     text = base.mark_text(align="left", dx=4, fontSize=12, color="#37475E").encode(
         text=alt.Text("分数:Q", format=".1f"))
-    return (bars + text).properties(height=190, title=title).configure_view(stroke=None)
+    return (bars + text).properties(height=180).configure_view(stroke=None)
 
 
 def cluster_donut(rows):
@@ -260,93 +260,98 @@ def cluster_donut(rows):
         theta=alt.Theta("占比数值:Q"),
         color=alt.Color("簇名:N", scale=alt.Scale(scheme="tableau20"), legend=alt.Legend(title="簇")),
         tooltip=["簇名", "岗位数", "占比"],
-    ).properties(height=340)
+    ).properties(height=330)
 
 
-# ================================================================ 侧边栏
+# ================================================================ 顶部导航
 inject_css()
 
-with st.sidebar:
-    st.markdown('<div class="brand"><b>🎯 人岗匹配推荐系统</b>'
-                '<div>行业大数据分析实践 · 23大数据班</div></div>', unsafe_allow_html=True)
+if "page" not in st.session_state:
+    st.session_state["page"] = "resume"
 
-    if LOGGED():
-        u = USER()
-        st.markdown("**%s**  %s" % (u.get("nickname") or u.get("username"),
-                                   pill(u.get("role_label", ""), "purple")), unsafe_allow_html=True)
-        st.caption("账号：%s ｜ 上次登录 %s" % (u.get("username"), u.get("last_login") or "首次"))
-        if st.button("退出登录", width="stretch"):
-            api("POST", "/api/auth/logout", token=TOKEN())
-            for k in ("token", "user", "parsed", "resume_id", "matched"):
-                st.session_state.pop(k, None)
-            st.rerun()
-    else:
-        st.caption("当前是**游客模式**：核心功能可用，数据不会保存。")
-        with st.expander("🔐 登录 / 注册", expanded=True):
-            tab_l, tab_r = st.tabs(["登录", "注册"])
-            with tab_l:
-                lu = st.text_input("用户名", key="lu")
-                lp = st.text_input("密码", type="password", key="lp")
-                if st.button("登录", type="primary", width="stretch"):
-                    j = api("POST", "/api/auth/login", json={"username": lu, "password": lp})
-                    if j:
-                        st.session_state["token"] = j["token"]
-                        st.session_state["user"] = j["用户"]
-                        st.rerun()
-            with tab_r:
-                ru = st.text_input("用户名（3~24 位字母/数字/下划线）", key="ru")
-                rp = st.text_input("密码（至少 6 位）", type="password", key="rp")
-                rn = st.text_input("昵称（可选）", key="rn")
-                rr = st.selectbox("角色", ["求职者", "企业（预留）"], index=0, key="rr")
-                if st.button("注册并登录", type="primary", width="stretch"):
-                    j = api("POST", "/api/auth/register",
-                            json={"username": ru, "password": rp, "nickname": rn,
-                                  "role": "jobseeker" if rr.startswith("求职") else "employer"})
-                    if j:
-                        st.session_state["token"] = j["token"]
-                        st.session_state["user"] = j["用户"]
-                        st.rerun()
-
-    st.divider()
-    if st.button("🔄 检查后端状态", width="stretch"):
-        st.session_state["health"] = api("GET", "/api/health", token=TOKEN())
-    if "health" not in st.session_state:
-        st.session_state["health"] = api("GET", "/api/health", token=TOKEN())
-    h = st.session_state.get("health") or {}
-    if h.get("ok"):
-        me, rg = h.get("匹配引擎", {}), h.get("RAG检索", {})
-        st.success("后端就绪")
-        st.caption("岗位库 **%s** ｜ 知识卡 **%s** ｜ 权重 **%s**"
-                   % (me.get("岗位数", "—"), rg.get("卡片数", "—"), me.get("权重版本", "—")))
-        with st.expander("组件详情"):
-            st.json(h, expanded=False)
-    else:
-        st.error("后端未就绪")
-
-    st.divider()
-    st.caption("✅ 每个结论都带 `来源`，可逐条回溯到报告或数据文件。")
-    st.caption("⚠️ 已知局限：无人工金标 · 简历侧为合成数据 · 只覆盖 16 城 4 省 · 经验字段 24.69% 错位")
-
-
-# ================================================================ 主体
-hero("岗位-简历人岗匹配推荐系统",
-     "上传/粘贴简历 → 六维匹配打分 → Top-N 推荐 → 智能问答 ｜ 数据 8,836 个真实岗位 · 全部结论可溯源")
-
+NAV = [("📄 简历", "resume"), ("🎯 职位推荐", "match"),
+       ("🏢 岗位聚类", "cluster"), ("💬 智能问答", "chat")]
 if LOGGED():
-    tabs = ["📄 简历输入", "🎯 匹配推荐", "🏢 岗位聚类", "💬 智能问答", "👤 个人中心"]
-else:
-    tabs = ["📄 简历输入", "🎯 匹配推荐", "🏢 岗位聚类", "💬 智能问答"]
-tab_objs = st.tabs(tabs)
+    NAV.append(("👤 个人中心", "me"))
 
-# ---------------------------------------------------------------- ① 简历输入
-with tab_objs[0]:
+with st.container():
+    c_logo, c_nav, c_user = st.columns([2.6, 6.4, 2.4], vertical_alignment="center")
+    with c_logo:
+        st.markdown(
+            '<div class="brand"><div class="logo">🎯</div>'
+            '<div><div class="name">人岗匹配推荐</div>'
+            '<div class="sub">岗位-简历智能匹配系统</div></div></div>',
+            unsafe_allow_html=True)
+    with c_nav:
+        nav_cols = st.columns(len(NAV))
+        for i, (label, key) in enumerate(NAV):
+            if nav_cols[i].button(label, key="nav_%s" % key, width="stretch",
+                                  type=("primary" if st.session_state["page"] == key else "secondary")):
+                st.session_state["page"] = key
+                st.rerun()
+    with c_user:
+        if LOGGED():
+            u = USER()
+            with st.popover("👤 %s" % (u.get("nickname") or u.get("username")), width="stretch"):
+                st.markdown("**%s**  %s" % (u.get("nickname") or u.get("username"),
+                                           pill(u.get("role_label", ""), "purple")),
+                            unsafe_allow_html=True)
+                st.caption("账号：%s" % u.get("username"))
+                st.caption("上次登录：%s" % (u.get("last_login") or "首次"))
+                if st.button("个人中心", width="stretch"):
+                    st.session_state["page"] = "me"
+                    st.rerun()
+                if st.button("退出登录", width="stretch"):
+                    api("POST", "/api/auth/logout", token=TOKEN())
+                    for k in ("token", "user", "parsed", "resume_id", "matched",
+                              "match_result", "chat_result"):
+                        st.session_state.pop(k, None)
+                    st.session_state["page"] = "resume"
+                    st.rerun()
+        else:
+            with st.popover("登录 / 注册", width="stretch"):
+                t1, t2 = st.tabs(["登录", "注册"])
+                with t1:
+                    lu = st.text_input("用户名", key="lu")
+                    lp = st.text_input("密码", type="password", key="lp")
+                    if st.button("登录", type="primary", width="stretch"):
+                        j = api("POST", "/api/auth/login", json={"username": lu, "password": lp})
+                        if j:
+                            st.session_state["token"] = j["token"]
+                            st.session_state["user"] = j["用户"]
+                            st.rerun()
+                with t2:
+                    ru = st.text_input("用户名（3~24 位字母/数字/下划线）", key="ru")
+                    rp = st.text_input("密码（至少 6 位）", type="password", key="rp")
+                    rn = st.text_input("昵称（可选）", key="rn")
+                    rr = st.selectbox("角色", ["求职者", "企业（预留）"], index=0, key="rr")
+                    if st.button("注册并登录", type="primary", width="stretch"):
+                        j = api("POST", "/api/auth/register",
+                                json={"username": ru, "password": rp, "nickname": rn,
+                                      "role": "jobseeker" if rr.startswith("求职") else "employer"})
+                        if j:
+                            st.session_state["token"] = j["token"]
+                            st.session_state["user"] = j["用户"]
+                            st.rerun()
+
+page = st.session_state["page"]
+
+# 后端状态：只在"简历"页顶部用一行小字提示，不占导航
+if "health" not in st.session_state:
+    st.session_state["health"] = api("GET", "/api/health", token=TOKEN())
+h = st.session_state.get("health") or {}
+if not h.get("ok"):
+    st.error("后端未就绪，请先启动 FastAPI（`scripts/run_api.ps1`）")
+
+# ================================================================ 📄 简历
+if page == "resume":
     sec("简历输入：粘贴文本 或 上传 PDF")
     st.caption("两条通路**共用同一个解析器**，结果可验证——这是任务6 的设计契约。")
     c1, c2 = st.columns([3, 2], gap="large")
     with c1:
         text = st.text_area("粘贴简历正文", value=st.session_state.get("resume_text", SAMPLE),
                             height=300)
-        b1, b2 = st.columns([1, 1])
+        b1, b2 = st.columns(2)
         if b1.button("解析这份文本", type="primary", width="stretch"):
             j = api("POST", "/api/resume/parse_text", json={"resume_text": text}, token=TOKEN())
             if j:
@@ -378,43 +383,46 @@ with tab_objs[0]:
         f = p["解析字段"]
         cols = st.columns(4)
         for c, (k, v) in zip(cols, [("姓名", f.get("姓名") or "（未识别）"),
-                                    ("期望岗位", (f.get("期望岗位") or "—")),
+                                    ("期望岗位", f.get("期望岗位") or "—"),
                                     ("期望城市", f.get("期望城市") or "—"),
                                     ("工作年限", "%s 年" % f.get("工作年限", "—"))]):
             kpi(c, v, k)
         st.write("")
-        st.markdown("**技能（%d 项）**：%s" % (p["技能数"], " ".join(
-            pill(s, "blue") for s in p["技能列表"]) or "—"), unsafe_allow_html=True)
+        st.markdown("**技能（%d 项）**：%s" % (p["技能数"],
+                                          " ".join(pill(s, "blue") for s in p["技能列表"]) or "—"),
+                    unsafe_allow_html=True)
         if p.get("未在词典的技能"):
-            st.markdown("**词典外技能**：%s" % " ".join(
-                pill(s, "gray") for s in p["未在词典的技能"]), unsafe_allow_html=True)
+            st.markdown("**词典外技能**：%s" % " ".join(pill(s, "gray")
+                                                   for s in p["未在词典的技能"]),
+                        unsafe_allow_html=True)
         if p.get("解析告警"):
             st.warning("解析告警：" + "；".join(p["解析告警"]))
         with st.expander("全部解析字段"):
             st.json(f)
-        st.info("下一步 → 切到 **🎯 匹配推荐** 页看 Top-N 岗位。")
+        st.info("下一步 → 点顶部 **🎯 职位推荐** 看匹配结果。")
+    else:
+        st.info("粘贴一份简历后点「解析这份文本」，或直接上传 PDF。"
+                "示例文本已预填，可直接点解析体验。")
 
-# ---------------------------------------------------------------- ② 匹配推荐
-with tab_objs[1]:
-    sec("人岗匹配：对全量 8,836 个岗位逐对打分，返回 Top-N")
+# ================================================================ 🎯 职位推荐
+elif page == "match":
+    sec("职位推荐：对全量 8,836 个岗位逐对打分，返回 Top-N")
     saved = []
     if LOGGED():
         jr = api("GET", "/api/user/resumes", token=TOKEN())
         saved = (jr or {}).get("简历", [])
     if not st.session_state.get("resume_id") and not saved:
-        st.warning("请先在 **📄 简历输入** 页解析一份简历，或登录后在个人中心保存简历。")
+        st.warning("请先在 **📄 简历** 页解析一份简历，或登录后在个人中心保存简历。")
     else:
-        c1, c2, c3 = st.columns([1.4, 1, 1])
+        c1, c2, c3 = st.columns([1.6, 1, 1])
         src_label = c1.radio("使用哪份简历", ["本次解析的简历"] + ["📁 %s" % r["title"] for r in saved],
                              horizontal=True, label_visibility="collapsed")
         top_n = c2.slider("返回条数", 1, 20, 5)
-        go = c3.button("开始匹配", type="primary", width="stretch")
-
-        def do_match():
+        if c3.button("开始匹配", type="primary", width="stretch"):
             body = {"top_n": top_n}
             if src_label.startswith("📁"):
-                idx = [i for i, r in enumerate(saved) if "📁 %s" % r["title"] == src_label]
-                body["saved_resume_id"] = saved[idx[0]]["id"]
+                i = [k for k, r in enumerate(saved) if "📁 %s" % r["title"] == src_label][0]
+                body["saved_resume_id"] = saved[i]["id"]
             else:
                 body["resume_id"] = st.session_state.get("resume_id")
             j = api("POST", "/api/match", token=TOKEN(), json=body)
@@ -422,10 +430,8 @@ with tab_objs[1]:
                 st.session_state["matched"] = True
                 st.session_state["match_result"] = j
 
-        if go:
-            do_match()
-        if st.session_state.get("matched") and st.session_state.get("match_result"):
-            j = st.session_state["match_result"]
+        j = st.session_state.get("match_result") if st.session_state.get("matched") else None
+        if j:
             st.write("")
             cols = st.columns(4)
             for c, (v, l) in zip(cols, [(j["推荐数"], "推荐岗位数"),
@@ -441,45 +447,57 @@ with tab_objs[1]:
             st.write("")
             for x in j["推荐"]:
                 rk = "gold" if x["排名"] == 1 else ("silver" if x["排名"] == 2 else "")
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                a, b = st.columns([3, 1.6], gap="large")
+                st.markdown('<div class="job">', unsafe_allow_html=True)
+                a, b = st.columns([3, 1.5], gap="large")
                 with a:
                     st.markdown(
-                        '<div><span class="rank %s">%d</span>'
-                        '<span style="font-size:18px;font-weight:700;color:#16233A">%s</span>'
-                        '&nbsp;&nbsp;<span class="score">%.2f<small> 分</small></span></div>'
-                        % (rk, x["排名"], x["岗位名称"], x["总分"]), unsafe_allow_html=True)
-                    st.markdown(
-                        "".join([pill("🏢 " + x["公司"], "gray"),
-                                 pill("📍 " + (x["城市"] or "—"), "blue"),
-                                 pill("💰 " + (x["岗位薪资"] or "—"), "green"),
-                                 pill("🎓 " + (x["学历要求"] or "不限"), "purple"),
-                                 pill("🧭 " + (x["经验要求"] or "不限"), "orange")]),
+                        '<div style="display:flex;justify-content:space-between;align-items:baseline">'
+                        '<div class="title"><span class="rank %s">%d</span>%s</div>'
+                        '<div class="salary">%s</div></div>'
+                        % (rk, x["排名"], x["岗位名称"], x["岗位薪资"] or "薪资面议"),
                         unsafe_allow_html=True)
+                    st.markdown(
+                        '<div class="co">%s</div><div class="meta">%s</div>'
+                        % (x["公司"],
+                           " ｜ ".join([x["城市"] or "—", x["经验要求"] or "经验不限",
+                                      x["学历要求"] or "学历不限",
+                                      "匹配度 %.1f 分" % x["总分"]])),
+                        unsafe_allow_html=True)
+                    st.markdown("".join([pill("技能命中 %s/%s" % (x["技能命中数"],
+                                                             x["岗位技能要求数"]), "blue"),
+                                         pill("TF-IDF 余弦 %s" % x["余弦分"], "teal"),
+                                         pill("距离 %s km" % x["距离km"], "gray"),
+                                         pill("岗位ID %s" % x["岗位ID"], "gray")]),
+                                unsafe_allow_html=True)
                     st.markdown("**推荐理由**：%s" % x["推荐理由"])
-                    st.caption("岗位ID `%s` ｜ 技能命中 %s/%s ｜ TF-IDF 余弦 %s ｜ 距离 %s km"
-                               % (x["岗位ID"], x["技能命中数"], x["岗位技能要求数"],
-                                  x["余弦分"], x["距离km"]))
                     if LOGGED():
-                        if st.button("⭐ 收藏这个岗位", key="fav_%s" % x["岗位ID"]):
+                        if st.button("⭐ 收藏", key="fav_%s" % x["岗位ID"]):
                             r = api("POST", "/api/user/favorites", token=TOKEN(),
                                     json={"job_id": x["岗位ID"]})
                             if r:
                                 st.success(r.get("message", "已收藏"))
                 with b:
-                    st.pyplot(radar({d: x[d] for d in DIMS}, "六维得分"))
+                    st.pyplot(radar({d: x[d] for d in DIMS}, ""))
                 with st.expander("六维分明细"):
                     st.altair_chart(dim_bar_altair({d: x[d] for d in DIMS}), width="stretch")
                 st.markdown('</div>', unsafe_allow_html=True)
                 st.write("")
 
-# ---------------------------------------------------------------- ③ 岗位聚类
-with tab_objs[2]:
+    with st.expander("⚠️ 已知局限（如实说明）"):
+        st.markdown("- **无人工金标**：真值都由规则生成，不能宣称「准确率 X%」\n"
+                    "- **简历侧为合成数据**（500 份），岗位侧 8,836 条为真实抓取\n"
+                    "- **只覆盖 16 城 / 4 省**（闽浙苏皖）\n"
+                    "- **`经验要求` 字段 24.69% 错位**，系统按「信息缺失」处理\n"
+                    "- **模型口径是规则的蒸馏**（任务8 实测 Spearman 0.9909）")
+
+# ================================================================ 🏢 岗位聚类
+elif page == "cluster":
     sec("岗位聚类画像（任务7：K-Means 定 K=9）")
     j = api("GET", "/api/cluster/list", token=TOKEN())
     if j:
         cols = st.columns(4)
-        for c, (v, l) in zip(cols, [(j["主方案"], "主方案"), (j["簇数"], "簇数"),
+        for c, (v, l) in zip(cols, [(j["主方案"], "主方案"),
+                                    (j["簇数"], "簇数"),
                                     ("%d 个" % sum(x["岗位数"] for x in j["簇"]), "覆盖岗位"),
                                     ("0.6735 / 1.0000", "轮廓系数 / ARI")]):
             kpi(c, v, l)
@@ -490,7 +508,7 @@ with tab_objs[2]:
             st.altair_chart(cluster_donut(j["簇"]), width="stretch")
         with b:
             st.dataframe(pd.DataFrame(j["簇"])[["簇名", "岗位数", "占比", "薪资中位数"]],
-                         width="stretch", hide_index=True, height=340)
+                         width="stretch", hide_index=True, height=330)
         if j.get("各方案") and len(j["方案"]) > 1:
             with st.expander("其他方案（K=5 对照 / 「其他」巨簇的二阶细分 K=8）"):
                 pick = st.selectbox("方案", j["方案"], index=min(2, len(j["方案"]) - 1))
@@ -502,8 +520,8 @@ with tab_objs[2]:
         name = c1.text_input("簇名关键词", value="软件测试", label_visibility="collapsed",
                              help="例如：软件测试 / 算法 / 后端 / 质量检验")
         if c2.button("查询", type="primary", width="stretch"):
-            r = api("GET", "/api/cluster/profile", token=TOKEN(), params={"name": name})
-            st.session_state["cluster_profile"] = r
+            st.session_state["cluster_profile"] = api("GET", "/api/cluster/profile",
+                                                      token=TOKEN(), params={"name": name})
         r = st.session_state.get("cluster_profile")
         if r:
             st.markdown("**%s**" % r.get("summary", ""))
@@ -521,9 +539,9 @@ with tab_objs[2]:
         st.warning("簇名是**统计推断**（主导大类 + 特征技能 lift + 关键词规则），未做人工逐簇确认；"
                    "最大簇占 51.45%，已做二阶细分（K=8）。")
 
-# ---------------------------------------------------------------- ④ 智能问答
-with tab_objs[3]:
-    sec("Agent 智能问答（Function Calling + 9 工具）")
+# ================================================================ 💬 智能问答
+elif page == "chat":
+    sec("智能问答（Agent · Function Calling + 9 工具）")
     st.caption("问题 → DeepSeek 选工具 → 本地工具执行 → 带来源的中文回答；最多 6 轮、12 次工具调用。")
     c1, c2, c3 = st.columns([4, 1.1, 1.4])
     q = c1.text_input("问点什么", value="福州市的Java岗位有多少个？", label_visibility="collapsed")
@@ -562,135 +580,127 @@ with tab_objs[3]:
                   "帮我看看北京有没有合适的岗位，我想投字节跳动。"]:
             st.markdown("- %s" % s)
 
-# ---------------------------------------------------------------- ⑤ 个人中心
-if LOGGED():
-    with tab_objs[4]:
-        j = api("GET", "/api/user/stats", token=TOKEN())
-        if j:
-            s = j["统计"]
-            sec("个人中心 · 概览")
-            cols = st.columns(4)
-            for c, (v, l) in zip(cols, [(s["简历数"], "我的简历"), (s["收藏岗位数"], "收藏岗位"),
-                                        (s["匹配次数"], "匹配次数"), (s["提问次数"], "提问次数")]):
-                kpi(c, v, l)
-            st.caption("账号：%s ｜ 角色：%s ｜ 注册时间：%s"
-                       % (j["用户"]["username"], j["用户"]["role_label"], j["用户"]["created_at"]))
+# ================================================================ 👤 个人中心
+elif page == "me" and LOGGED():
+    j = api("GET", "/api/user/stats", token=TOKEN())
+    if j:
+        s = j["统计"]
+        sec("个人中心")
+        cols = st.columns(4)
+        for c, (v, l) in zip(cols, [(s["简历数"], "我的简历"), (s["收藏岗位数"], "收藏岗位"),
+                                    (s["匹配次数"], "匹配次数"), (s["提问次数"], "提问次数")]):
+            kpi(c, v, l)
+        st.caption("账号：%s ｜ 角色：%s ｜ 注册时间：%s"
+                   % (j["用户"]["username"], j["用户"]["role_label"], j["用户"]["created_at"]))
 
-        sub = st.tabs(["📁 我的简历", "⭐ 我的收藏", "🕘 匹配历史", "💬 问答记录", "⚙️ 账号设置"])
+    sub = st.tabs(["📁 我的简历", "⭐ 我的收藏", "🕘 匹配历史", "💬 问答记录", "⚙️ 账号设置"])
 
-        # ---- 我的简历
-        with sub[0]:
-            jr = api("GET", "/api/user/resumes", token=TOKEN()) or {}
-            rs = jr.get("简历", [])
-            if not rs:
-                st.info("还没有保存的简历。到 **📄 简历输入** 页粘贴简历后点「保存到我的简历」。")
-            for r in rs:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                c1, c2, c3, c4 = st.columns([4, 1, 1, 1])
-                c1.markdown("**%s** %s" % (r["title"], pill("默认", "green") if r["is_default"] else ""),
-                            unsafe_allow_html=True)
-                c1.caption("更新于 %s ｜ 约 %s 字" % (r["updated_at"], r["字数"]))
-                if c2.button("用这份匹配", key="use_%d" % r["id"]):
-                    st.session_state["match_result"] = api(
-                        "POST", "/api/match", token=TOKEN(),
-                        json={"saved_resume_id": r["id"], "top_n": 5})
-                    st.session_state["matched"] = True
-                    st.success("已匹配，请切到 **🎯 匹配推荐** 查看结果")
-                if not r["is_default"] and c3.button("设为默认", key="def_%d" % r["id"]):
-                    api("PUT", "/api/user/resumes/%d/default" % r["id"], token=TOKEN())
+    with sub[0]:
+        jr = api("GET", "/api/user/resumes", token=TOKEN()) or {}
+        rs = jr.get("简历", [])
+        if not rs:
+            st.info("还没有保存的简历。到 **📄 简历** 页粘贴简历后点「保存到我的简历」。")
+        for r in rs:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            c1, c2, c3, c4 = st.columns([4, 1, 1, 1])
+            c1.markdown("**%s** %s" % (r["title"], pill("默认", "green") if r["is_default"] else ""),
+                        unsafe_allow_html=True)
+            c1.caption("更新于 %s ｜ 约 %s 字" % (r["updated_at"], r["字数"]))
+            if c2.button("用这份匹配", key="use_%d" % r["id"]):
+                st.session_state["match_result"] = api("POST", "/api/match", token=TOKEN(),
+                                                       json={"saved_resume_id": r["id"], "top_n": 5})
+                st.session_state["matched"] = True
+                st.session_state["page"] = "match"
+                st.rerun()
+            if not r["is_default"] and c3.button("设为默认", key="def_%d" % r["id"]):
+                api("PUT", "/api/user/resumes/%d/default" % r["id"], token=TOKEN())
+                st.rerun()
+            if c4.button("删除", key="del_%d" % r["id"]):
+                api("DELETE", "/api/user/resumes/%d" % r["id"], token=TOKEN())
+                st.rerun()
+            with st.expander("查看/编辑正文"):
+                nt = st.text_input("标题", value=r["title"], key="t_%d" % r["id"])
+                nx = st.text_area("正文", value=r["text"], height=200, key="x_%d" % r["id"])
+                if st.button("保存修改", key="up_%d" % r["id"]):
+                    api("PUT", "/api/user/resumes/%d" % r["id"], token=TOKEN(),
+                        json={"title": nt, "text": nx})
+                    st.success("已保存")
                     st.rerun()
-                if c4.button("删除", key="del_%d" % r["id"]):
-                    api("DELETE", "/api/user/resumes/%d" % r["id"], token=TOKEN())
-                    st.rerun()
-                with st.expander("查看/编辑正文"):
-                    nt = st.text_input("标题", value=r["title"], key="t_%d" % r["id"])
-                    nx = st.text_area("正文", value=r["text"], height=200, key="x_%d" % r["id"])
-                    if st.button("保存修改", key="up_%d" % r["id"]):
-                        api("PUT", "/api/user/resumes/%d" % r["id"], token=TOKEN(),
-                            json={"title": nt, "text": nx})
-                        st.success("已保存")
-                        st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        # ---- 我的收藏
-        with sub[1]:
-            jf = api("GET", "/api/user/favorites", token=TOKEN()) or {}
-            fs = jf.get("收藏", [])
-            if not fs:
-                st.info("还没有收藏。在 **🎯 匹配推荐** 页点每条岗位下的「⭐ 收藏这个岗位」。")
+    with sub[1]:
+        jf = api("GET", "/api/user/favorites", token=TOKEN()) or {}
+        fs = jf.get("收藏", [])
+        if not fs:
+            st.info("还没有收藏。到 **🎯 职位推荐** 页点岗位卡上的「⭐ 收藏」。")
+        else:
+            df = pd.DataFrame(fs)[["job_id", "job_name", "company", "city", "salary", "note",
+                                   "created_at"]]
+            df.columns = ["岗位ID", "岗位名称", "公司", "城市", "薪资", "备注", "收藏时间"]
+            st.dataframe(df, width="stretch", hide_index=True)
+            st.write("")
+            c1, c2 = st.columns([3, 1])
+            pick = c1.selectbox("取消收藏", ["%s ｜ %s" % (f["job_id"], f["job_name"]) for f in fs],
+                                label_visibility="collapsed")
+            if c2.button("取消收藏", width="stretch"):
+                api("DELETE", "/api/user/favorites/%s" % pick.split(" ｜ ")[0], token=TOKEN())
+                st.rerun()
+
+    with sub[2]:
+        jm = api("GET", "/api/user/matches", token=TOKEN()) or {}
+        hs = jm.get("历史", [])
+        if not hs:
+            st.info("还没有匹配记录。登录后使用 **🎯 职位推荐** 会自动保存。")
+        for h in hs:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown("**%s** ｜ %s ｜ Top-%s ｜ 简历：%s"
+                        % (h["created_at"], h["summary"], h["top_n"], h["resume_title"]))
+            st.markdown("".join(pill("#%s %s（%.1f 分）" % (x["排名"], x["岗位名称"], x["总分"] or 0),
+                                     "blue" if (x["排名"] or 9) <= 3 else "gray")
+                                for x in h["推荐"]), unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    with sub[3]:
+        jc = api("GET", "/api/user/chats", token=TOKEN()) or {}
+        cs = jc.get("历史", [])
+        if not cs:
+            st.info("还没有问答记录。登录后使用 **💬 智能问答** 会自动保存。")
+        for c in cs:
+            with st.expander("%s ｜ %s %s" % (c["created_at"], c["question"],
+                                              "（%s）" % c["tool_seq"] if c["tool_seq"] else "")):
+                st.markdown(c["answer"][:1200])
+                sources(c["sources"])
+
+    with sub[4]:
+        u = USER()
+        sec("修改个人资料")
+        a, b, c = st.columns(3)
+        nn = a.text_input("昵称", value=u.get("nickname", ""))
+        np_ = b.text_input("手机号", value=u.get("phone", ""))
+        ne = c.text_input("邮箱", value=u.get("email", ""))
+        if st.button("保存资料", type="primary"):
+            r = api("PUT", "/api/user/profile", token=TOKEN(),
+                    json={"nickname": nn, "phone": np_, "email": ne})
+            if r:
+                st.session_state["user"] = r["用户"]
+                st.success("资料已更新")
+        st.divider()
+        sec("修改密码")
+        p1, p2, p3 = st.columns(3)
+        po = p1.text_input("原密码", type="password")
+        pn = p2.text_input("新密码（至少 6 位）", type="password")
+        pc = p3.text_input("确认新密码", type="password")
+        if st.button("修改密码"):
+            if pn != pc:
+                st.warning("两次输入的新密码不一致")
             else:
-                df = pd.DataFrame(fs)[["job_id", "job_name", "company", "city", "salary", "note",
-                                       "created_at"]]
-                df.columns = ["岗位ID", "岗位名称", "公司", "城市", "薪资", "备注", "收藏时间"]
-                st.dataframe(df, width="stretch", hide_index=True)
-                st.write("")
-                c1, c2 = st.columns([3, 1])
-                pick = c1.selectbox("取消收藏", ["%s ｜ %s" % (f["job_id"], f["job_name"]) for f in fs],
-                                    label_visibility="collapsed")
-                if c2.button("取消收藏", width="stretch"):
-                    jid = pick.split(" ｜ ")[0]
-                    api("DELETE", "/api/user/favorites/%s" % jid, token=TOKEN())
-                    st.rerun()
-
-        # ---- 匹配历史
-        with sub[2]:
-            jm = api("GET", "/api/user/matches", token=TOKEN()) or {}
-            hs = jm.get("历史", [])
-            if not hs:
-                st.info("还没有匹配记录。登录后使用 **🎯 匹配推荐** 会自动保存。")
-            for h in hs:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                st.markdown("**%s** ｜ %s ｜ Top-%s ｜ 简历：%s"
-                            % (h["created_at"], h["summary"], h["top_n"], h["resume_title"]))
-                st.markdown("".join(pill("#%s %s（%.1f 分）" % (x["排名"], x["岗位名称"],
-                                                              x["总分"] or 0),
-                                        "blue" if (x["排名"] or 9) <= 3 else "gray")
-                                    for x in h["推荐"]), unsafe_allow_html=True)
-                st.markdown('</div>', unsafe_allow_html=True)
-
-        # ---- 问答记录
-        with sub[3]:
-            jc = api("GET", "/api/user/chats", token=TOKEN()) or {}
-            cs = jc.get("历史", [])
-            if not cs:
-                st.info("还没有问答记录。登录后使用 **💬 智能问答** 会自动保存。")
-            for c in cs:
-                with st.expander("%s ｜ %s %s" % (c["created_at"], c["question"],
-                                                  "（%s）" % c["tool_seq"] if c["tool_seq"] else "")):
-                    st.markdown(c["answer"][:1200])
-                    sources(c["sources"])
-
-        # ---- 账号设置
-        with sub[4]:
-            u = USER()
-            sec("修改个人资料")
-            a, b, c = st.columns(3)
-            nn = a.text_input("昵称", value=u.get("nickname", ""))
-            np_ = b.text_input("手机号", value=u.get("phone", ""))
-            ne = c.text_input("邮箱", value=u.get("email", ""))
-            if st.button("保存资料", type="primary"):
-                r = api("PUT", "/api/user/profile", token=TOKEN(),
-                        json={"nickname": nn, "phone": np_, "email": ne})
+                r = api("PUT", "/api/user/password", token=TOKEN(),
+                        json={"old_password": po, "new_password": pn})
                 if r:
-                    st.session_state["user"] = r["用户"]
-                    st.success("资料已更新")
-            st.divider()
-            sec("修改密码")
-            p1, p2, p3 = st.columns(3)
-            po = p1.text_input("原密码", type="password")
-            pn = p2.text_input("新密码（至少 6 位）", type="password")
-            pc = p3.text_input("确认新密码", type="password")
-            if st.button("修改密码"):
-                if pn != pc:
-                    st.warning("两次输入的新密码不一致")
-                else:
-                    r = api("PUT", "/api/user/password", token=TOKEN(),
-                            json={"old_password": po, "new_password": pn})
-                    if r:
-                        st.success(r.get("message", "已修改"))
-            st.divider()
-            st.caption("说明：口令以 **PBKDF2-HMAC-SHA256（20 万次迭代 + 每用户随机盐）** 存储，"
-                       "不保存明文；登录令牌有效期 7 天，退出即失效。")
+                    st.success(r.get("message", "已修改"))
+        st.divider()
+        st.caption("说明：口令以 **PBKDF2-HMAC-SHA256（20 万次迭代 + 每用户随机盐）** 存储，"
+                   "不保存明文；登录令牌有效期 7 天，退出即失效。")
 
 st.divider()
 st.caption("岗位-简历人岗匹配推荐系统 ｜ 任务11 前后端集成（Streamlit 前端 + FastAPI 后端）"
