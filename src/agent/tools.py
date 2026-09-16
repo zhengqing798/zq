@@ -24,7 +24,8 @@ sys.path.insert(0, os.path.join(ROOT, "src", "models", "matching"))
 TOOLS = [
     {"type": "function", "function": {
         "name": "search_jobs",
-        "description": "按语义检索岗位（适合「厦门有哪些 Java 岗位」这类问题）。可指定城市做硬过滤。",
+        "description": "按语义检索岗位，返回**最相似的 Top-k 样例**（适合「厦门有哪些 Java 岗位」这类问“有哪些”的问题）。"
+                       "**它答不了“有多少个”**——问数量请用 filter_jobs。可指定城市做硬过滤。",
         "parameters": {"type": "object", "properties": {
             "query": {"type": "string", "description": "检索语句，如「厦门 Java 开发 3-5 年」"},
             "k": {"type": "integer", "description": "返回条数，默认 5"},
@@ -32,10 +33,13 @@ TOOLS = [
             "required": ["query"]}}},
     {"type": "function", "function": {
         "name": "filter_jobs",
-        "description": "结构化筛选岗位并返回命中总数（适合「月薪 2 万以上的算法岗有多少」「宁波要求大专的测试岗」）。",
+        "description": "结构化筛选岗位并返回**命中总数**——凡问「有多少个」「几个」「数量」必须用本工具（search_jobs 只给 Top-k 样例，答不出数量）。"
+                       "关键词按**核心词匹配**：传「Java」即可召回所有含 Java 的岗位（含 Java工程师/Java后端/全栈+Java技能）。"
+                       "返回值同时给出三个口径：岗位名称命中（严格）、名称或技能标签命中（推荐主口径）、全字段命中（宽口径）。",
         "parameters": {"type": "object", "properties": {
             "city": {"type": "string", "description": "城市，可选"},
-            "keyword": {"type": "string", "description": "关键词，匹配岗位名称/技能标签/职位描述，可选"},
+            "keyword": {"type": "string", "description": "**只传核心专业词**，如「Java」「软件测试」「前端」；"
+                                                        "不要传「Java 开发工程师」这类组合短语（会被拆成核心词处理，但直接传核心词更稳）"},
             "salary_min": {"type": "integer", "description": "薪资下限门槛（元/月），可选"},
             "edu": {"type": "string", "description": "学历要求，如 大专/本科，可选"},
             "k": {"type": "integer", "description": "返回样例条数，默认 5"}},
@@ -104,12 +108,21 @@ def t_search_jobs(query, k=5, city=None):
 
 
 def t_filter_jobs(city=None, keyword=None, salary_min=None, edu=None, k=5):
-    from query import get_retriever
-    n, sample = get_retriever().structured_filter(city=city, keyword=keyword,
-                                                  salary_min=salary_min, edu=edu, k=int(k))
+    from query import get_retriever, keyword_terms
+    n, sample, tiers = get_retriever().structured_filter(city=city, keyword=keyword,
+                                                         salary_min=salary_min, edu=edu, k=int(k))
     cond = "、".join(x for x in [city and "城市=%s" % city, keyword and "关键词=%s" % keyword,
                                  salary_min and "薪资下限≥%d" % salary_min, edu and "学历=%s" % edu] if x)
-    return {"ok": n > 0, "summary": "条件（%s）命中 %d 个岗位" % (cond or "无", n), "data": sample,
+    if keyword:
+        summary = ("条件（%s）命中 %d 个岗位（口径：岗位名称含「%s」%d 个；名称或技能标签口径 %d 个；"
+                   "若把职位描述里提及的也算上共 %d 个）"
+                   % (cond or "无", n, keyword, tiers["岗位名称"], tiers["名称或技能标签"], tiers["全字段"]))
+        if "任一核心词_名称或技能标签" in tiers:
+            summary += "；按任一核心词口径 %d 个" % tiers["任一核心词_名称或技能标签"]
+    else:
+        summary = "条件（%s）命中 %d 个岗位" % (cond or "无", n)
+    return {"ok": n > 0, "summary": summary, "data": sample, "命中口径": tiers,
+            "解析后的核心词": keyword_terms(keyword) if keyword else [],
             "来源": ["zhaopin_jobs_cleaned_seg.csv（结构化筛选）"]}
 
 
