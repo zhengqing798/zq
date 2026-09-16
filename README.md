@@ -68,7 +68,32 @@ zq/
 └── .github/workflows/         # CI 配置（可选）
 ```
 
-## 5. Git 协作规范（团队共用）
+## 5. 怎么把它跑起来（克隆后 6 步）
+
+> 完整版见 **`docs/环境搭建指南.md`**；下面是最短路径。
+
+```bash
+git clone https://github.com/zhengqing798/zq.git && cd zq
+python -m venv .venv && .venv\Scripts\Activate.ps1     # Windows；macOS/Linux 用 source .venv/bin/activate
+pip install -r requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple/
+
+python scripts/doctor.py                # ★ 先体检：缺什么、怎么补，它会直接告诉你
+
+# 仓库只提交源码+根数据+文档（约 105MB）；下面 3 个体积大但可一键重建的产物未入库
+python src/models/scoring/build_labels.py     # 配对标签 207,640 行（27MB）
+python src/models/scoring/build_features.py   # 配对特征表（26MB）        ← 只跑 Agent 的话可跳过前两条
+python src/rag/build_kb.py                    # RAG 向量+卡片（43MB，首次会下 BGE 约 92MB）
+
+# 跑起来
+python src/agent/agent.py --ask "福州市的Java岗位有多少个？"
+python src/models/matching/match.py --text "大专 3 年软件测试 Selenium JMeter Python MySQL 期望苏州" --top 5
+```
+
+- **只跑 Agent 问答 / 人岗匹配** → 只需 `build_kb.py` 一条命令
+- **跑 Agent 需要 `.env`**（`DEEPSEEK_API_KEY` 等三个键，**不入库**，自己建）
+- **本地 1.2GB vs 仓库 105MB** 的原因见《环境搭建指南》第 0 节（主要是爬虫用的 Chrome profile 744MB + 虚拟环境 199MB，都无关运行）
+
+## 6. Git 协作规范（团队共用）
 
 ```bash
 git status                                   # 查看改动
@@ -82,7 +107,7 @@ git push origin main                         # 推送
 - `.env`、API Key、`.venv/`、浏览器 profile（`.zhaopin_profile/` 等）**一律不入库**（已在 .gitignore 中处理）；`data/` 下的原始、清洗、特征与划分结果**均已入库**，便于答辩核验与复现
 - 每人每天至少一次 commit + push，最终答辩会核验 **Git 提交记录**
 
-## 6. 数据合规声明
+## 7. 数据合规声明
 
 - 仅采集**公开的招聘岗位信息**，不采集求职者个人敏感信息；
 - 控制请求频率（间隔+随机 UA+失败重试），尊重目标网站 robots 与服务条款；
