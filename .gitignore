@@ -54,3 +54,13 @@ data/rag/jobs_kb_cards.json
 data/app.db
 data/*.db-journal
 data/*.db-wal
+
+# 任务11 · Vue3 前端（web/）
+web/node_modules/
+web/dist/
+web/.vite/
+web/*.local
+web/.env.local
+web/.env.*.local
+npm-debug.log*
+yarn-error.log*

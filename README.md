@@ -90,7 +90,8 @@ python src/models/matching/match.py --text "大专 3 年软件测试 Selenium JM
 
 # 前后端（任务11）：后端 + 前端各开一个终端
 powershell -ExecutionPolicy Bypass -File scripts/run_api.ps1   # 后端 http://127.0.0.1:8000/docs
-powershell -ExecutionPolicy Bypass -File scripts/run_web.ps1   # 前端 http://127.0.0.1:8501
+powershell -ExecutionPolicy Bypass -File scripts/run_web.ps1      # 前端A（Streamlit）http://127.0.0.1:8501
+powershell -ExecutionPolicy Bypass -File scripts/run_web_vue.ps1  # 前端B（Vue3，答辩主秀）http://127.0.0.1:5173
 # 前端支持注册/登录（游客也能用核心功能）；登录后可保存简历、收藏岗位、查看匹配与问答历史
 # 用户数据存在 data/app.db（SQLite，已 gitignore，不入库）
 pytest -q tests/test_api.py -m "not slow"                      # 接口测试
