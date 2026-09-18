@@ -324,11 +324,11 @@ with st.container():
                     ru = st.text_input("用户名（3~24 位字母/数字/下划线）", key="ru")
                     rp = st.text_input("密码（至少 6 位）", type="password", key="rp")
                     rn = st.text_input("昵称（可选）", key="rn")
-                    rr = st.selectbox("角色", ["求职者", "企业（预留）"], index=0, key="rr")
+                    # 本系统面向求职者：注册不再让用户选角色（后端默认 jobseeker）
                     if st.button("注册并登录", type="primary", width="stretch"):
                         j = api("POST", "/api/auth/register",
                                 json={"username": ru, "password": rp, "nickname": rn,
-                                      "role": "jobseeker" if rr.startswith("求职") else "employer"})
+                                      "role": "jobseeker"})
                         if j:
                             st.session_state["token"] = j["token"]
                             st.session_state["user"] = j["用户"]

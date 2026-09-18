@@ -75,7 +75,9 @@ const FORBIDDEN = {
   home: ['职位分类导航面板'],
   companies: ['口径说明'],
   // 登录页左栏品牌面板已删除：以下文案若回流即报错
-  login: ['PBKDF2', '8,836 个真实岗位', '游客也能体验全部核心功能', '六维加权匹配（'],
+  login: ['PBKDF2', '8,836 个真实岗位', '游客也能体验全部核心功能', '六维加权匹配（',
+          // 本系统面向求职者：注册界面的角色选择（角色 / 求职者 / 企业）已删除
+          '角色', '求职者', '企业'],
 }
 
 const errors = []
@@ -103,13 +105,15 @@ for (const [route, expects] of ROUTES) {
   await new Promise((r) => setTimeout(r, 1600))
   const info = await page.evaluate(() => ({
     text: document.body.innerText,
+    // 全量 DOM 文本（含隐藏元素）：反向断言用它，隐藏页签里的被删字段也逃不掉
+    domText: document.body.textContent || '',
     links: Array.from(document.querySelectorAll('.zq-nav a')).map((a) => a.textContent.trim()),
     els: document.querySelectorAll('*').length,
     title: document.title,
   }))
   const missing = expects.filter((t) => !info.text.includes(t))
   const forbidden = [...(FORBIDDEN[route] || []), ...(FORBIDDEN['*'] || [])]
-  const leaked = forbidden.filter((t) => info.text.includes(t))
+  const leaked = forbidden.filter((t) => (info.text + info.domText).includes(t))
   if (shots) await page.screenshot({ path: `${SHOT_DIR}/${route.replace(/\//g, '_')}.png`, fullPage: true })
   console.log(`\n--- /#/${route} ---`)
   console.log(`  导航=[${info.links.join(' | ')}] ｜ DOM 元素=${info.els} ｜ 标题="${info.title}"`)

@@ -35,12 +35,6 @@
               <el-form-item label="昵称（可选）">
                 <el-input v-model="rf.nickname" size="large" placeholder="如 小张" />
               </el-form-item>
-              <el-form-item label="角色">
-                <el-radio-group v-model="rf.role">
-                  <el-radio-button value="jobseeker">求职者</el-radio-button>
-                  <el-radio-button value="employer">企业（预留）</el-radio-button>
-                </el-radio-group>
-              </el-form-item>
               <el-button type="primary" size="large" class="submit" :loading="loading"
                          @click="doRegister">注册并登录</el-button>
             </el-form>
@@ -69,7 +63,8 @@ const auth = useAuthStore()
 const tab = ref('login')
 const loading = ref(false)
 const lf = reactive({ username: '', password: '' })
-const rf = reactive({ username: '', password: '', nickname: '', role: 'jobseeker' })
+// 本系统面向求职者，注册界面不再让用户选角色（后端默认 jobseeker）
+const rf = reactive({ username: '', password: '', nickname: '' })
 
 function done() {
   ElMessage.success('欢迎，' + (auth.user?.nickname || auth.user?.username))
@@ -88,7 +83,7 @@ async function doRegister() {
   loading.value = true
   try {
     await auth.register({ username: rf.username, password: rf.password,
-                          nickname: rf.nickname, role: rf.role })
+                          nickname: rf.nickname })
     done()
   } catch { /* 拦截器已提示 */ }
   finally { loading.value = false }
