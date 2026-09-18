@@ -302,6 +302,37 @@ if (jobUrlOk && drawerGone && detailText.includes('职位描述')) {
   console.log(`  ❌ 跳转异常：URL=${page.url().replace(URL, '')} ｜ 抽屉存在=${!drawerGone}`)
 }
 
+// 岗位列表「默认排序」= 打乱：每次进页面顺序不同，且翻页不重复（种子随机保证）
+console.log(`\n--- 岗位默认排序（随机） ---`)
+const firstNames = async () => {
+  await page.goto(`${URL}/#/jobs`, { waitUntil: 'networkidle2', timeout: 60000 })
+  await new Promise((r) => setTimeout(r, 1600))
+  return page.$$eval('.jcard .jname', (e) => e.map((x) => x.innerText.trim()))
+}
+const listA = await firstNames()
+await page.goto(`${URL}/#/home`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 800))
+const listB = await firstNames()
+if (listA.length && listB.length && listA[0] !== listB[0]) {
+  console.log(`  ✅ 两次进入顺序不同（「${listA[0]}」 vs 「${listB[0]}」）`)
+} else {
+  failed++
+  console.log(`  ❌ 默认排序没变化：${listA[0]} / ${listB[0]}`)
+}
+await page.evaluate(() => {
+  const b = Array.from(document.querySelectorAll('.el-pager li')).find((x) => x.innerText.trim() === '2')
+  if (b) b.click()
+})
+await new Promise((r) => setTimeout(r, 1600))
+const page2 = await page.$$eval('.jcard .jname', (e) => e.map((x) => x.innerText.trim()))
+const overlap = listB.filter((x) => page2.includes(x))
+if (page2.length && overlap.length === 0) {
+  console.log(`  ✅ 翻页不重复（第 1 页与第 2 页无交集，第 2 页首条「${page2[0]}」）`)
+} else {
+  failed++
+  console.log(`  ❌ 翻页出现重复岗位 ${overlap.length} 条`)
+}
+
 // 游客态：必须用**独立无痕上下文**——同浏览器的普通新页面与本页同源、共享 localStorage，
 // 会误判成"已登录游客"（第一次写这段就踩了这个坑）。
 const guestCtx = browser.createBrowserContext

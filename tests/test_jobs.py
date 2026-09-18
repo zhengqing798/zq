@@ -156,6 +156,44 @@ class TestJobFilter:
         r = client.get("/api/jobs", params={"sort": "not-a-sort"})
         assert r.status_code == 200 and r.json()["总数"] == 8836
 
+    def test_default_sort_is_shuffled_by_seed(self):
+        """默认排序 = 种子打乱：换 seed 顺序不同，同 seed 完全一致（翻页才不会重复/漏）"""
+        a = client.get("/api/jobs", params={"seed": 111, "size": 30}).json()["岗位"]
+        b = client.get("/api/jobs", params={"seed": 222, "size": 30}).json()["岗位"]
+        a2 = client.get("/api/jobs", params={"seed": 111, "size": 30}).json()["岗位"]
+        assert [x["岗位ID"] for x in a] == [x["岗位ID"] for x in a2], "同 seed 必须完全一致"
+        assert [x["岗位ID"] for x in a] != [x["岗位ID"] for x in b], "不同 seed 应当给出不同顺序"
+        # 不再是按岗位ID升序
+        ids = [x["岗位ID"] for x in a]
+        assert ids != sorted(ids), "默认排序不应仍是按岗位ID排序"
+
+    def test_default_sort_pagination_consistency(self):
+        """种子打乱后翻页必须不重不漏：第 1、2 页无交集，且并集能上溯到同一洗牌序列"""
+        seed = 987654321
+        p1 = client.get("/api/jobs", params={"seed": seed, "page": 1, "size": 20}).json()["岗位"]
+        p2 = client.get("/api/jobs", params={"seed": seed, "page": 2, "size": 20}).json()["岗位"]
+        p3 = client.get("/api/jobs", params={"seed": seed, "page": 3, "size": 20}).json()["岗位"]
+        ids = [x["岗位ID"] for x in p1 + p2 + p3]
+        assert len(ids) == len(set(ids)) == 60, "翻页出现重复岗位：%d 个岗位 %d 个唯一ID" % (len(ids), len(set(ids)))
+        # 与「一次取 60 条」的结果完全一致（证明是同一条洗牌序列）
+        one = client.get("/api/jobs", params={"seed": seed, "page": 1, "size": 60}).json()["岗位"]
+        assert ids == [x["岗位ID"] for x in one]
+
+    def test_seed_ignored_for_explicit_sorts(self):
+        """种子只影响默认排序：显式排序（薪资/回复）结果必须与 seed 无关"""
+        s1 = client.get("/api/jobs", params={"sort": "salary_desc", "seed": 1, "size": 10}).json()["岗位"]
+        s2 = client.get("/api/jobs", params={"sort": "salary_desc", "seed": 999, "size": 10}).json()["岗位"]
+        assert [x["岗位ID"] for x in s1] == [x["岗位ID"] for x in s2]
+        ups = [x["薪资上限"] for x in s1]
+        assert ups == sorted(ups, reverse=True)
+
+    def test_no_seed_keeps_stable_order(self):
+        """不带 seed 时保持稳定顺序（接口默认行为，便于脚本/测试复现）"""
+        a = client.get("/api/jobs", params={"size": 10}).json()["岗位"]
+        b = client.get("/api/jobs", params={"size": 10}).json()["岗位"]
+        assert [x["岗位ID"] for x in a] == [x["岗位ID"] for x in b]
+        assert [x["岗位ID"] for x in a][0] == "J0001"
+
     def test_filter_no_match(self):
         j = client.get("/api/jobs", params={"city": "北京"}).json()
         assert j["总数"] == 0 and j["岗位"] == []

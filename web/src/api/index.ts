@@ -23,6 +23,8 @@ export interface JobQuery {
   keyword?: string
   /** 精确匹配「来源关键词」列（首页热门分类卡的数字就是这个口径） */
   source_kw?: string
+  /** 默认排序（打乱）用的随机种子：同种子翻页顺序稳定，换种子换一批 */
+  seed?: number
   salary_min?: number
   edu?: string
   cluster?: string

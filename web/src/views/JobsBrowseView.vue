@@ -57,7 +57,7 @@
       <div class="frow">
         <span class="flb">排序：</span>
         <a v-for="s in st.筛选项.排序" :key="s.value" :class="{ on: sort === s.value }"
-           @click="sort = s.value; search()">{{ s.label }}</a>
+           @click="setSort(s.value)">{{ s.label }}</a>
       </div>
     </div>
 
@@ -140,6 +140,9 @@ const salaryMin = ref(0)
 const category = ref('')
 const sourceKw = ref('')
 const sort = ref('default')
+/** 默认排序的随机种子：进页面时随机一次，点「默认排序」再随机一次 → 每次顺序都不同 */
+const newSeed = () => Math.floor(Math.random() * 1e9)
+const seed = ref(newSeed())
 const page = ref(1)
 const size = ref(20)
 
@@ -170,6 +173,8 @@ function load(pageNo = 1) {
     page: pageNo, size: size.value, city: city.value, district: district.value,
     category: category.value, keyword: kw.value, source_kw: sourceKw.value,
     salary_min: salaryMin.value || 0, edu: edu.value, sort: sort.value,
+    // 默认排序是「打乱」：带上种子，翻页顺序才稳定（否则第 1、2 页会重复/漏岗位）
+    seed: seed.value,
   }).then((r) => { list.value = r; page.value = r.页码 })
     .catch(() => { /* 拦截器已提示 */ })
     .finally(() => { loading.value = false })
@@ -186,6 +191,13 @@ function setDistrict(d: string) { district.value = d; search() }
 function setSalary(v: number) { salaryMin.value = salaryMin.value === v ? 0 : v; search() }
 function setEdu(e: string) { edu.value = edu.value === e ? '' : e; search() }
 
+/** 切换排序；切到/重新点「默认排序」时换一个随机种子（= 换一批顺序） */
+function setSort(v: string) {
+  sort.value = v
+  if (v === 'default') seed.value = newSeed()
+  search()
+}
+
 /** 从 URL 查询参数初始化筛选（首页的「看这类岗位」/ 地区卡就是这么跳过来的） */
 function initFromQuery() {
   const q = route.query
@@ -197,6 +209,7 @@ function initFromQuery() {
   edu.value = String(q.edu || '')
   sort.value = String(q.sort || 'default')
   salaryMin.value = Number(q.salary_min || 0) || 0
+  if (sort.value === 'default') seed.value = newSeed()   // 每次带新种子进页面 = 换一批顺序
 }
 
 async function open(j: JobItem) {

@@ -47,6 +47,7 @@ SORTS = {
     "reply": "回复最积极",
     "online": "在线优先",
 }
+# 「默认排序」= 打乱顺序（种子随机，见 JobStore.query）；前端每次进页面会换一个 seed
 
 # 公司列表排序（BOSS直聘「公司」页的排序维度）
 COMPANY_SORTS = {
@@ -244,7 +245,7 @@ class JobStore:
 
     # ------------------------------------------------ 浏览与筛选
     def query(self, page=1, size=20, city=None, district=None, category=None, keyword=None,
-              salary_min=None, edu=None, cluster=None, sort="default", source_kw=None):
+              salary_min=None, edu=None, cluster=None, sort="default", source_kw=None, seed=None):
         rows = self.items
         if city:
             rows = [x for x in rows if x["城市"] == city]
@@ -274,6 +275,12 @@ class JobStore:
             rows = sorted(rows, key=lambda x: -x["今日回复数"])
         elif sort == "online":
             rows = sorted(rows, key=lambda x: -x["是否在线"])
+        elif seed:
+            # 默认排序 = **打乱**：同一个 seed 顺序稳定（翻页不会重复/漏岗位），
+            # 换一个 seed 就是另一批顺序 → 前端每次进页面/重点默认排序都会换 seed。
+            # 不用 random.shuffle 直接改全局随机：并发请求下会导致翻页顺序不一致。
+            rows = list(rows)
+            random.Random(int(seed)).shuffle(rows)
 
         total = len(rows)
         page = max(1, int(page))

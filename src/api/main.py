@@ -122,14 +122,19 @@ def jobs_stats():
 @app.get("/api/jobs", response_model=schemas.JobListResponse, tags=["⓪ 首页"])
 def jobs_list(page: int = 1, size: int = 20, city: str = "", district: str = "",
               category: str = "", keyword: str = "", salary_min: int = 0, edu: str = "",
-              cluster: str = "", sort: str = "default", source_kw: str = ""):
-    """分页浏览全部岗位，支持城市/区县/大类/学历/关键词/薪资下限/簇/来源关键词筛选与排序"""
+              cluster: str = "", sort: str = "default", source_kw: str = "", seed: int = 0):
+    """分页浏览全部岗位，支持城市/区县/大类/学历/关键词/薪资下限/簇/来源关键词筛选与排序
+
+    `sort=default`（默认）时用 `seed` 做**种子随机打乱**：同 seed 翻页顺序稳定，
+    换 seed 就是新顺序（前端每次进「岗位」页/重新点默认排序都会换一个 seed）。
+    """
     try:
         from src.api.jobs import get_store
         r = get_store().query(page=page, size=size, city=city or None, district=district or None,
                               category=category or None, keyword=keyword or None,
                               salary_min=salary_min or None, edu=edu or None,
-                              cluster=cluster or None, sort=sort, source_kw=source_kw or None)
+                              cluster=cluster or None, sort=sort, source_kw=source_kw or None,
+                              seed=seed or None)
         r["来源"] = ["zhaopin_jobs_cleaned_seg.csv（清洗后 %d 个岗位）" % r["总数"]]
         return {"ok": True, **r}
     except Exception as e:
