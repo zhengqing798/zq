@@ -202,6 +202,20 @@ class JobStatsResponse(BaseModel):
     来源: List[str] = []
 
 
+# ================================================================ 首页推荐（首页改版）
+class HomeResponse(BaseModel):
+    ok: bool = True
+    热门分类: List[Dict[str, Any]] = []
+    地区推荐: List[Dict[str, Any]] = []
+    高薪岗位: List[Dict[str, Any]] = []
+    热门岗位: List[Dict[str, Any]] = []
+    热门企业: List[Dict[str, Any]] = []
+    热门技能: List[Dict[str, Any]] = []
+    总体: Dict[str, Any]
+    口径说明: List[str] = []
+    来源: List[str] = []
+
+
 # ================================================================ 公司浏览（公司页）
 class CompanyListResponse(BaseModel):
     ok: bool = True

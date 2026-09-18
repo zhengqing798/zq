@@ -237,7 +237,7 @@ class JobStore:
 
     # ------------------------------------------------ 浏览与筛选
     def query(self, page=1, size=20, city=None, district=None, category=None, keyword=None,
-              salary_min=None, edu=None, cluster=None, sort="default"):
+              salary_min=None, edu=None, cluster=None, sort="default", source_kw=None):
         rows = self.items
         if city:
             rows = [x for x in rows if x["城市"] == city]
@@ -245,6 +245,10 @@ class JobStore:
             rows = [x for x in rows if x["区县"] == district]
         if category:
             rows = [x for x in rows if x["岗位大类"] == category]
+        if source_kw:
+            # 精确匹配「来源关键词」列（首页热门分类卡上的数字就是这么来的，
+            # 用模糊 keyword 搜出来会更多，两者口径不同）
+            rows = [x for x in rows if x["来源关键词"] == source_kw]
         if edu:
             rows = [x for x in rows if edu in x["学历要求"]]
         if cluster:
@@ -387,6 +391,91 @@ class JobStore:
                 "薪资中位数由该公司的真实薪资上下限（元/月）计算，剔除无薪资的岗位。",
             ],
             "来源": ["zhaopin_jobs_cleaned_seg.csv（%d 个岗位 → %d 家公司）" % (n_jobs, n_comp)],
+        }
+
+    # ------------------------------------------------ 首页推荐（任务11 首页改版）
+    @staticmethod
+    def _job_brief(x):
+        """首页/榜单用的岗位精简卡（字段够渲染卡片，不含描述全文）"""
+        return {
+            "岗位ID": x["岗位ID"], "岗位名称": x["岗位名称"], "公司": x["公司"],
+            "公司ID": x.get("公司ID", ""), "城市": x["城市"], "区县": x["区县"],
+            "薪资": x["薪资"], "薪资上限": x["薪资上限"], "岗位大类": x["岗位大类"],
+            "经验要求": x["经验要求"], "学历要求": x["学历要求"],
+            "技能标签": x["技能标签"][:5], "是否在线": x["是否在线"],
+            "今日回复数": x["今日回复数"], "回复文案": x["回复文案"],
+            "招聘者": x["招聘者"], "招聘者职位": x["招聘者职位"],
+            "同公司岗位数": x["同公司岗位数"],
+        }
+
+    def home(self, hot_n=8):
+        """首页推荐数据：热门分类轮播 + 地区推荐 + 高薪/热门岗位 + 热门企业。
+
+        全部只用真实存在的列，**没有**浏览量/投递量这类数据，因此"热门"一律给出
+        明确排序口径（见返回体的 `口径说明`），不写含糊的"热度"。
+        """
+        # ① 热门分类 = 抓取这批岗位时用的「来源关键词」列（真实列，共 8 个）
+        kws = Counter(x["来源关键词"] for x in self.items if x["来源关键词"])
+        hero = []
+        for kw, cnt in kws.most_common():
+            sub = [x for x in self.items if x["来源关键词"] == kw]
+            ups = [x["薪资上限"] for x in sub if x["薪资上限"] > 0]
+            samples = sorted(sub, key=lambda x: (-x["今日回复数"], -x["薪资上限"]))[:3]
+            hero.append({
+                "分类": kw, "岗位数": cnt,
+                "在线岗位数": sum(1 for x in sub if x["是否在线"]),
+                "公司数": len({x["公司"] for x in sub if x["公司"]}),
+                "平均薪资上限": int(sum(ups) / len(ups)) if ups else 0,
+                "热门技能": [k for k, _ in Counter(s for x in sub for s in x["技能标签"]).most_common(6)],
+                "示例岗位": [self._job_brief(x) for x in samples],
+            })
+
+        # ② 地区推荐（岗位数 / 公司数 / 平均薪资 / 热门区县）
+        regions = []
+        for city, cnt in Counter(x["城市"] for x in self.items if x["城市"]).most_common():
+            sub = [x for x in self.items if x["城市"] == city]
+            ups = [x["薪资上限"] for x in sub if x["薪资上限"] > 0]
+            regions.append({
+                "城市": city, "省份": PROVINCE.get(city, ""), "岗位数": cnt,
+                "公司数": len({x["公司"] for x in sub if x["公司"]}),
+                "平均薪资上限": int(sum(ups) / len(ups)) if ups else 0,
+                "在线岗位数": sum(1 for x in sub if x["是否在线"]),
+                "热门区县": [{"名称": k, "数量": v} for k, v in
+                          Counter(x["区县"] for x in sub if x["区县"]).most_common(3)],
+            })
+
+        # ③ 高薪岗位：薪资上限降序（薪资面议/无值排最后）
+        high = sorted(self.items,
+                      key=lambda x: (-(x["薪资上限"] if x["薪资上限"] > 0 else -1),
+                                     -x["今日回复数"]))[:hot_n]
+        # ④ 热门岗位：招聘者「今日回复数」→ 在线 → 薪资上限
+        hot = sorted(self.items,
+                     key=lambda x: (-x["今日回复数"], -x["是否在线"], -x["薪资上限"]))[:hot_n]
+
+        return {
+            "热门分类": hero,
+            "地区推荐": regions,
+            "高薪岗位": [self._job_brief(x) for x in high],
+            "热门岗位": [self._job_brief(x) for x in hot],
+            "热门企业": [self._card(c) for c in self.companies[:10]],
+            "热门技能": [{"名称": k, "数量": v} for k, v in
+                     Counter(s for x in self.items for s in x["技能标签"]).most_common(12)],
+            "总体": {
+                "岗位数": len(self.items), "公司数": len(self.companies),
+                "城市数": len(self.cities), "在线岗位数": sum(1 for x in self.items if x["是否在线"]),
+                "有回复岗位数": sum(1 for x in self.items if x["今日回复数"] > 0),
+            },
+            "口径说明": [
+                "「热门分类」取自真实的「来源关键词」列（抓取这批岗位时用的搜索词，共 8 个），"
+                "不是编的榜单。",
+                "「高薪岗位」按该岗位的薪资上限（元/月）降序；薪资面议的排最后。",
+                "「热门岗位」按「招聘者今日回复数 → 是否在线 → 薪资上限」降序——"
+                "数据里没有浏览/投递量，所以不写含糊的“热度”。",
+                "「地区推荐」的岗位数/公司数/平均薪资上限由该城市真实岗位聚合。",
+                "「热门企业」按在招职位数降序（与公司页同一口径）。",
+            ],
+            "来源": ["zhaopin_jobs_cleaned_seg.csv（%d 个清洗后岗位）" % len(self.items),
+                   "岗位聚类_标签.csv（任务7 聚类结果）"],
         }
 
     # ------------------------------------------------ 分类统计（首页图表用）

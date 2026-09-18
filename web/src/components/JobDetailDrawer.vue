@@ -52,7 +52,9 @@
         </el-descriptions>
       </div>
       <div v-else-if="!resume.canMatch()" class="muted" style="margin-top:8px">
-        先在「📄 简历」解析一份简历，才能算匹配分
+        还没有简历 → 去
+        <el-button link type="primary" @click="goResume">个人中心</el-button>
+        粘贴或上传 PDF 简历后即可算匹配分
       </div>
       <div v-if="!auth.isLogged()" class="muted" style="margin-top:8px">登录后可收藏</div>
     </template>
@@ -88,6 +90,12 @@ function goCompany() {
   if (!job.value?.公司ID) return
   visible.value = false
   router.push('/company/' + job.value.公司ID)
+}
+
+/** 没有简历时引导去个人中心（简历已并入个人中心，不再有独立「简历」页） */
+function goResume() {
+  visible.value = false
+  router.push('/profile')
 }
 
 const job = ref<JobItem | null>(null)

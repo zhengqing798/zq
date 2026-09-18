@@ -52,18 +52,20 @@ try {
 } catch { /* 后端不可用会由断言/错误计数暴露 */ }
 
 const ROUTES = [
-  ['home', ['人岗匹配推荐', '热门职位', '区域：', '薪资：', '学历：', '排序：']],
+  // 首页 = 推荐页（热门分类轮播 / 地区推荐 / 高薪岗位 / 热门岗位 / 热门企业 / 热门技能）
+  ['home', ['热门分类', '地区推荐', '高薪岗位推荐', '热门岗位推荐', '热门企业', '热门技能']],
   ['login', ['人岗匹配推荐系统', '登录', '注册', '先以游客身份逛逛']],
+  ['jobs', ['热门职位：', '区域：', '薪资：', '学历：', '排序：']],
+  ['match', ['岗位推荐', '使用简历', '开始匹配']],
   ['companies', ['公司广场', '在招职位', '热门企业', '最活跃企业',
                  '在招职位数：', '排序：', '技能需求：', '热招职位：']],
   ...(companyId
     ? [['company/' + companyId,
         ['在招职位', '岗位大类分布', '技能需求', '招聘者', '相似公司', '数据来源']]]
     : []),
-  ['resume', ['简历输入', '解析这份文本', '上传 PDF 简历']],
-  ['jobs', ['职位推荐', '开始匹配']],
+  ['profile', ['个人中心', '我的简历', '粘贴简历正文', '上传 PDF 简历', '已保存的简历',
+               '我的收藏', '匹配历史', '账号设置']],
   ['chat', ['智能问答', '提问']],
-  ['profile', ['个人中心', '我的简历', '我的收藏', '匹配历史', '问答记录', '账号设置']],
 ]
 
 /**
@@ -71,7 +73,11 @@ const ROUTES = [
  * 每个路由的断言 + `*` 全局断言（对每个路由都检查）
  */
 const FORBIDDEN = {
-  '*': ['岗位聚类', 'ClusterList'],
+  // 2026-09-18 改版：顶部只剩 首页/岗位/公司(+登录后 岗位推荐)；「职位推荐」旧名、
+  // 「问答记录」页签、已删的公司页口径面板等都不该再出现。
+  // 注意：这里用「🏢 岗位聚类」（旧导航项）而不是裸的「岗位聚类」——
+  // 首页底部「数据来源」会如实列出 data/processed/岗位聚类_标签.csv 这个文件名，属正当出处。
+  '*': ['🏢 岗位聚类', 'ClusterList', '职位推荐', '问答记录'],
   home: ['职位分类导航面板'],
   companies: ['口径说明'],
   // 登录页左栏品牌面板已删除：以下文案若回流即报错
@@ -125,6 +131,63 @@ for (const [route, expects] of ROUTES) {
     console.log('  ✅ 关键文本齐全，无遗留内容')
   }
 }
+
+// 旧地址兼容：/#/resume 应被重定向到个人中心（简历页已并入个人中心）
+await page.goto(`${URL}/#/resume`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 1200))
+const redirected = page.url().includes('/profile')
+const hasResumeInput = (await page.evaluate(() => document.body.innerText)).includes('粘贴简历正文')
+console.log(`\n--- /#/resume（旧地址） ---`)
+if (redirected && hasResumeInput) {
+  console.log('  ✅ 已重定向到个人中心且简历输入可见')
+} else {
+  failed++
+  console.log(`  ❌ 未按预期重定向（当前 URL=${page.url()}）`)
+}
+
+// 已删除的模块：/#/clusters 不应再有页面，应由兜底路由送回首页
+await page.goto(`${URL}/#/clusters`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 1200))
+const clustersGone = page.url().includes('/home')
+console.log(`\n--- /#/clusters（已删除的岗位聚类模块） ---`)
+if (clustersGone) {
+  console.log('  ✅ 页面已移除，兜底路由回首页')
+} else {
+  failed++
+  console.log(`  ❌ 岗位聚类页面仍然可达（当前 URL=${page.url()}）`)
+}
+
+// 游客态：必须用**独立无痕上下文**——同浏览器的普通新页面与本页同源、共享 localStorage，
+// 会误判成"已登录游客"（第一次写这段就踩了这个坑）。
+const guestCtx = browser.createBrowserContext
+  ? await browser.createBrowserContext()
+  : await browser.createIncognitoBrowserContext()
+const guest = await guestCtx.newPage()
+await guest.setViewport({ width: 1440, height: 950 })
+guest.on('pageerror', (e) => errors.push('GUEST PAGEERROR: ' + e.message))
+guest.on('console', (m) => { if (m.type() === 'error') errors.push('GUEST: ' + m.text()) })
+await guest.goto(`${URL}/#/home`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 1500))
+const gnav = await guest.$$eval('.zq-nav a', (e) => e.map((x) => x.innerText.trim()))
+const gtext = await guest.evaluate(() => document.body.innerText)
+console.log(`\n--- 游客态 /#/home ---`)
+console.log(`  导航=[${gnav.join(' | ')}]`)
+const navOk = gnav.length === 3 && !gnav.some((t) => t.includes('岗位推荐'))
+if (navOk && gtext.includes('热门分类')) {
+  console.log('  ✅ 只有 首页/岗位/公司 三个标签，且首页推荐内容可见')
+} else {
+  failed++
+  console.log('  ❌ 游客导航不应出现「岗位推荐」或首页内容缺失：', gnav)
+}
+for (const [route, label] of [['match', '岗位推荐'], ['profile', '个人中心']]) {
+  await guest.goto(`${URL}/#/${route}`, { waitUntil: 'networkidle2', timeout: 60000 })
+  await new Promise((r) => setTimeout(r, 1200))
+  const backToLogin = guest.url().includes('/login')
+  console.log(`  ${backToLogin ? '✅' : '❌'} 游客访问 /#/${route}（${label}）→ ` +
+              (backToLogin ? '被弹回登录页' : '未被拦截：' + guest.url()))
+  if (!backToLogin) failed++
+}
+await guestCtx.close()
 
 console.log('\n' + '='.repeat(72))
 console.log(`路由 ${ROUTES.length} 个 ｜ 失败 ${failed} ｜ 控制台 error ${errors.length}`)

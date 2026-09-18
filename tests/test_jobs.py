@@ -119,6 +119,20 @@ class TestJobFilter:
         assert j["总数"] == 1453
         assert all("软件测试" in x["一级簇名"] for x in j["岗位"])
 
+    def test_filter_source_kw_exact(self):
+        """正常：按「来源关键词」精确筛选（首页热门分类卡上的数字就是这个口径）"""
+        j = client.get("/api/jobs", params={"source_kw": "数据分析", "size": 5}).json()
+        assert j["总数"] == 2564                     # 与 /api/home 热门分类里的数字一致
+        assert all(x["来源关键词"] == "数据分析" for x in j["岗位"])
+        # 与模糊 keyword 的区别：模糊匹配会命中标题/描述里提到该词的岗位，数量更多
+        fuzzy = client.get("/api/jobs", params={"keyword": "数据分析", "size": 1}).json()["总数"]
+        assert fuzzy > j["总数"]
+
+    def test_filter_source_kw_combined_with_city(self):
+        j = client.get("/api/jobs", params={"source_kw": "测试", "city": "苏州", "size": 5}).json()
+        assert j["总数"] > 0
+        assert all(x["来源关键词"] == "测试" and x["城市"] == "苏州" for x in j["岗位"])
+
     def test_filters_combined(self):
         j = client.get("/api/jobs", params={"city": "苏州", "category": "测试", "size": 5}).json()
         assert j["总数"] == 360

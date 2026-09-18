@@ -122,14 +122,14 @@ def jobs_stats():
 @app.get("/api/jobs", response_model=schemas.JobListResponse, tags=["⓪ 首页"])
 def jobs_list(page: int = 1, size: int = 20, city: str = "", district: str = "",
               category: str = "", keyword: str = "", salary_min: int = 0, edu: str = "",
-              cluster: str = "", sort: str = "default"):
-    """分页浏览全部岗位，支持城市/区县/大类/学历/关键词/薪资下限/簇筛选与排序"""
+              cluster: str = "", sort: str = "default", source_kw: str = ""):
+    """分页浏览全部岗位，支持城市/区县/大类/学历/关键词/薪资下限/簇/来源关键词筛选与排序"""
     try:
         from src.api.jobs import get_store
         r = get_store().query(page=page, size=size, city=city or None, district=district or None,
                               category=category or None, keyword=keyword or None,
                               salary_min=salary_min or None, edu=edu or None,
-                              cluster=cluster or None, sort=sort)
+                              cluster=cluster or None, sort=sort, source_kw=source_kw or None)
         r["来源"] = ["zhaopin_jobs_cleaned_seg.csv（清洗后 %d 个岗位）" % r["总数"]]
         return {"ok": True, **r}
     except Exception as e:
@@ -145,6 +145,17 @@ def job_detail(job_id: str):
         if not x:
             raise ValueError("岗位不存在：%s（有效范围 J0001 ~ J8836）" % job_id)
         return {"ok": True, **x}
+    except Exception as e:
+        _err(e)
+
+
+# ================================================================ 首页推荐（首页改版）
+@app.get("/api/home", response_model=schemas.HomeResponse, tags=["⓪ 首页"])
+def home(n: int = 8):
+    """首页推荐：热门分类轮播（来源关键词）/ 地区推荐 / 高薪岗位 / 热门岗位 / 热门企业"""
+    try:
+        from src.api.jobs import get_store
+        return {"ok": True, **get_store().home(hot_n=max(1, min(int(n), 20)))}
     except Exception as e:
         _err(e)
 

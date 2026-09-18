@@ -14,9 +14,63 @@
     </div>
 
     <el-tabs v-model="tab" style="margin-top:14px">
-      <!-- 我的简历 -->
+      <!-- 我的简历：粘贴 / 上传 PDF → 解析 → 匹配（原来的「简历」页已并入此处） -->
       <el-tab-pane label="📁 我的简历" name="resumes">
-        <div class="zq-card pad">
+        <div class="rgrid">
+          <div class="zq-card pad">
+            <div class="zq-section" style="margin-top:0">粘贴简历正文</div>
+            <el-input v-model="rtext" type="textarea" :rows="10"
+                      placeholder="把简历内容粘贴到这里，例如：姓名、期望岗位、期望城市、学历、工作年限、技能特长…" />
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <el-button type="primary" :loading="rloading" @click="doParse">解析这份文本</el-button>
+              <el-button :loading="rloading" @click="saveParsed">💾 保存到我的简历</el-button>
+              <el-button text @click="rtext = SAMPLE">填入示例</el-button>
+            </div>
+          </div>
+
+          <div>
+            <div class="zq-card pad">
+              <div class="zq-section" style="margin-top:0">上传 PDF 简历</div>
+              <el-upload drag :auto-upload="false" :show-file-list="true" accept=".pdf"
+                         :on-change="onResumeFile" :limit="1">
+                <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+                <div class="el-upload__text">拖拽 PDF 到此处，或<em>点击选择</em></div>
+                <template #tip>
+                  <div class="muted">一份 PDF = 一份简历（多页视为续页）</div>
+                </template>
+              </el-upload>
+            </div>
+
+            <div v-if="resume.parsed" class="zq-card pad" style="margin-top:12px">
+              <div class="zq-section" style="margin-top:0">解析结果</div>
+              <div class="muted" style="line-height:2">
+                姓名：<b>{{ resume.parsed.解析字段['姓名'] || '（未识别）' }}</b> ｜
+                期望岗位：{{ resume.parsed.解析字段['期望岗位'] || '—' }} ｜
+                期望城市：{{ resume.parsed.解析字段['期望城市'] || '—' }}<br />
+                工作年限：{{ resume.parsed.解析字段['工作年限'] }} 年 ｜
+                识别技能：<b>{{ resume.parsed.技能数 }}</b> 项
+              </div>
+              <div style="margin-top:8px">
+                <el-tag v-for="s in resume.parsed.技能列表.slice(0, 12)" :key="s" effect="light"
+                        style="margin:0 6px 6px 0">{{ s }}</el-tag>
+              </div>
+              <el-alert v-if="resume.parsed.解析告警.length" type="warning" :closable="false"
+                        style="margin-top:8px"
+                        :title="'解析告警：' + resume.parsed.解析告警.join('；')" />
+              <div style="margin-top:10px">
+                <el-button type="primary" @click="router.push('/match')">
+                  用这份简历做岗位推荐 →</el-button>
+                <el-popover placement="top" :width="420" trigger="click">
+                  <template #reference><el-button text>查看全部解析字段</el-button></template>
+                  <pre style="max-height:320px;overflow:auto;font-size:12px">{{ resume.parsed.解析字段 }}</pre>
+                </el-popover>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zq-card pad" style="margin-top:14px">
+          <div class="zq-section" style="margin-top:0">已保存的简历（{{ resumes.length }}）</div>
           <el-table :data="resumes" size="default" v-loading="loading">
             <el-table-column prop="title" label="标题" min-width="160">
               <template #default="{ row }">
@@ -43,7 +97,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!resumes.length" description="还没有保存的简历：到「📄 简历」页粘贴后点保存" />
+          <el-empty v-if="!resumes.length" description="还没有保存的简历：在上方粘贴正文或上传 PDF 后点「保存到我的简历」" />
         </div>
       </el-tab-pane>
 
@@ -66,7 +120,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!favorites.length" description="还没有收藏：在「🎯 职位推荐」点岗位卡片 → 收藏" />
+          <el-empty v-if="!favorites.length" description="还没有收藏：在「岗位」或「岗位推荐」点岗位卡片 → 收藏" />
         </div>
       </el-tab-pane>
 
@@ -84,21 +138,7 @@
             #{{ x.排名 }} {{ x.岗位名称 }}（{{ Number(x.总分 || 0).toFixed(1) }} 分）
           </el-tag>
         </div>
-        <el-empty v-if="!matches.length" description="还没有匹配记录：登录后使用「🎯 职位推荐」会自动保存" />
-      </el-tab-pane>
-
-      <!-- 问答记录 -->
-      <el-tab-pane label="💬 问答记录" name="chats">
-        <el-collapse v-for="c in chats" :key="c.id" style="margin-bottom:8px">
-          <el-collapse-item :title="c.created_at + ' ｜ ' + c.question +
-            (c.tool_seq ? '（' + c.tool_seq + '）' : '')">
-            <div class="chat-bubble">{{ c.answer }}</div>
-            <div style="margin-top:8px">
-              <div v-for="s in c.sources" :key="s"><code>{{ s }}</code></div>
-            </div>
-          </el-collapse-item>
-        </el-collapse>
-        <el-empty v-if="!chats.length" description="还没有问答记录：登录后使用「💬 智能问答」会自动保存" />
+        <el-empty v-if="!matches.length" description="还没有匹配记录：使用「岗位推荐」会自动保存" />
       </el-tab-pane>
 
       <!-- 账号设置 -->
@@ -138,11 +178,31 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
+import { UploadFilled } from '@element-plus/icons-vue'
 import * as api from '../api'
-import type { ChatHistoryRow, FavoriteRow, MatchHistoryRow, ResumeRow } from '../api/types'
+import type { FavoriteRow, MatchHistoryRow, ResumeRow } from '../api/types'
 import { useAuthStore } from '../stores/auth'
 import { useResumeStore } from '../stores/resume'
+
+/** 简历示例（与「填入示例」一致，便于演示解析能力） */
+const SAMPLE = `姓名：张伟
+期望岗位：测试开发工程师
+期望城市：苏州
+期望薪资：12000-16000元
+最高学历：大专
+专业：软件技术
+工作年限：3年
+是否应届：否
+
+【技能特长】
+熟练掌握 Selenium、JMeter、Python、MySQL、Linux，了解 Postman 与 Git
+
+【工作经历】
+2022.07-2025.06 某软件公司 测试工程师，负责接口自动化测试与性能测试
+
+【项目经验】
+使用 Python + Selenium 搭建 UI 自动化框架，覆盖 300 条用例`
 
 const auth = useAuthStore()
 const resume = useResumeStore()
@@ -154,7 +214,10 @@ const stats = ref<Record<string, number>>({})
 const resumes = ref<ResumeRow[]>([])
 const favorites = ref<FavoriteRow[]>([])
 const matches = ref<MatchHistoryRow[]>([])
-const chats = ref<ChatHistoryRow[]>([])
+
+/* 简历输入（粘贴 / PDF）：原来独立的「简历」页已并入本页 */
+const rtext = ref(resume.text || '')
+const rloading = ref(false)
 
 const pf = reactive({ nickname: '', phone: '', email: '' })
 const pw = reactive({ old_password: '', new_password: '', confirm: '' })
@@ -162,14 +225,14 @@ const pw = reactive({ old_password: '', new_password: '', confirm: '' })
 async function refresh() {
   loading.value = true
   try {
-    const [s, r, f, m, c] = await Promise.all([
-      api.getStats(), api.listResumes(), api.listFavorites(), api.listMatches(), api.listChats(),
+    // 注意：问答记录页签已删除，这里不再拉 /api/user/chats（接口仍在，需要时可恢复）
+    const [s, r, f, m] = await Promise.all([
+      api.getStats(), api.listResumes(), api.listFavorites(), api.listMatches(),
     ])
     stats.value = s.统计
     resumes.value = r.简历
     favorites.value = f.收藏
     matches.value = m.历史
-    chats.value = c.历史
     pf.nickname = s.用户.nickname
     pf.phone = s.用户.phone
     pf.email = s.用户.email
@@ -177,6 +240,41 @@ async function refresh() {
   finally { loading.value = false }
 }
 onMounted(refresh)
+
+/* ---------------- 简历：粘贴解析 / 上传 PDF / 保存 ---------------- */
+async function doParse() {
+  if (!rtext.value.trim()) return ElMessage.warning('请先粘贴简历正文')
+  rloading.value = true
+  try {
+    const r = await api.parseResumeText(rtext.value)
+    resume.setParsed(r, rtext.value)
+    ElMessage.success('解析完成，会话 ID：' + r.resume_id)
+  } catch { /* 拦截器已提示 */ }
+  finally { rloading.value = false }
+}
+
+async function onResumeFile(f: UploadFile) {
+  const raw = f.raw as File | undefined
+  if (!raw) return
+  rloading.value = true
+  try {
+    const r = await api.parseResumePdf(raw)
+    resume.setParsed(r, '')
+    ElMessage.success('PDF 解析完成（' + r.来源 + '）')
+  } catch { /* 拦截器已提示 */ }
+  finally { rloading.value = false }
+}
+
+async function saveParsed() {
+  const text = rtext.value.trim() || resume.text
+  if (!text) return ElMessage.warning('请先粘贴简历正文或上传 PDF')
+  try {
+    const r = await api.createResume(
+      (resume.parsed?.解析字段['期望岗位'] as string) || '我的简历', text)
+    ElMessage.success('已保存（id=' + r.id + '）')
+    refresh()
+  } catch { /* 拦截器已提示 */ }
+}
 
 async function save(row: ResumeRow) {
   try { await api.updateResume(row.id, row.title, row.text); ElMessage.success('已保存'); refresh() }
@@ -197,7 +295,7 @@ async function useIt(row: ResumeRow) {
   try {
     resume.matchResult = await api.runMatch({ saved_resume_id: row.id, top_n: 20 })
     ElMessage.success('已用这份简历匹配，正在跳转…')
-    router.push('/jobs')
+    router.push('/match')
   } catch { /* 拦截器已提示 */ }
 }
 async function unfav(row: FavoriteRow) {
@@ -220,3 +318,8 @@ async function savePw() {
   } catch { /* 拦截器已提示 */ }
 }
 </script>
+
+<style scoped>
+.rgrid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+@media (max-width: 1000px) { .rgrid { grid-template-columns: 1fr; } }
+</style>

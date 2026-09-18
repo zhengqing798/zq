@@ -66,14 +66,13 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const menus = computed(() => {
+  // 顶部标签：首页 / 岗位 / 公司（游客可见）；岗位推荐需登录后才有
   const base = [
     { path: '/home', label: '🏠 首页', match: ['/home'] },
+    { path: '/jobs', label: '💼 岗位', match: ['/jobs'] },
     { path: '/companies', label: '🏬 公司', match: ['/companies', '/company/'] },
-    { path: '/resume', label: '📄 简历', match: ['/resume'] },
-    { path: '/jobs', label: '🎯 职位推荐', match: ['/jobs'] },
-    { path: '/chat', label: '💬 智能问答', match: ['/chat'] },
   ]
-  if (auth.isLogged()) base.push({ path: '/profile', label: '👤 个人中心', match: ['/profile'] })
+  if (auth.isLogged()) base.push({ path: '/match', label: '🎯 岗位推荐', match: ['/match'] })
   return base
 })
 
@@ -85,7 +84,7 @@ async function onCommand(cmd: string) {
   if (cmd === 'logout') {
     await auth.doLogout()
     ElMessage.success('已退出登录')
-    router.push('/jobs')
+    router.push('/home')
   }
 }
 </script>

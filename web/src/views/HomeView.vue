@@ -1,272 +1,285 @@
 <template>
   <div class="home">
-    <!-- ① 顶部：城市切换 + 搜索 + 热门职位 -->
-    <div class="topbar">
-      <div class="cityline">
-        <span class="cur">📍 {{ city || '全部城市' }}</span>
-        <div class="cities">
-          <a :class="{ on: !city }" @click="pickCity('')">全部</a>
-          <a v-for="c in st.按城市" :key="c.名称" :class="{ on: city === c.名称 }"
-             @click="pickCity(c.名称)">{{ c.名称 }}</a>
-        </div>
-      </div>
-      <div class="searchline">
-        <el-input v-model="kw" size="large" class="sinput"
-                  :placeholder="(city || '全部') + ' 搜索职位 / 公司 / 技能'"
-                  clearable @keyup.enter="search">
-          <template #prepend>
-            <el-select v-model="category" placeholder="职位类型" clearable
-                       style="width:126px" @change="search">
-              <el-option v-for="g in st.分类导航" :key="g.大类" :label="g.大类" :value="g.大类" />
-            </el-select>
-          </template>
-          <template #append>
-            <el-button type="primary" :icon="Search" @click="search">搜索</el-button>
-          </template>
-        </el-input>
-        <div class="hot">
-          <span class="lb">热门职位：</span>
-          <a v-for="k in st.热门搜索" :key="k.名称" @click="kw = k.名称; search()">{{ k.名称 }}</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ② 筛选栏 -->
-    <div class="filters">
-      <div class="frow">
-        <span class="flb">区域：</span>
-        <a :class="{ on: !district }" @click="setDistrict('')">不限</a>
-        <a v-for="d in districts" :key="d.名称" :class="{ on: district === d.名称 }"
-           @click="setDistrict(d.名称)">{{ d.名称 }}<em>{{ d.数量 }}</em></a>
-        <span v-if="!city" class="tip">（先选城市才能按区域筛）</span>
-      </div>
-      <div class="frow">
-        <span class="flb">薪资：</span>
-        <a :class="{ on: !salaryMin }" @click="setSalary(0)">不限</a>
-        <a v-for="s in salaryOpts" :key="s.v" :class="{ on: salaryMin === s.v }"
-           @click="setSalary(s.v)">{{ s.t }}</a>
-      </div>
-      <div class="frow">
-        <span class="flb">学历：</span>
-        <a :class="{ on: !edu }" @click="setEdu('')">不限</a>
-        <a v-for="e in st.按学历" :key="e.名称" :class="{ on: edu === e.名称 }"
-           @click="setEdu(e.名称)">{{ e.名称 }}<em>{{ e.数量 }}</em></a>
-      </div>
-      <div class="frow">
-        <span class="flb">排序：</span>
-        <a v-for="s in st.筛选项.排序" :key="s.value" :class="{ on: sort === s.value }"
-           @click="sort = s.value; search()">{{ s.label }}</a>
-      </div>
-    </div>
-
-    <!-- ③ 结果统计 -->
-    <div class="resultbar">
-      <span>共 <b class="num">{{ fmt(list.总数) }}</b> 个职位</span>
-      <span class="muted">{{ city || '全部城市' }}{{ district ? ' · ' + district : '' }}{{ category ? ' · ' + category : '' }}{{ kw ? ' · ' + kw : '' }}</span>
-      <span class="right">
-        <el-radio-group v-model="size" size="small" @change="search">
-          <el-radio-button :value="20">20/页</el-radio-button>
-          <el-radio-button :value="50">50/页</el-radio-button>
-        </el-radio-group>
-      </span>
-    </div>
-
-    <!-- ④ 职位列表（左：职位 / 右：公司 + 招聘者） -->
-    <div v-loading="loading" class="joblist">
-      <div v-for="j in list.岗位" :key="j.岗位ID" class="jcard" @click="open(j)">
-        <div class="left">
-          <div class="t1">
-            <span class="jname">{{ j.岗位名称 }}</span>
-            <span class="jsalary">{{ j.薪资 || '薪资面议' }}</span>
+    <!-- ① Hero 轮播：热门分类（取自真实的「来源关键词」列） -->
+    <el-carousel v-if="st.热门分类.length" class="hero" height="286px"
+                 :interval="4500" arrow="hover" indicator-position="outside">
+      <el-carousel-item v-for="(c, i) in st.热门分类" :key="c.分类">
+        <div class="slide" :class="'g' + (i % 6)">
+          <div class="sleft">
+            <div class="stag">热门分类</div>
+            <div class="stitle">{{ c.分类 }}</div>
+            <div class="snum"><b>{{ fmt(c.岗位数) }}</b> 个在招岗位</div>
+            <div class="smeta">
+              平均薪资上限 {{ fmtSalaryK(0, c.平均薪资上限) }} ｜ 在招企业 {{ c.公司数 }} 家
+              ｜ 在线 {{ c.在线岗位数 }} 个
+            </div>
+            <div class="sskills">
+              <el-tag v-for="s in c.热门技能" :key="s" size="small" effect="dark"
+                      class="stg">{{ s }}</el-tag>
+            </div>
+            <div class="sbtns">
+              <el-button type="primary" @click="goJobs({ source_kw: c.分类 })">
+                看这类岗位 →</el-button>
+              <el-button plain @click="goJobs({ source_kw: c.分类, sort: 'salary_desc' })">
+                按薪资从高到低</el-button>
+            </div>
           </div>
-          <div class="t2">
-            <span>{{ j.区县 || j.城市 }}</span><i>·</i>
-            <span>{{ j.经验要求 || '经验不限' }}</span><i>·</i>
-            <span>{{ j.学历要求 || '学历不限' }}</span>
-            <el-tag v-if="j.是否在线" size="small" type="success" effect="light" class="ml">在线</el-tag>
-          </div>
-          <div class="t3">
-            <el-tag v-for="s in j.技能标签.slice(0, 5)" :key="s" size="small" effect="plain"
-                    class="ml0">{{ s }}</el-tag>
-          </div>
-        </div>
-        <div class="right">
-          <div class="comrow">
-            <span class="comname" :title="j.公司ID ? '查看该公司全部在招职位' : ''"
-                  @click.stop="goCompany(j)">{{ j.公司 }}</span>
-            <span v-if="j.同公司岗位数 > 1" class="muted">在招 {{ j.同公司岗位数 }} 个职位</span>
-          </div>
-          <div class="hrrow">
-            <div class="avatar">{{ j.招聘者.slice(0, 1) }}</div>
-            <div class="hrinfo">
-              <div><b>{{ j.招聘者 }}</b> <span class="muted">{{ j.招聘者职位 }}</span></div>
-              <div class="muted">{{ j.回复文案 || '暂无回复数据' }}</div>
+          <div class="sright">
+            <div class="srtip">该类热门在招职位</div>
+            <div v-for="j in c.示例岗位" :key="j.岗位ID" class="sjob" @click="openJob(j.岗位ID)">
+              <div class="sj1">
+                <span class="sjname">{{ j.岗位名称 }}</span>
+                <span class="sjsal">{{ j.薪资 || '面议' }}</span>
+              </div>
+              <div class="sj2">{{ j.公司 }} ｜ {{ j.区县 || j.城市 }}</div>
             </div>
           </div>
         </div>
-      </div>
-      <el-empty v-if="!list.岗位.length" description="没有符合条件的职位，试试放宽筛选" />
+      </el-carousel-item>
+    </el-carousel>
+
+    <!-- ② 热门分类快捷条 -->
+    <div class="chips">
+      <span class="lb">热门分类：</span>
+      <a v-for="c in st.热门分类" :key="c.分类" @click="goJobs({ source_kw: c.分类 })">
+        {{ c.分类 }}<em>{{ c.岗位数 }}</em></a>
+      <a class="more" @click="goJobs({})">全部岗位 →</a>
     </div>
 
-    <el-pagination v-if="list.总页数 > 1" background layout="prev, pager, next, jumper"
-                   :total="list.总数" :page-size="size" :current-page="page"
-                   class="pager" @current-change="turn" />
+    <!-- ③ 地区推荐 -->
+    <div class="zq-section">地区推荐<em class="sub">按岗位数排序，点卡片看该地区岗位</em></div>
+    <div class="regions">
+      <div v-for="r in st.地区推荐" :key="r.城市" class="rcard" @click="goJobs({ city: r.城市 })">
+        <div class="rc1"><b>{{ r.城市 }}</b><em>{{ r.省份 }}</em></div>
+        <div class="rc2"><span class="num">{{ fmt(r.岗位数) }}</span> 个岗位
+          ｜ {{ r.公司数 }} 家企业 ｜ {{ r.在线岗位数 }} 个在线</div>
+        <div class="rc3">平均薪资上限 {{ fmtSalaryK(0, r.平均薪资上限) }}</div>
+        <div class="rc4">
+          <a v-for="d in r.热门区县" :key="d.名称"
+             @click.stop="goJobs({ city: r.城市, district: d.名称 })">
+            {{ d.名称 }}<em>{{ d.数量 }}</em></a>
+        </div>
+      </div>
+    </div>
 
-    <!-- ⑤ 职位详情抽屉（与公司页共用同一个组件） -->
+    <!-- ④ 高薪岗位推荐 -->
+    <div class="zq-section">高薪岗位推荐<em class="sub">按该岗位薪资上限（元/月）排序</em></div>
+    <div class="jobgrid">
+      <div v-for="(j, i) in st.高薪岗位" :key="j.岗位ID" class="jmini" @click="openJob(j.岗位ID)">
+        <div class="jm1">
+          <span class="rank" :class="{ top: i < 3 }">{{ i + 1 }}</span>
+          <span class="jmname">{{ j.岗位名称 }}</span>
+          <span class="jmsal">{{ j.薪资 || '面议' }}</span>
+        </div>
+        <div class="jm2">
+          <span class="jmco" @click.stop="goCompany(j)">{{ j.公司 }}</span>
+        </div>
+        <div class="jm3">
+          {{ j.区县 || j.城市 }} ｜ {{ j.经验要求 || '经验不限' }} ｜ {{ j.学历要求 || '学历不限' }}
+        </div>
+        <div class="jm4">
+          <el-tag v-for="s in j.技能标签.slice(0, 3)" :key="s" size="small" effect="plain"
+                  class="jmtg">{{ s }}</el-tag>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ 热门岗位推荐 -->
+    <div class="zq-section">热门岗位推荐
+      <em class="sub">按招聘者「今日回复数」排序（在线优先）</em></div>
+    <div class="jobgrid">
+      <div v-for="j in st.热门岗位" :key="j.岗位ID" class="jmini" @click="openJob(j.岗位ID)">
+        <div class="jm1">
+          <span class="jmname">{{ j.岗位名称 }}</span>
+          <span class="jmsal">{{ j.薪资 || '面议' }}</span>
+        </div>
+        <div class="jm2">
+          <span class="jmco" @click.stop="goCompany(j)">{{ j.公司 }}</span>
+          <el-tag v-if="j.是否在线" size="small" type="success" effect="light" class="jml">在线</el-tag>
+        </div>
+        <div class="jm3">
+          {{ j.区县 || j.城市 }} ｜ {{ j.招聘者 }}（{{ j.招聘者职位 }}）｜ {{ j.回复文案 }}
+        </div>
+        <div class="jm4">
+          <el-tag v-for="s in j.技能标签.slice(0, 3)" :key="s" size="small" effect="plain"
+                  class="jmtg">{{ s }}</el-tag>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ 热门企业 -->
+    <div class="zq-section">热门企业<em class="sub">按在招职位数排序，点卡片看全部在招岗位</em></div>
+    <div class="compgrid">
+      <CompanyCard v-for="c in st.热门企业" :key="c.公司ID" :c="c" compact
+                   @open="goCompanyCard" @job="openJob" />
+    </div>
+
+    <!-- ⑦ 热门技能 -->
+    <div class="zq-section">热门技能<em class="sub">点标签搜相关岗位</em></div>
+    <div class="skills">
+      <a v-for="s in st.热门技能" :key="s.名称" class="skill" @click="goJobs({ keyword: s.名称 })">
+        {{ s.名称 }}<em>{{ s.数量 }}</em></a>
+    </div>
+
+    <!-- 数据来源与口径（一行小字，完整说明见《系统设计文档》§3.9/§3.10） -->
+    <div class="foot">
+      <span class="muted">{{ st.口径说明.join(' ') }}</span>
+      <span class="muted">数据来源：{{ st.来源.join('、') }}</span>
+    </div>
+
     <JobDetailDrawer v-model="drawer" :job-id="curJob" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+/**
+ * 首页 = 推荐页（游客可用）：热门分类 hero 轮播 → 地区推荐 → 高薪岗位 →
+ * 热门岗位 → 热门企业 → 热门技能。
+ *
+ * 所有榜单都来自真实列，排序口径写在每节标题旁 + 页面底部（接口也返回 `口径说明`）。
+ * 点任意岗位/公司都会跳到对应详情，形成"首页 → 岗位/公司 → 职位详情"的动线。
+ */
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search } from '@element-plus/icons-vue'
 import * as api from '../api'
-import type { JobItem, JobListResp, JobStatsResp } from '../api/jobs'
+import type { HomeJob, HomeResp } from '../api/home'
+import type { CompanyItem } from '../api/companies'
+import CompanyCard from '../components/CompanyCard.vue'
 import JobDetailDrawer from '../components/JobDetailDrawer.vue'
+import { fmtNum, fmtSalaryK } from '../utils/format'
 
 const router = useRouter()
-const loading = ref(false)
-const kw = ref('')
-const city = ref('')
-const district = ref('')
-const edu = ref('')
-const salaryMin = ref(0)
-const category = ref('')
-const sort = ref('default')
-const page = ref(1)
-const size = ref(20)
 
-const salaryOpts = [
-  { v: 5000, t: '5千以上' }, { v: 8000, t: '8千以上' }, { v: 10000, t: '1万以上' },
-  { v: 15000, t: '1.5万以上' }, { v: 20000, t: '2万以上' }, { v: 30000, t: '3万以上' },
-]
-
-const empty: JobStatsResp = {
-  ok: true,
-  总体: { 岗位总数: 0, 公司数: 0, 城市数: 0, 省份数: 0, 平均薪资上限: 0,
-         薪资下限中位数: 0, 薪资上限中位数: 0, 在线岗位数: 0, 区县数: 0,
-         有招聘者职位数: 0, 有回复数据岗位数: 0 },
-  按城市: [], 按大类: [], 按学历: [], 按经验: [], 按簇: [], 热门技能: [],
-  热门搜索: [], 按城市区县: {}, 分类导航: [],
-  筛选项: { 城市: [], 大类: [], 学历: [], 省份: [], 排序: [] }, 来源: [],
+const empty: HomeResp = {
+  ok: true, 热门分类: [], 地区推荐: [], 高薪岗位: [], 热门岗位: [], 热门企业: [],
+  热门技能: [], 总体: { 岗位数: 0, 公司数: 0, 城市数: 0, 在线岗位数: 0, 有回复岗位数: 0 },
+  口径说明: [], 来源: [],
 }
-const st = ref<JobStatsResp>(empty)
-const list = ref<JobListResp>({ ok: true, 总数: 0, 页码: 1, 每页: 20, 总页数: 1, 岗位: [], 来源: [] })
-
+const st = ref<HomeResp>(empty)
 const drawer = ref(false)
 const curJob = ref('')
 
-const fmt = (n: number) => (n || 0).toLocaleString('en-US')
-const districts = computed(() => (city.value ? st.value.按城市区县[city.value] || [] : [])
-  .filter((d) => d.数量 >= 3))
+const fmt = fmtNum
 
-function load(pageNo = 1) {
-  loading.value = true
-  return api.listJobs({
-    page: pageNo, size: size.value, city: city.value, district: district.value,
-    category: category.value, keyword: kw.value, salary_min: salaryMin.value || 0,
-    edu: edu.value, sort: sort.value,
-  }).then((r) => { list.value = r; page.value = r.页码 })
-    .catch(() => { /* 拦截器已提示 */ })
-    .finally(() => { loading.value = false })
+/** 跳「岗位」页并带上筛选条件（该页支持 URL 查询参数） */
+function goJobs(q: Record<string, string>) {
+  router.push({ path: '/jobs', query: q })
 }
-const search = () => load(1)
-const turn = (p: number) => load(p)
-
-function pickCity(c: string) {
-  city.value = c
-  district.value = ''
-  search()
-}
-function setDistrict(d: string) { district.value = d; search() }
-function setSalary(v: number) { salaryMin.value = salaryMin.value === v ? 0 : v; search() }
-function setEdu(e: string) { edu.value = edu.value === e ? '' : e; search() }
-
-async function open(j: JobItem) {
-  curJob.value = j.岗位ID
-  drawer.value = true
-}
-
-/** 点公司名 → 该公司详情页（全部在招职位） */
-function goCompany(j: JobItem) {
-  if (j.公司ID) router.push('/company/' + j.公司ID)
-}
+function openJob(jobId: string) { curJob.value = jobId; drawer.value = true }
+function goCompany(j: HomeJob) { if (j.公司ID) router.push('/company/' + j.公司ID) }
+function goCompanyCard(c: CompanyItem) { router.push('/company/' + c.公司ID) }
 
 onMounted(async () => {
-  try { st.value = await api.jobStats() } catch { /* 拦截器已提示 */ }
-  await load(1)
+  try { st.value = await api.home(8) } catch { /* 拦截器已提示 */ }
 })
 </script>
 
 <style scoped>
 .home { max-width: 1180px; margin: 0 auto; }
-.ml { margin-left: 6px; }
-.ml0 { margin: 0 6px 6px 0; }
-.num { color: #ff6a00; font-size: 17px; }
 .muted { color: #8896ab; font-size: 12.5px; }
+.zq-section .sub { font-weight: 500; font-size: 12.5px; color: #8896ab; margin-left: 10px; }
 
-/* ---------- 顶部 ---------- */
-.topbar { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
-  padding: 14px 18px; }
-.cityline { display: flex; align-items: center; gap: 10px; padding-bottom: 10px;
-  border-bottom: 1px dashed #eef3f9; }
-.cityline .cur { font-weight: 700; color: var(--el-color-primary); white-space: nowrap; }
-.cities { display: flex; flex-wrap: wrap; gap: 4px 12px; }
-.cities a { color: #41506b; cursor: pointer; font-size: 13.5px; }
-.cities a:hover { color: var(--el-color-primary); }
-.cities a.on { color: var(--el-color-primary); font-weight: 700; }
-.searchline { padding-top: 12px; }
-.sinput { max-width: 760px; }
-.hot { margin-top: 10px; font-size: 13px; color: #8896ab; }
-.hot .lb { margin-right: 4px; }
-.hot a { color: #41506b; margin-right: 14px; cursor: pointer; }
-.hot a:hover { color: var(--el-color-primary); }
+/* ---------- Hero 轮播 ---------- */
+.hero { border-radius: 14px; overflow: hidden; }
+.hero :deep(.el-carousel__indicators--outside) { margin-top: 4px; }
+.hero :deep(.el-carousel__indicator button) { background: #c3ccda; }
+.slide { height: 100%; border-radius: 14px; padding: 22px 26px; display: flex; gap: 24px;
+  color: #fff; }
+.slide.g0 { background: linear-gradient(120deg, #00a6a7 0%, #12c2b4 60%, #57d9c8 100%); }
+.slide.g1 { background: linear-gradient(120deg, #2b6cb0 0%, #3f8fd0 60%, #6bb6e8 100%); }
+.slide.g2 { background: linear-gradient(120deg, #7c3aed 0%, #9a5cf5 60%, #b98bfa 100%); }
+.slide.g3 { background: linear-gradient(120deg, #d97706 0%, #f59e0b 60%, #fbbf24 100%); }
+.slide.g4 { background: linear-gradient(120deg, #0f766e 0%, #14907f 60%, #3fb39c 100%); }
+.slide.g5 { background: linear-gradient(120deg, #be185d 0%, #db2777 60%, #f472b6 100%); }
+.sleft { flex: 1; min-width: 0; }
+.stag { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 20px;
+  background: rgba(255,255,255,.22); }
+.stitle { font-size: 34px; font-weight: 800; margin-top: 8px; letter-spacing: 1px; }
+.snum { font-size: 15px; opacity: .95; margin-top: 2px; }
+.snum b { font-size: 22px; }
+.smeta { font-size: 12.5px; opacity: .9; margin-top: 6px; }
+.sskills { margin-top: 10px; }
+.stg { margin: 0 6px 6px 0; background: rgba(255,255,255,.18); border: none; color: #fff; }
+.sbtns { margin-top: 10px; display: flex; gap: 10px; }
+.sright { width: 372px; flex: none; background: rgba(255,255,255,.14); border-radius: 12px;
+  padding: 12px 14px; }
+.srtip { font-size: 12px; opacity: .85; margin-bottom: 6px; }
+.sjob { padding: 6px 0; cursor: pointer; border-bottom: 1px dashed rgba(255,255,255,.22); }
+.sjob:last-child { border-bottom: none; }
+.sjob:hover .sjname { text-decoration: underline; }
+.sj1 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.sjname { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+.sjsal { font-size: 13.5px; font-weight: 800; white-space: nowrap; }
+.sj2 { font-size: 12px; opacity: .85; margin-top: 2px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
 
-/* ---------- 筛选栏 ---------- */
-.filters { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
-  padding: 10px 18px; margin-top: 12px; }
-.filters em { font-style: normal; color: #b3bfd0; font-size: 11.5px; margin-left: 3px; }
-.frow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 5px 0; }
-.flb { color: #8896ab; font-size: 13px; flex: none; }
-.frow a { color: #41506b; font-size: 13.5px; cursor: pointer; }
-.frow a:hover { color: var(--el-color-primary); }
-.frow a.on { color: var(--el-color-primary); font-weight: 700; }
-.frow .tip { color: #c0c9d6; font-size: 12px; }
+/* ---------- 热门分类快捷条 ---------- */
+.chips { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
+  padding: 10px 18px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 4px 14px;
+  align-items: center; }
+.chips .lb { color: #8896ab; font-size: 13px; }
+.chips a { color: #41506b; font-size: 13.5px; cursor: pointer; }
+.chips a:hover { color: var(--el-color-primary); }
+.chips em { font-style: normal; color: #b3bfd0; font-size: 11.5px; margin-left: 3px; }
+.chips a.more { color: var(--el-color-primary); font-weight: 700; }
 
-/* ---------- 结果统计 ---------- */
-.resultbar { display: flex; align-items: center; gap: 12px; margin: 14px 2px 10px; }
-.resultbar .right { margin-left: auto; }
-
-/* ---------- 职位卡 ---------- */
-.joblist { display: flex; flex-direction: column; gap: 10px; }
-.jcard { display: flex; gap: 20px; background: #fff; border: 1px solid var(--zq-border);
-  border-radius: 12px; padding: 16px 18px; cursor: pointer; transition: .16s;
-  box-shadow: var(--zq-card-shadow); }
-.jcard:hover { box-shadow: 0 8px 22px rgba(0,166,167,.14); transform: translateY(-2px);
+/* ---------- 地区推荐 ---------- */
+.regions { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 12px; }
+.rcard { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
+  padding: 12px 14px; cursor: pointer; transition: .16s; box-shadow: var(--zq-card-shadow); }
+.rcard:hover { box-shadow: 0 8px 22px rgba(0,166,167,.14); transform: translateY(-2px);
   border-color: var(--el-color-primary-light-5); }
-.jcard .left { flex: 1; min-width: 0; }
-.jcard .right { width: 270px; flex: none; border-left: 1px dashed #eef3f9; padding-left: 18px; }
-.t1 { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; }
-.jname { font-size: 17px; font-weight: 700; color: #16233a; }
-.jsalary { font-size: 18px; font-weight: 800; color: #ff6a00; white-space: nowrap; }
-.t2 { margin-top: 8px; color: #5b6b7f; font-size: 13px; display: flex; align-items: center; gap: 6px;
-  flex-wrap: wrap; }
-.t2 i { color: #c9d3e0; font-style: normal; }
-.t3 { margin-top: 10px; }
-.comrow { display: flex; flex-direction: column; gap: 2px; }
-.comname { font-weight: 600; color: #41506b; font-size: 14px; cursor: pointer; }
-.comname:hover { color: var(--el-color-primary); }
-.hrrow { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-.avatar { width: 34px; height: 34px; border-radius: 50%; flex: none; color: #fff; font-size: 15px;
-  display: flex; align-items: center; justify-content: center; font-weight: 700;
-  background: linear-gradient(135deg, #00a6a7, #12c2b4); }
-.hrinfo { font-size: 13px; line-height: 1.5; }
-.pager { margin-top: 18px; justify-content: center; }
+.rc1 { display: flex; align-items: baseline; gap: 8px; }
+.rc1 b { font-size: 17px; color: #16233a; }
+.rc1 em { font-style: normal; color: #b3bfd0; font-size: 12px; }
+.rc2 { margin-top: 6px; color: #5b6b7f; font-size: 12.5px; }
+.rc2 .num { color: #ff6a00; font-weight: 800; font-size: 15px; }
+.rc3 { margin-top: 4px; color: #8896ab; font-size: 12.5px; }
+.rc4 { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.rc4 a { font-size: 12.5px; color: var(--el-color-primary); cursor: pointer; }
+.rc4 a:hover { text-decoration: underline; }
+.rc4 em { font-style: normal; color: #b3bfd0; margin-left: 3px; }
+
+/* ---------- 岗位推荐网格 ---------- */
+.jobgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.jmini { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
+  padding: 12px 14px; cursor: pointer; transition: .16s; box-shadow: var(--zq-card-shadow); }
+.jmini:hover { box-shadow: 0 8px 22px rgba(0,166,167,.14); transform: translateY(-2px);
+  border-color: var(--el-color-primary-light-5); }
+.jm1 { display: flex; align-items: baseline; gap: 8px; }
+.jm1 .rank { width: 18px; height: 18px; border-radius: 5px; flex: none; color: #fff; font-size: 11.5px;
+  font-weight: 700; display: flex; align-items: center; justify-content: center; background: #c3ccda; }
+.jm1 .rank.top { background: linear-gradient(135deg, #ff8a3d, #ff6a00); }
+.jmname { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; color: #16233a;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jmsal { font-size: 15px; font-weight: 800; color: #ff6a00; white-space: nowrap; }
+.jm2 { margin-top: 6px; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.jmco { color: #41506b; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+.jmco:hover { color: var(--el-color-primary); }
+.jml { flex: none; }
+.jm3 { margin-top: 4px; color: #8896ab; font-size: 12.5px; }
+.jm4 { margin-top: 8px; }
+.jmtg { margin: 0 6px 4px 0; }
+
+/* ---------- 热门企业 ---------- */
+.compgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+
+/* ---------- 热门技能 ---------- */
+.skills { display: flex; flex-wrap: wrap; gap: 8px; }
+.skill { background: #fff; border: 1px solid var(--zq-border); border-radius: 8px;
+  padding: 6px 12px; font-size: 13px; color: #41506b; cursor: pointer; transition: .16s; }
+.skill:hover { color: var(--el-color-primary); border-color: var(--el-color-primary-light-5); }
+.skill em { font-style: normal; color: #b3bfd0; font-size: 11.5px; margin-left: 5px; }
+
+/* ---------- 底部 ---------- */
+.foot { margin-top: 20px; display: flex; flex-direction: column; gap: 4px;
+  line-height: 1.7; }
 
 @media (max-width: 900px) {
-  .jcard { flex-direction: column; }
-  .jcard .right { width: auto; border-left: none; border-top: 1px dashed #eef3f9;
-    padding-left: 0; padding-top: 12px; }
+  .slide { flex-direction: column; padding: 16px; }
+  .sright { width: auto; }
+  .stitle { font-size: 26px; }
 }
 </style>

@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div class="zq-page-title">职位推荐</div>
+    <div class="zq-page-title">岗位推荐</div>
+    <div class="zq-page-desc">
+      用你的简历做六维加权匹配 ｜ 简历在
+      <router-link to="/profile">个人中心</router-link> 粘贴或上传 PDF
+    </div>
 
     <!-- 匹配控制条 -->
     <div class="zq-card pad">
@@ -20,7 +24,7 @@
         </div>
         <el-button type="primary" :loading="loading" @click="doMatch">开始匹配</el-button>
         <span v-if="!resume.canMatch()" class="muted">
-          还没有简历 → 先去 <router-link to="/resume">📄 简历</router-link> 解析一份
+          还没有简历 → 去 <router-link to="/profile">个人中心</router-link> 粘贴或上传 PDF 简历
         </span>
       </div>
     </div>
@@ -177,6 +181,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 「岗位推荐」页（需登录）：用简历做六维加权匹配。
+ * 简历不在本页输入——统一在个人中心粘贴/上传（见 ProfileView）。
+ */
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as api from '../api'
@@ -263,7 +271,7 @@ onMounted(async () => {
 })
 
 async function doMatch() {
-  if (!resume.canMatch()) return ElMessage.warning('请先在「简历」页解析一份简历')
+  if (!resume.canMatch()) return ElMessage.warning('请先在个人中心粘贴或上传一份简历')
   loading.value = true
   try {
     const body: api.MatchPayload = { top_n: topN.value }

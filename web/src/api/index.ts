@@ -5,8 +5,13 @@ import type {
 } from './types'
 import type { JobListResp, JobStatsResp } from './jobs'
 import type { CompanyDetail, CompanyListResp, CompanyStatsResp } from './companies'
+import type { HomeResp } from './home'
 
-/** 后端 33 个接口的前端封装（与 src/api/schemas.py 一一对应） */
+/** 后端 34 个接口的前端封装（与 src/api/schemas.py 一一对应） */
+
+// ---------------- 首页推荐
+export const home = (n = 8) =>
+  client.get<HomeResp>('/api/home', { params: { n } }).then((r) => r.data)
 
 // ---------------- 首页：岗位浏览
 export interface JobQuery {
@@ -16,6 +21,8 @@ export interface JobQuery {
   district?: string
   category?: string
   keyword?: string
+  /** 精确匹配「来源关键词」列（首页热门分类卡的数字就是这个口径） */
+  source_kw?: string
   salary_min?: number
   edu?: string
   cluster?: string

@@ -68,7 +68,7 @@ const rf = reactive({ username: '', password: '', nickname: '' })
 
 function done() {
   ElMessage.success('欢迎，' + (auth.user?.nickname || auth.user?.username))
-  router.push((route.query.redirect as string) || '/jobs')
+  router.push((route.query.redirect as string) || '/home')
 }
 
 async function doLogin() {
