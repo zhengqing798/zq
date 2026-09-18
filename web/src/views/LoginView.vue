@@ -1,21 +1,12 @@
 <template>
   <div class="login-wrap">
-    <!-- 左：品牌区（招聘网站的"登录页左栏"） -->
-    <div class="login-left">
-      <div class="logo-big">🎯</div>
-      <h1>人岗匹配推荐系统</h1>
-      <p class="slogan">8,836 个真实岗位 · 六维匹配打分 · 全部结论可溯源</p>
-      <ul class="feat">
-        <li>📄 粘贴或上传 PDF 简历，自动结构化解析</li>
-        <li>🎯 六维加权匹配（技能 / 经验 / 学历 / 地域 / 薪资 / 证书）</li>
-        <li>🏢 K-Means 岗位聚类画像与降维可视化</li>
-        <li>💬 Agent 智能问答，答案带来源与工具轨迹</li>
-      </ul>
-      <div class="tip">游客也能体验全部核心功能；登录后可保存简历、收藏岗位、查看历史。</div>
-    </div>
+    <div class="login-box">
+      <!-- 极简品牌头（原来的左栏大面板已按要求删除） -->
+      <div class="brand">
+        <div class="logo">🎯</div>
+        <div class="name">人岗匹配推荐系统</div>
+      </div>
 
-    <!-- 右：登录 / 注册 -->
-    <div class="login-right">
       <el-card shadow="never" class="box">
         <el-tabs v-model="tab" stretch>
           <el-tab-pane label="登录" name="login">
@@ -28,7 +19,7 @@
                 <el-input v-model="lf.password" size="large" type="password" show-password
                           placeholder="请输入密码" :prefix-icon="Lock" @keyup.enter="doLogin" />
               </el-form-item>
-              <el-button type="primary" size="large" style="width:100%" :loading="loading"
+              <el-button type="primary" size="large" class="submit" :loading="loading"
                          @click="doLogin">登 录</el-button>
             </el-form>
           </el-tab-pane>
@@ -50,16 +41,14 @@
                   <el-radio-button value="employer">企业（预留）</el-radio-button>
                 </el-radio-group>
               </el-form-item>
-              <el-button type="primary" size="large" style="width:100%" :loading="loading"
+              <el-button type="primary" size="large" class="submit" :loading="loading"
                          @click="doRegister">注册并登录</el-button>
             </el-form>
           </el-tab-pane>
         </el-tabs>
-        <div class="muted" style="margin-top:10px;text-align:center">
-          口令以 PBKDF2-HMAC-SHA256（20 万次迭代 + 随机盐）存储，不保存明文
-        </div>
       </el-card>
-      <el-button text @click="router.push('/jobs')" style="margin-top:8px">
+
+      <el-button text class="guest" @click="router.push('/jobs')">
         先以游客身份逛逛 →
       </el-button>
     </div>
@@ -107,23 +96,44 @@ async function doRegister() {
 </script>
 
 <style scoped>
+/* 整页居中：浅青渐变底 + 顶部光晕，登录卡居中且比例收敛（不再左右分栏） */
 .login-wrap {
-  min-height: 100vh; display: grid; grid-template-columns: 1.15fr .85fr;
-  background: linear-gradient(135deg, #00a6a7 0%, #12c2b4 45%, #43d6c4 100%);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 16px;
+  background:
+    radial-gradient(760px 380px at 50% -60px, rgba(0, 166, 167, .16), transparent 70%),
+    linear-gradient(180deg, #f4fbfb 0%, #e9f5f7 100%);
 }
-.login-left { color: #fff; padding: 8vh 6vw; }
-.logo-big { font-size: 46px; }
-.login-left h1 { font-size: 32px; margin: 10px 0 6px; font-weight: 800; }
-.slogan { font-size: 15px; opacity: .92; margin-bottom: 26px; }
-.feat { list-style: none; padding: 0; line-height: 2.15; font-size: 15px; }
-.feat li { opacity: .96; }
-.tip { margin-top: 26px; font-size: 13px; opacity: .85;
-  background: rgba(255,255,255,.14); padding: 10px 14px; border-radius: 10px; }
-.login-right { display: flex; flex-direction: column; align-items: center;
-  justify-content: center; background: #fff; padding: 24px; }
-.box { width: 380px; border: none; }
-@media (max-width: 900px) {
-  .login-wrap { grid-template-columns: 1fr; }
-  .login-left { padding: 6vh 8vw 2vh; }
+.login-box { width: 100%; max-width: 420px; display: flex; flex-direction: column;
+  align-items: center; }
+
+/* 极简品牌头 */
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.brand .logo {
+  width: 40px; height: 40px; border-radius: 11px; font-size: 21px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #00a6a7, #12c2b4);
+  box-shadow: 0 6px 16px rgba(0, 166, 167, .32);
+}
+.brand .name { font-size: 19px; font-weight: 800; color: #16233a; letter-spacing: .3px; }
+
+/* 卡片：只留一层柔和投影，去掉多余边框，宽度收敛到 420 */
+.box {
+  width: 100%; border: 1px solid var(--zq-border); border-radius: 16px;
+  background: #fff; box-shadow: 0 18px 44px rgba(16, 43, 51, .10);
+}
+.box :deep(.el-card__body) { padding: 22px 26px 26px; }
+.box :deep(.el-tabs__item) { font-size: 15.5px; font-weight: 700; }
+.box :deep(.el-tabs__nav-wrap::after) { height: 1px; }
+.box :deep(.el-form-item) { margin-bottom: 16px; }
+.box :deep(.el-form-item__label) { font-size: 13.5px; color: #5b6b7f; padding-bottom: 4px; }
+.submit { width: 100%; height: 42px; font-size: 15.5px; font-weight: 700;
+  letter-spacing: 2px; margin-top: 2px; }
+.guest { margin-top: 14px; color: #5b6b7f; }
+
+@media (max-width: 480px) {
+  .login-wrap { padding: 28px 14px; }
+  .box :deep(.el-card__body) { padding: 18px 18px 22px; }
 }
 </style>
