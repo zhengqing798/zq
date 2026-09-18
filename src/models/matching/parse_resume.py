@@ -617,6 +617,9 @@ def parse_resume_pdf(path, terms=None, syn=None, pool_norm=None):
     text, info = extract_text_from_pdf(path, with_info=True)
     q = _text_quality(text)
     out = parse_resume_text(text, terms, syn, pool_norm)
+    # 把 PDF 提取出的**原始正文**一并带出去：API 层要用它把"上传的 PDF"存成"我的简历"
+    # （此前 services.py 一直在读 parsed["_原文"]，但没有任何地方写入这个键 → PDF 正文恒为空）
+    out["_原文"] = text or ""
     ids = count_resume_identities(text)
     out["来源"] = os.path.basename(path)
     out["PDF页数"] = info["页数"]

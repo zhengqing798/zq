@@ -23,6 +23,8 @@ export interface TokenResp {
 export interface ParsedResume {
   resume_id: string
   来源: string
+  /** 解析出的原始正文（粘贴文本原样 / PDF 文本层）：用于保存成"我的简历" */
+  原文?: string
   解析字段: Record<string, string | number>
   技能列表: string[]
   技能数: number

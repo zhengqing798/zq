@@ -36,6 +36,8 @@ class ParseResponse(BaseModel):
     ok: bool = True
     resume_id: str
     来源: str
+    # 解析出的原始正文（粘贴文本原样 / PDF 的文本层），供前端保存为"我的简历"
+    原文: str = ""
     解析字段: Dict[str, Any]
     技能列表: List[str]
     技能数: int

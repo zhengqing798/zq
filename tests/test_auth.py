@@ -17,6 +17,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from src.api.main import app                                              # noqa: E402
+from src.api import db                                                    # noqa: E402
 
 client = TestClient(app)
 RESUME = """姓名：李四
@@ -193,39 +194,78 @@ class TestProfile:
         assert len(row[0]) == 64 and len(row[1]) == 32     # sha256 hex / 16 字节盐
 
 
-# ================================================================ 个人中心：简历
+# ================================================================ 个人中心：简历（一个用户只有一份）
 class TestResumes:
-    def test_normal_crud(self):
+    def test_normal_save_and_overwrite(self):
+        """正常：保存 → 再保存一次 = **覆盖更新**（不是新增第二份）"""
         tok, _ = token_of()
         r = client.post("/api/user/resumes", headers=auth(tok),
                         json={"title": "Java求职简历", "text": RESUME})
         assert r.status_code == 200
+        assert r.json()["message"] == "简历已保存"
         rid = r.json()["id"]
-        # 列表（第一份自动为默认）
         lst = client.get("/api/user/resumes", headers=auth(tok)).json()["简历"]
         assert len(lst) == 1 and lst[0]["is_default"] is True
         assert lst[0]["字数"] > 0
-        # 再存一份 → 不抢默认
-        rid2 = client.post("/api/user/resumes", headers=auth(tok),
-                           json={"title": "第二份", "text": RESUME}).json()["id"]
+
+        # 第二次保存 → 覆盖同一份
+        r2 = client.post("/api/user/resumes", headers=auth(tok),
+                         json={"title": "改名后的简历", "text": RESUME + "\n补充一段"})
+        assert r2.json()["message"] == "简历已更新"
+        assert r2.json()["id"] == rid                      # 还是同一条
         lst = client.get("/api/user/resumes", headers=auth(tok)).json()["简历"]
-        assert len(lst) == 2
-        assert sum(1 for x in lst if x["is_default"]) == 1
-        # 改默认
-        assert client.put("/api/user/resumes/%d/default" % rid2, headers=auth(tok)).status_code == 200
-        lst = client.get("/api/user/resumes", headers=auth(tok)).json()["简历"]
-        assert [x["id"] for x in lst if x["is_default"]] == [rid2]
-        # 更新
+        assert len(lst) == 1                               # 没有变成两份
+        assert lst[0]["title"] == "改名后的简历"
+        assert lst[0]["字数"] > len(RESUME)
+
+    def test_normal_update_and_delete(self):
+        tok, _ = token_of()
+        rid = client.post("/api/user/resumes", headers=auth(tok),
+                          json={"title": "简历", "text": RESUME}).json()["id"]
         assert client.put("/api/user/resumes/%d" % rid, headers=auth(tok),
                           json={"title": "改名了"}).status_code == 200
-        # 删除
+        assert client.get("/api/user/resumes", headers=auth(tok)).json()["简历"][0]["title"] == "改名了"
+        # 删除后就没有简历了（不存在"顺延到下一份"）
         assert client.delete("/api/user/resumes/%d" % rid, headers=auth(tok)).status_code == 200
+        assert client.get("/api/user/resumes", headers=auth(tok)).json()["简历"] == []
+        # 删掉之后可以重新保存一份
+        rid2 = client.post("/api/user/resumes", headers=auth(tok),
+                           json={"title": "新简历", "text": RESUME}).json()["id"]
         assert len(client.get("/api/user/resumes", headers=auth(tok)).json()["简历"]) == 1
+        assert rid2 != rid
+
+    def test_one_resume_per_user_in_db(self):
+        """关键规则：连续保存 5 次，库里也**只能有 1 行**（直接查 SQLite，不看接口口径）"""
+        tok, uname = token_of()
+        for i in range(5):
+            client.post("/api/user/resumes", headers=auth(tok),
+                        json={"title": "第%d次" % i, "text": RESUME})
+        assert len(client.get("/api/user/resumes", headers=auth(tok)).json()["简历"]) == 1
+        with db.conn() as c:
+            uid = c.execute("SELECT id FROM users WHERE username=?", (uname,)).fetchone()["id"]
+            n = c.execute("SELECT COUNT(*) n FROM resumes WHERE user_id=?", (uid,)).fetchone()["n"]
+            row = c.execute("SELECT title FROM resumes WHERE user_id=?", (uid,)).fetchone()
+        assert n == 1, "一个用户出现了 %d 份简历" % n
+        assert row["title"] == "第4次"                     # 最后一次覆盖生效
+
+    def test_default_flag_always_true(self):
+        """单份简历恒为默认（不再有"设为默认"的多份概念，但接口保留兼容）"""
+        tok, _ = token_of()
+        rid = client.post("/api/user/resumes", headers=auth(tok),
+                          json={"title": "r", "text": RESUME}).json()["id"]
+        assert client.get("/api/user/resumes", headers=auth(tok)).json()["简历"][0]["is_default"] is True
+        assert client.put("/api/user/resumes/%d/default" % rid, headers=auth(tok)).status_code == 200
+        assert client.get("/api/user/resumes", headers=auth(tok)).json()["简历"][0]["is_default"] is True
 
     def test_abnormal_empty_text(self):
         tok, _ = token_of()
         assert client.post("/api/user/resumes", headers=auth(tok),
                            json={"title": "空", "text": ""}).status_code == 422
+        # 更新成空正文也要拦住（不能把唯一一份改成空）
+        rid = client.post("/api/user/resumes", headers=auth(tok),
+                          json={"title": "r", "text": RESUME}).json()["id"]
+        assert client.put("/api/user/resumes/%d" % rid, headers=auth(tok),
+                          json={"text": "   "}).status_code == 400
 
     def test_abnormal_cannot_touch_others_resume(self):
         """异常：用户 A 不能改/删用户 B 的简历（越权保护）"""
@@ -238,8 +278,9 @@ class TestResumes:
         assert client.delete("/api/user/resumes/%d" % rid, headers=auth(tok_a)).status_code == 400
         assert client.put("/api/user/resumes/%d/default" % rid,
                           headers=auth(tok_a)).status_code == 400
-        # B 的简历仍然完好
-        assert len(client.get("/api/user/resumes", headers=auth(tok_b)).json()["简历"]) == 1
+        # B 的简历仍然完好（标题没被改）
+        lst = client.get("/api/user/resumes", headers=auth(tok_b)).json()["简历"]
+        assert len(lst) == 1 and lst[0]["title"] == "B的简历"
 
     def test_abnormal_unauthenticated(self):
         assert client.get("/api/user/resumes").status_code == 401

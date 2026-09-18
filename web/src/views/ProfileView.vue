@@ -7,7 +7,10 @@
     </div>
 
     <div class="kpi-row">
-      <div class="kpi"><div class="v">{{ stats['简历数'] ?? 0 }}</div><div class="l">我的简历</div></div>
+      <div class="kpi">
+        <div class="v">{{ myResume ? '已保存' : '未保存' }}</div>
+        <div class="l">我的简历</div>
+      </div>
       <div class="kpi"><div class="v">{{ stats['收藏岗位数'] ?? 0 }}</div><div class="l">收藏岗位</div></div>
       <div class="kpi"><div class="v">{{ stats['匹配次数'] ?? 0 }}</div><div class="l">匹配次数</div></div>
       <div class="kpi"><div class="v">{{ stats['提问次数'] ?? 0 }}</div><div class="l">提问次数</div></div>
@@ -23,7 +26,8 @@
                       placeholder="把简历内容粘贴到这里，例如：姓名、期望岗位、期望城市、学历、工作年限、技能特长…" />
             <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
               <el-button type="primary" :loading="rloading" @click="doParse">解析这份文本</el-button>
-              <el-button :loading="rloading" @click="saveParsed">💾 保存到我的简历</el-button>
+              <el-button :loading="rloading" @click="saveResume">
+                💾 {{ myResume ? '保存修改' : '保存简历' }}</el-button>
               <el-button text @click="rtext = SAMPLE">填入示例</el-button>
             </div>
           </div>
@@ -39,6 +43,24 @@
                   <div class="muted">一份 PDF = 一份简历（多页视为续页）</div>
                 </template>
               </el-upload>
+            </div>
+
+            <div class="zq-card pad" style="margin-top:12px">
+              <div class="zq-section" style="margin-top:0">我的简历</div>
+              <template v-if="myResume">
+                <el-input v-model="rTitle" maxlength="24" placeholder="简历标题"
+                          style="max-width:280px" />
+                <div class="muted" style="margin-top:8px">
+                  {{ myResume.字数 }} 字 ｜ 更新于 {{ myResume.updated_at }}
+                </div>
+                <div class="racts">
+                  <el-button @click="loadMyResume">✏️ 修改</el-button>
+                  <el-button type="primary" @click="saveResume">💾 保存修改</el-button>
+                  <el-button type="danger" plain @click="delMyResume">删除</el-button>
+                  <el-button @click="goMatch">去岗位推荐 →</el-button>
+                </div>
+              </template>
+              <el-empty v-else description="还没有简历：在左边粘贴正文或在这里上传 PDF，然后点保存" />
             </div>
 
             <div v-if="resume.parsed" class="zq-card pad" style="margin-top:12px">
@@ -58,8 +80,7 @@
                         style="margin-top:8px"
                         :title="'解析告警：' + resume.parsed.解析告警.join('；')" />
               <div style="margin-top:10px">
-                <el-button type="primary" @click="router.push('/match')">
-                  用这份简历做岗位推荐 →</el-button>
+                <el-button type="primary" @click="goMatch">用这份简历做岗位推荐 →</el-button>
                 <el-popover placement="top" :width="420" trigger="click">
                   <template #reference><el-button text>查看全部解析字段</el-button></template>
                   <pre style="max-height:320px;overflow:auto;font-size:12px">{{ resume.parsed.解析字段 }}</pre>
@@ -67,37 +88,6 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="zq-card pad" style="margin-top:14px">
-          <div class="zq-section" style="margin-top:0">已保存的简历（{{ resumes.length }}）</div>
-          <el-table :data="resumes" size="default" v-loading="loading">
-            <el-table-column prop="title" label="标题" min-width="160">
-              <template #default="{ row }">
-                <b>{{ row.title }}</b>
-                <el-tag v-if="row.is_default" size="small" type="success" effect="light"
-                        style="margin-left:6px">默认</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="字数" label="字数" width="90" />
-            <el-table-column prop="updated_at" label="更新时间" width="170" />
-            <el-table-column label="操作" width="250">
-              <template #default="{ row }">
-                <el-button link type="primary" @click="useIt(row)">用这份匹配</el-button>
-                <el-button link @click="setDef(row)" :disabled="row.is_default">设为默认</el-button>
-                <el-button link type="danger" @click="del(row)">删除</el-button>
-              </template>
-            </el-table-column>
-            <el-table-column type="expand" width="40">
-              <template #default="{ row }">
-                <el-input v-model="row.title" size="small" style="max-width:320px;margin-bottom:8px" />
-                <el-input v-model="row.text" type="textarea" :rows="6" />
-                <el-button type="primary" size="small" style="margin-top:8px"
-                           @click="save(row)">保存修改</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-          <el-empty v-if="!resumes.length" description="还没有保存的简历：在上方粘贴正文或上传 PDF 后点「保存到我的简历」" />
         </div>
       </el-tab-pane>
 
@@ -174,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
@@ -213,9 +203,16 @@ const resumes = ref<ResumeRow[]>([])
 const favorites = ref<FavoriteRow[]>([])
 const matches = ref<MatchHistoryRow[]>([])
 
+/** 一个用户只有一份简历：取唯一的那条（没有则 null） */
+const myResume = computed<ResumeRow | null>(() => resumes.value[0] || null)
+
 /* 简历输入（粘贴 / PDF）：原来独立的「简历」页已并入本页 */
 const rtext = ref(resume.text || '')
+const rTitle = ref('我的简历')
 const rloading = ref(false)
+
+// 简历变化时同步标题输入框
+watch(myResume, (r) => { rTitle.value = r?.title || '我的简历' })
 
 const pf = reactive({ nickname: '', phone: '', email: '' })
 const pw = reactive({ old_password: '', new_password: '', confirm: '' })
@@ -257,45 +254,57 @@ async function onResumeFile(f: UploadFile) {
   rloading.value = true
   try {
     const r = await api.parseResumePdf(raw)
-    resume.setParsed(r, '')
+    // 用解析出的原文填充正文，这样上传 PDF 之后也能"保存简历"
+    resume.setParsed(r, r.原文 || '')
+    if (r.原文) rtext.value = r.原文
     ElMessage.success('PDF 解析完成（' + r.来源 + '）')
   } catch { /* 拦截器已提示 */ }
   finally { rloading.value = false }
 }
 
-async function saveParsed() {
-  const text = rtext.value.trim() || resume.text
+/** 保存 / 覆盖那一份简历（一个用户只有一份） */
+async function saveResume() {
+  const text = rtext.value.trim() || resume.text || ''
   if (!text) return ElMessage.warning('请先粘贴简历正文或上传 PDF')
+  rloading.value = true
   try {
-    const r = await api.createResume(
-      (resume.parsed?.解析字段['期望岗位'] as string) || '我的简历', text)
-    ElMessage.success('已保存（id=' + r.id + '）')
-    refresh()
+    if (myResume.value) {
+      await api.updateResume(myResume.value.id, rTitle.value, text)
+      ElMessage.success('简历已更新')
+    } else {
+      const r = await api.createResume(rTitle.value || '我的简历', text)
+      ElMessage.success(r.message || '简历已保存')
+    }
+    await refresh()
+    const cur = resumes.value[0]
+    if (cur) resume.useSaved(cur.id, cur.title, cur.text)   // 同步给「岗位推荐」用
   } catch { /* 拦截器已提示 */ }
+  finally { rloading.value = false }
 }
 
-async function save(row: ResumeRow) {
-  try { await api.updateResume(row.id, row.title, row.text); ElMessage.success('已保存'); refresh() }
-  catch { /* 拦截器已提示 */ }
+/** 把已保存的正文载入左侧输入框，便于修改 */
+function loadMyResume() {
+  if (!myResume.value) return
+  rtext.value = myResume.value.text
+  ElMessage.success('正文已载入，改完点「保存修改」')
 }
-async function setDef(row: ResumeRow) {
-  try { await api.setDefaultResume(row.id); ElMessage.success('已设为默认'); refresh() }
-  catch { /* 拦截器已提示 */ }
-}
-async function del(row: ResumeRow) {
+
+async function delMyResume() {
+  if (!myResume.value) return
   try {
-    await ElMessageBox.confirm('确定删除简历「' + row.title + '」？', '确认', { type: 'warning' })
-    await api.deleteResume(row.id); ElMessage.success('已删除'); refresh()
+    await ElMessageBox.confirm('确定删除你的简历？', '确认', { type: 'warning' })
+    await api.deleteResume(myResume.value.id)
+    ElMessage.success('已删除')
+    await refresh()
   } catch { /* 取消或失败 */ }
 }
-async function useIt(row: ResumeRow) {
-  resume.useSaved(row.id, row.title, row.text)
-  try {
-    resume.matchResult = await api.runMatch({ saved_resume_id: row.id, top_n: 20 })
-    ElMessage.success('已用这份简历匹配，正在跳转…')
-    router.push('/match')
-  } catch { /* 拦截器已提示 */ }
+
+/** 带着这份简历去「岗位推荐」 */
+function goMatch() {
+  if (myResume.value) resume.useSaved(myResume.value.id, myResume.value.title, myResume.value.text)
+  router.push('/match')
 }
+
 async function unfav(row: FavoriteRow) {
   try { await api.removeFavorite(row.job_id); ElMessage.success('已取消收藏'); refresh() }
   catch { /* 拦截器已提示 */ }
@@ -319,5 +328,6 @@ async function savePw() {
 
 <style scoped>
 .rgrid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+.racts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 @media (max-width: 1000px) { .rgrid { grid-template-columns: 1fr; } }
 </style>

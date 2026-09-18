@@ -127,6 +127,13 @@ def conn():
 def init_db():
     with conn() as c:
         c.executescript(SCHEMA)
+        # 「一个用户只有一份简历」：早期版本允许多份，这里把历史遗留的多份收敛成
+        # 每人只保留最近更新的那一份（用户内容只删多余的，不删最后一份）。
+        c.execute("""DELETE FROM resumes WHERE id NOT IN (
+                       SELECT id FROM resumes r WHERE r.updated_at = (
+                         SELECT MAX(updated_at) FROM resumes x WHERE x.user_id = r.user_id)
+                       GROUP BY user_id)""")
+        c.execute("UPDATE resumes SET is_default=1")
     return DB_PATH
 
 
@@ -254,28 +261,48 @@ def delete_session(token):
         c.execute("DELETE FROM sessions WHERE token=?", (token,))
 
 
-# ---------------------------------------------------------------- 简历
+# ---------------------------------------------------------------- 简历（一人一份）
 def list_resumes(user_id):
+    """一个用户最多一份简历，所以这里正常只会返回 0 或 1 条"""
     with conn() as c:
-        rows = c.execute("SELECT * FROM resumes WHERE user_id=? ORDER BY is_default DESC, id DESC",
+        rows = c.execute("SELECT * FROM resumes WHERE user_id=? ORDER BY id DESC",
                          (user_id,)).fetchall()
     return [{"id": r["id"], "title": r["title"], "is_default": bool(r["is_default"]),
              "created_at": r["created_at"], "updated_at": r["updated_at"],
              "字数": len(r["text"] or ""), "text": r["text"]} for r in rows]
 
 
-def add_resume(user_id, title, text, is_default=None):
+def get_resume(user_id):
+    """取该用户的那一份简历（没有则 None）"""
+    rows = list_resumes(user_id)
+    return rows[0] if rows else None
+
+
+def save_resume(user_id, title, text, is_default=None):
+    """保存简历（**一个用户只有一份**）：已有则**覆盖更新**，没有才新建。
+
+    返回 (简历id, 是否新建)。`is_default` 参数保留仅为兼容旧调用，单份简历恒为默认。
+    """
     if not (text or "").strip():
         raise DBError("简历正文不能为空")
-    title = (title or "").strip() or "未命名简历"
+    title = (title or "").strip() or "我的简历"
     with conn() as c:
-        n = c.execute("SELECT COUNT(*) n FROM resumes WHERE user_id=?", (user_id,)).fetchone()["n"]
-        default = 1 if (is_default is True or (is_default is None and n == 0)) else 0
-        if default:
-            c.execute("UPDATE resumes SET is_default=0 WHERE user_id=?", (user_id,))
+        r = c.execute("SELECT id FROM resumes WHERE user_id=? ORDER BY id DESC LIMIT 1",
+                      (user_id,)).fetchone()
+        if r:
+            c.execute("UPDATE resumes SET title=?, text=?, is_default=1, updated_at=? WHERE id=?",
+                      (title, text, now(), r["id"]))
+            # 历史遗留的多余行一并清掉（正常不会有）
+            c.execute("DELETE FROM resumes WHERE user_id=? AND id<>?", (user_id, r["id"]))
+            return r["id"], False
         cur = c.execute("INSERT INTO resumes(user_id,title,text,is_default,created_at,updated_at) "
-                        "VALUES(?,?,?,?,?,?)", (user_id, title, text, default, now(), now()))
-        return cur.lastrowid
+                        "VALUES(?,?,?,1,?,?)", (user_id, title, text, now(), now()))
+        return cur.lastrowid, True
+
+
+def add_resume(user_id, title, text, is_default=None):
+    """兼容旧名（等价 save_resume，只返回 id）"""
+    return save_resume(user_id, title, text, is_default)[0]
 
 
 def update_resume(user_id, rid, title=None, text=None):
@@ -283,18 +310,20 @@ def update_resume(user_id, rid, title=None, text=None):
         r = c.execute("SELECT * FROM resumes WHERE id=? AND user_id=?", (rid, user_id)).fetchone()
         if not r:
             raise DBError("简历不存在或无权访问")
+        new_text = text if text is not None else r["text"]
+        if not (new_text or "").strip():
+            raise DBError("简历正文不能为空")
         c.execute("UPDATE resumes SET title=?, text=?, updated_at=? WHERE id=?",
-                  (title if title is not None else r["title"],
-                   text if text is not None else r["text"], now(), rid))
+                  (title if title is not None else r["title"], new_text, now(), rid))
     return True
 
 
 def set_default_resume(user_id, rid):
+    """只有一份简历，恒为默认；这里只校验归属（保持接口兼容）"""
     with conn() as c:
         r = c.execute("SELECT 1 FROM resumes WHERE id=? AND user_id=?", (rid, user_id)).fetchone()
         if not r:
             raise DBError("简历不存在或无权访问")
-        c.execute("UPDATE resumes SET is_default=0 WHERE user_id=?", (user_id,))
         c.execute("UPDATE resumes SET is_default=1 WHERE id=?", (rid,))
     return True
 
@@ -304,10 +333,6 @@ def delete_resume(user_id, rid):
         cur = c.execute("DELETE FROM resumes WHERE id=? AND user_id=?", (rid, user_id))
         if cur.rowcount == 0:
             raise DBError("简历不存在或无权访问")
-        left = c.execute("SELECT id FROM resumes WHERE user_id=? ORDER BY id LIMIT 1",
-                         (user_id,)).fetchone()
-        if left:
-            c.execute("UPDATE resumes SET is_default=1 WHERE id=?", (left["id"],))
     return True
 
 

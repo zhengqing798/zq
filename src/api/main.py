@@ -367,17 +367,19 @@ def user_stats(user=Depends(current_user)):
     return {"ok": True, "统计": db.user_stats(user["id"]), "用户": user}
 
 
-# ---------------------------------------------------------------- 个人中心：简历
+# ---------------------------------------------------------------- 个人中心：简历（一人一份）
 @app.get("/api/user/resumes", response_model=schemas.ResumeListResponse, tags=["⑦ 个人中心"])
 def list_resumes(user=Depends(current_user)):
+    """一个用户只有一份简历，所以「简历」数组正常是 0 或 1 条"""
     return {"ok": True, "简历": db.list_resumes(user["id"])}
 
 
 @app.post("/api/user/resumes", tags=["⑦ 个人中心"])
 def create_resume(req: schemas.ResumeCreateRequest, user=Depends(current_user)):
+    """保存简历：**已有就覆盖更新**，没有才新建（一个用户始终只有一份）"""
     try:
-        rid = db.add_resume(user["id"], req.title, req.text, req.is_default)
-        return {"ok": True, "id": rid, "message": "简历已保存"}
+        rid, created = db.save_resume(user["id"], req.title, req.text, req.is_default)
+        return {"ok": True, "id": rid, "message": "简历已保存" if created else "简历已更新"}
     except Exception as e:
         _err(e)
 

@@ -115,6 +115,36 @@ class TestResumeParse:
         assert r.status_code == 400
         assert r.json()["ok"] is False
 
+    def test_normal_returns_raw_text(self):
+        """正常：解析结果要带回**原始正文**（前端靠它把简历存成"我的简历"）"""
+        j = client.post("/api/resume/parse_text", json={"resume_text": RESUME}).json()
+        assert j["原文"].strip() == RESUME.strip()
+
+    def test_normal_pdf_parse_and_raw_text(self):
+        """正常：上传 PDF → 解析字段正确 + **原文非空**（此前 PDF 通路这一项恒为空，是真 bug）"""
+        import os
+        import sys
+        import tempfile
+
+        sys.path.insert(0, os.path.join(ROOT, "src", "models", "matching"))
+        import parse_resume as PR                                          # noqa: E402
+
+        path = os.path.join(tempfile.gettempdir(), "api_probe_resume.pdf")
+        try:
+            PR._make_test_pdf([RESUME], path)
+            with open(path, "rb") as f:
+                r = client.post("/api/resume/parse",
+                                files={"file": ("resume.pdf", f, "application/pdf")})
+            assert r.status_code == 200, r.text
+            j = r.json()
+            assert j["来源"].startswith("PDF")
+            assert j["解析字段"]["期望城市"] == "苏州"
+            assert len(j["原文"]) > 20, "PDF 提取的原文不能为空"
+            assert "Python" in j["原文"] or "Selenium" in j["原文"]
+        finally:
+            if os.path.exists(path):
+                os.remove(path)
+
 
 # ================================================================ ② 人岗匹配
 class TestMatch:
