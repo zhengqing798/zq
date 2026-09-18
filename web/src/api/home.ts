@@ -10,6 +10,7 @@ export interface HomeJob {
   城市: string
   区县: string
   薪资: string
+  薪资下限: number
   薪资上限: number
   岗位大类: string
   经验要求: string

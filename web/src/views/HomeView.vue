@@ -219,7 +219,7 @@ onMounted(async () => {
 .chips a.more { color: var(--el-color-primary); font-weight: 700; }
 
 /* ---------- 地区推荐 ---------- */
-.regions { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 12px; }
+.regions { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
 .rcard { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
   padding: 12px 14px; cursor: pointer; transition: .16s; box-shadow: var(--zq-card-shadow); }
 .rcard:hover { box-shadow: 0 8px 22px rgba(0,166,167,.14); transform: translateY(-2px);

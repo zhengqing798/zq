@@ -12,6 +12,7 @@
 """
 import hashlib
 import os
+import random
 import re
 import sys
 from collections import Counter, defaultdict
@@ -32,6 +33,12 @@ JOBS_CSV = os.path.join(P, "zhaopin_jobs_cleaned_seg.csv")
 CLUSTER_CSV = os.path.join(P, "岗位聚类_标签.csv")
 
 _STORE = None
+
+# 首页「高薪 / 热门岗位」随机推荐的候选池门槛（都是真实列的口径）
+HIGH_SALARY_MIN = 10000      # 高薪池：薪资下限 > 10000 元/月（实测 2,472 个岗位）
+HOT_REPLY_MIN = 20           # 热门池：招聘者今日回复数 ≥ 20（实测 1,676 个岗位）
+REGION_TOP = 5               # 地区推荐只给 Top 5
+COMPANY_TOP = 10             # 热门企业 Top 10
 
 SORTS = {
     "default": "默认排序",
@@ -400,7 +407,8 @@ class JobStore:
         return {
             "岗位ID": x["岗位ID"], "岗位名称": x["岗位名称"], "公司": x["公司"],
             "公司ID": x.get("公司ID", ""), "城市": x["城市"], "区县": x["区县"],
-            "薪资": x["薪资"], "薪资上限": x["薪资上限"], "岗位大类": x["岗位大类"],
+            "薪资": x["薪资"], "薪资下限": x["薪资下限"], "薪资上限": x["薪资上限"],
+            "岗位大类": x["岗位大类"],
             "经验要求": x["经验要求"], "学历要求": x["学历要求"],
             "技能标签": x["技能标签"][:5], "是否在线": x["是否在线"],
             "今日回复数": x["今日回复数"], "回复文案": x["回复文案"],
@@ -409,10 +417,12 @@ class JobStore:
         }
 
     def home(self, hot_n=8):
-        """首页推荐数据：热门分类轮播 + 地区推荐 + 高薪/热门岗位 + 热门企业。
+        """首页推荐数据：热门分类轮播 + 地区推荐 Top5 + 高薪/热门岗位（随机）+ 热门企业 Top10。
 
-        全部只用真实存在的列，**没有**浏览量/投递量这类数据，因此"热门"一律给出
-        明确排序口径（见返回体的 `口径说明`），不写含糊的"热度"。
+        · 地区与热门企业是**固定榜单**（Top N，可复现）；
+        · 高薪 / 热门岗位是**随机抽取**：从真实条件的候选池里 `random.sample`，
+          因此每次进首页看到的都不一样，池子与门槛见 HIGH_SALARY_MIN / HOT_REPLY_MIN；
+        · 全部只用真实存在的列，没有浏览量/投递量这类数据（说明见 `口径说明`，页面不展示）。
         """
         # ① 热门分类 = 抓取这批岗位时用的「来源关键词」列（真实列，共 8 个）
         kws = Counter(x["来源关键词"] for x in self.items if x["来源关键词"])
@@ -430,9 +440,9 @@ class JobStore:
                 "示例岗位": [self._job_brief(x) for x in samples],
             })
 
-        # ② 地区推荐（岗位数 / 公司数 / 平均薪资 / 热门区县）
+        # ② 地区推荐（只给 Top 5；岗位数 / 公司数 / 平均薪资 / 热门区县）
         regions = []
-        for city, cnt in Counter(x["城市"] for x in self.items if x["城市"]).most_common():
+        for city, cnt in Counter(x["城市"] for x in self.items if x["城市"]).most_common(REGION_TOP):
             sub = [x for x in self.items if x["城市"] == city]
             ups = [x["薪资上限"] for x in sub if x["薪资上限"] > 0]
             regions.append({
@@ -444,20 +454,22 @@ class JobStore:
                           Counter(x["区县"] for x in sub if x["区县"]).most_common(3)],
             })
 
-        # ③ 高薪岗位：薪资上限降序（薪资面议/无值排最后）
-        high = sorted(self.items,
-                      key=lambda x: (-(x["薪资上限"] if x["薪资上限"] > 0 else -1),
-                                     -x["今日回复数"]))[:hot_n]
-        # ④ 热门岗位：招聘者「今日回复数」→ 在线 → 薪资上限
-        hot = sorted(self.items,
-                     key=lambda x: (-x["今日回复数"], -x["是否在线"], -x["薪资上限"]))[:hot_n]
+        # ③ 高薪岗位：从「薪资下限 > 10000 元/月」的池子里**随机抽**（每次请求都不一样），
+        #    抽出来后按薪资上限降序展示，榜首仍是本批里最高的
+        high_pool = [x for x in self.items if x["薪资下限"] > HIGH_SALARY_MIN]
+        high = random.sample(high_pool, min(hot_n, len(high_pool))) if high_pool else []
+        high.sort(key=lambda x: -x["薪资上限"])
+        # ④ 热门岗位：从「招聘者今日回复数 ≥ HOT_REPLY_MIN」的池子里**随机抽**，再按回复数降序
+        hot_pool = [x for x in self.items if x["今日回复数"] >= HOT_REPLY_MIN]
+        hot = random.sample(hot_pool, min(hot_n, len(hot_pool))) if hot_pool else []
+        hot.sort(key=lambda x: (-x["今日回复数"], -x["是否在线"], -x["薪资上限"]))
 
         return {
             "热门分类": hero,
             "地区推荐": regions,
             "高薪岗位": [self._job_brief(x) for x in high],
             "热门岗位": [self._job_brief(x) for x in hot],
-            "热门企业": [self._card(c) for c in self.companies[:10]],
+            "热门企业": [self._card(c) for c in self.companies[:COMPANY_TOP]],
             "热门技能": [{"名称": k, "数量": v} for k, v in
                      Counter(s for x in self.items for s in x["技能标签"]).most_common(12)],
             "总体": {
@@ -466,13 +478,15 @@ class JobStore:
                 "有回复岗位数": sum(1 for x in self.items if x["今日回复数"] > 0),
             },
             "口径说明": [
-                "「热门分类」取自真实的「来源关键词」列（抓取这批岗位时用的搜索词，共 8 个），"
-                "不是编的榜单。",
-                "「高薪岗位」按该岗位的薪资上限（元/月）降序；薪资面议的排最后。",
-                "「热门岗位」按「招聘者今日回复数 → 是否在线 → 薪资上限」降序——"
-                "数据里没有浏览/投递量，所以不写含糊的“热度”。",
-                "「地区推荐」的岗位数/公司数/平均薪资上限由该城市真实岗位聚合。",
-                "「热门企业」按在招职位数降序（与公司页同一口径）。",
+                "「热门分类」取自真实的「来源关键词」列（抓取这批岗位时用的搜索词，共 8 个）。",
+                "「地区推荐」只给岗位数 Top %d 的城市，数字由该城市真实岗位聚合。" % REGION_TOP,
+                "「高薪岗位」从薪资下限 > %d 元/月的 %d 个岗位中**随机抽取**（每次请求重新抽），"
+                "抽出来后按薪资上限降序展示；薪资面议的不进池。" % (
+                    HIGH_SALARY_MIN, len(high_pool)),
+                "「热门岗位」从招聘者今日回复数 ≥ %d 的 %d 个岗位中**随机抽取**（每次请求重新抽），"
+                "再按回复数降序；数据里没有浏览/投递量，故不写“热度”。" % (
+                    HOT_REPLY_MIN, len(hot_pool)),
+                "「热门企业」按在招职位数降序取 Top %d。" % COMPANY_TOP,
             ],
             "来源": ["zhaopin_jobs_cleaned_seg.csv（%d 个清洗后岗位）" % len(self.items),
                    "岗位聚类_标签.csv（任务7 聚类结果）"],

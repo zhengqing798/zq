@@ -71,41 +71,62 @@ class TestHomeNormal:
             assert got == c["岗位数"], "「%s」首页显示 %d，岗位页筛出 %d" % (
                 c["分类"], c["岗位数"], got)
 
-    def test_region_recommendation(self):
+    def test_region_recommendation_top5(self):
+        """地区推荐只给 Top 5（按岗位数），每张卡带公司数/平均薪资/热门区县"""
         j = _home()
         regs = j["地区推荐"]
-        assert len(regs) == 16                     # 16 个城市全覆盖
-        assert regs[0]["城市"] == "苏州" and regs[0]["岗位数"] == 2073
-        assert sum(x["岗位数"] for x in regs) == 8836
+        assert len(regs) == 5
+        assert [x["城市"] for x in regs] == ["苏州", "福州", "厦门", "宁波", "嘉兴"]
+        assert regs[0]["岗位数"] == 2073
+        nums = [x["岗位数"] for x in regs]
+        assert nums == sorted(nums, reverse=True)          # Top 5 之间仍是降序
+        assert sum(nums) < 8836                            # 只是子集，不是全部城市
         for x in regs:
             assert x["省份"] and x["公司数"] > 0 and x["平均薪资上限"] > 0
             assert len(x["热门区县"]) <= 3
             assert all(0 < d["数量"] <= x["岗位数"] for d in x["热门区县"])
 
-    def test_high_salary_jobs_sorted(self):
-        j = _home()
-        up = [x["薪资上限"] for x in j["高薪岗位"]]
-        assert len(up) == 8
-        assert up == sorted(up, reverse=True)
-        assert up[0] == 200000                     # 与 /api/jobs?sort=salary_desc 同口径
-        first = client.get("/api/jobs", params={"sort": "salary_desc", "size": 1}).json()["岗位"][0]
-        assert j["高薪岗位"][0]["岗位ID"] == first["岗位ID"]
-        # 「薪资面议」的岗位不能混进高薪榜
-        assert all(x["薪资上限"] > 0 for x in j["高薪岗位"])
+    def test_high_salary_jobs_from_pool(self):
+        """高薪岗位：必须全部来自「薪资下限 > 10000 元/月」的池子，且按薪资上限降序"""
+        ids = {x["岗位ID"] for x in client.get("/api/jobs", params={"size": 100}).json()["岗位"]}
+        assert ids                                            # 岗位接口可用
+        for _ in range(3):
+            j = _home()
+            high = j["高薪岗位"]
+            assert len(high) == 8
+            assert all(x["薪资下限"] > 10000 for x in high), "有岗位的薪资下限没到 1 万"
+            ups = [x["薪资上限"] for x in high]
+            assert ups == sorted(ups, reverse=True)
+            # 池子校验：随机抽出来的岗位确实存在于岗位库中
+            for x in high:
+                assert client.get("/api/jobs/%s" % x["岗位ID"]).status_code == 200
 
-    def test_hot_jobs_sorted_by_recruiter_reply(self):
-        j = _home()
-        rep = [x["今日回复数"] for x in j["热门岗位"]]
-        assert len(rep) == 8
-        assert rep == sorted(rep, reverse=True)
-        assert rep[0] > 0
-        # 与岗位接口「回复最积极」排序的最大值一致
-        top_reply = client.get("/api/jobs", params={"sort": "reply", "size": 1}).json()["岗位"][0]
-        assert rep[0] == top_reply["今日回复数"]
-        for x in j["热门岗位"]:
-            assert x["招聘者"] and x["回复文案"]
+    def test_hot_jobs_from_pool(self):
+        """热门岗位：必须全部来自「招聘者今日回复数 ≥ 20」的池子，且按回复数降序"""
+        for _ in range(3):
+            hot = _home()["热门岗位"]
+            assert len(hot) == 8
+            assert all(x["今日回复数"] >= 20 for x in hot), "有岗位的回复数没到 20"
+            rep = [x["今日回复数"] for x in hot]
+            assert rep == sorted(rep, reverse=True)
+            for x in hot:
+                assert x["招聘者"] and x["回复文案"]
 
-    def test_hot_companies(self):
+    def test_both_lists_are_random_each_request(self):
+        """随机性：连续 5 次请求，两组榜单至少出现 2 种不同组合（池子 1000+，不可能撞车）"""
+        high_sets, hot_sets = set(), set()
+        for _ in range(5):
+            j = _home()
+            high_sets.add(frozenset(x["岗位ID"] for x in j["高薪岗位"]))
+            hot_sets.add(frozenset(x["岗位ID"] for x in j["热门岗位"]))
+        assert len(high_sets) >= 2, "高薪岗位每次返回都一样，没有随机"
+        assert len(hot_sets) >= 2, "热门岗位每次返回都一样，没有随机"
+        # 反向：固定榜单（地区 / 热门企业）必须每次一致
+        a, b = _home(), _home()
+        assert [x["城市"] for x in a["地区推荐"]] == [x["城市"] for x in b["地区推荐"]]
+        assert [x["公司ID"] for x in a["热门企业"]] == [x["公司ID"] for x in b["热门企业"]]
+
+    def test_hot_companies_top10(self):
         j = _home()
         comps = j["热门企业"]
         assert len(comps) == 10
@@ -134,11 +155,15 @@ class TestHomeNormal:
         assert h["有回复岗位数"] == s["有回复数据岗位数"]
 
     def test_caliber_notes(self):
+        """口径说明随接口返回（页面不展示，但接口/文档必须有）"""
         j = _home()
         assert len(j["口径说明"]) >= 5
-        assert any("来源关键词" in s for s in j["口径说明"])
-        assert any("薪资上限" in s for s in j["口径说明"])
-        assert any("浏览" in s or "投递" in s for s in j["口径说明"])
+        notes = " ".join(j["口径说明"])
+        assert "来源关键词" in notes
+        assert "随机抽取" in notes                    # 高薪/热门是随机抽的，必须写明
+        assert "10000" in notes and "Top 5" in notes
+        assert "回复数 ≥ 20" in notes and "Top 10" in notes
+        assert "浏览" in notes or "投递" in notes      # 说明为什么不用"热度"
         assert j["来源"]
 
 
