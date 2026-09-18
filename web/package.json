@@ -10,7 +10,8 @@
     "preview": "vite preview --port 4173",
     "typecheck": "vue-tsc --noEmit",
     "check:render": "node scripts/render-check.mjs",
-    "check:api": "node scripts/api-check.mjs"
+    "check:api": "node scripts/api-check.mjs",
+    "check:chat": "node scripts/chat-check.mjs"
   },
   "keywords": [],
   "author": "",

@@ -88,8 +88,10 @@ export const getClusterProfile = (name: string) =>
     '/api/cluster/profile', { params: { name } }).then((r) => r.data)
 
 // ---------------- ⑤ 对话
-export const ask = (question: string, use_cache = true) =>
-  client.post<ChatResp>('/api/chat', { question, use_cache }).then((r) => r.data)
+/** 提问；`use_cache=false` 强制真实调用模型；`history` 传最近几轮对话以支持追问 */
+export const ask = (question: string, use_cache = true,
+                    history: { role: string; content: string }[] = []) =>
+  client.post<ChatResp>('/api/chat', { question, use_cache, history }).then((r) => r.data)
 
 // ---------------- ⑥ 用户
 export const register = (p: { username: string; password: string; nickname?: string; role?: string }) =>

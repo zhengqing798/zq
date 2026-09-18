@@ -290,3 +290,38 @@ class TestChat:
     def test_boundary_too_long_question(self):
         r = client.post("/api/chat", json={"question": "问" * 501})
         assert r.status_code == 422
+
+    def test_normal_force_real_call(self):
+        """v6：use_cache=false 必须真的走模型（tokens>0、非缓存），这是"不是固定答案"的证据"""
+        r = client.post("/api/chat", json={"question": "要求硕士学历的岗位有多少个？", "use_cache": False})
+        assert r.status_code == 200
+        j = r.json()
+        assert j["缓存命中"] is False
+        assert j["tokens"]["prompt"] > 0 and j["tokens"]["completion"] > 0
+        assert j["工具轨迹"], "应当先调用工具再回答"
+        assert j["来源"], "答案必须带来源"
+        assert j["模型"] and j["prompt版本"]
+
+    def test_normal_history_and_cache_time_fields(self):
+        """v6：接口接受 history（多轮追问）并返回缓存时间字段"""
+        r = client.post("/api/chat", json={
+            "question": "那再给我举 2 个例子",
+            "use_cache": False,
+            "history": [{"role": "user", "content": "厦门有哪些 Java 岗位？"},
+                        {"role": "assistant", "content": "厦门有 65 个岗位名含 Java 的岗位。"}],
+        })
+        assert r.status_code == 200
+        j = r.json()
+        assert j["回答"] and "缓存时间" in j
+        # 同一问题第二次问（允许缓存）→ 命中时缓存时间必须非空
+        q = "福州市的Java岗位有多少个？"
+        client.post("/api/chat", json={"question": q, "use_cache": True})
+        j2 = client.post("/api/chat", json={"question": q, "use_cache": True}).json()
+        if j2["缓存命中"]:
+            assert j2["缓存时间"], "命中缓存时必须给出缓存时间"
+        else:
+            assert j2["缓存时间"] == ""
+
+    def test_abnormal_bad_history_type(self):
+        r = client.post("/api/chat", json={"question": "你好", "history": "不是数组"})
+        assert r.status_code == 422

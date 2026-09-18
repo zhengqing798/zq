@@ -24,7 +24,10 @@ class ScoreRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=500, description="自然语言问题")
-    use_cache: bool = Field(True, description="是否使用结果缓存")
+    use_cache: bool = Field(True, description="是否使用结果缓存（false = 强制真实调用大模型）")
+    history: List[Dict[str, str]] = Field(
+        default_factory=list,
+        description="最近几轮对话 [{'role':'user'|'assistant','content':'...'}]，用于多轮追问")
 
 
 class TextParseRequest(BaseModel):
@@ -91,6 +94,7 @@ class ChatResponse(BaseModel):
     prompt版本: str
     模型: str
     缓存命中: bool
+    缓存时间: str = Field("", description="命中缓存时：该答案的生成时间（缓存 TTL 7 天）")
     服务耗时秒: float
     已存历史: Optional[bool] = Field(None, description="已登录时：本次问答是否已写入问答记录")
 

@@ -130,7 +130,7 @@ def main():
         print("       %s建一个 .env（**不要提交**，已在 .gitignore 里）：" % INFO)
         print("          DEEPSEEK_API_KEY=sk-你的key")
         print("          DEEPSEEK_BASE_URL=https://api.deepseek.com")
-        print("          DEEPSEEK_MODEL=deepseek-chat")
+        print("          DEEPSEEK_MODEL=deepseek-v4-pro")
 
     # ---------- 4. 必须入库的文件 ----------
     print("\n【4】根数据与模型（克隆后应当已存在）")

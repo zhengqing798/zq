@@ -9,6 +9,9 @@
   · `match_resume`     —— 任务6 人岗匹配：简历文本 → Top-N 岗位 + 分项得分 + 推荐理由
   · `cluster_profile`  —— 任务7 岗位聚类画像（按簇名/方案）
   · `kb_stats`         —— 知识库自述（卡片数、模型、召回指标），用于回答"你这个系统怎么做的"
+  · `company_query`    —— 公司维度（招人最多的公司 / 某公司的全部在招岗位）
+  · `home_stats`       —— 首页各类榜单的确定性版本（分类/地区/企业/技能/高薪岗位/热门岗位）
+  · `generic_agg`      —— 通用分组统计（按任意维度下钻岗位数/占比/薪资）
 
 工具返回统一结构：{"ok": bool, "summary": str, "data": ..., "来源": [...]}，便于拼进上下文与溯源。
 """
@@ -82,9 +85,47 @@ TOOLS = [
         "name": "kb_stats",
         "description": "返回知识库自身的构成与检索评估指标（卡片数、Embedding 模型、召回 P@5 等）。",
         "parameters": {"type": "object", "properties": {}, "required": []}}},
+    {"type": "function", "function": {
+        "name": "company_query",
+        "description": "**公司维度**查询：① 问「哪家公司招人最多 / 招人最多的公司」→ 不传 name，返回在招岗位数最多的公司 Top-N；"
+                       "② 问「某公司在招什么岗位 / 某某公司的岗位」→ 传 name（公司名关键词），返回该公司档案 + 它的全部在招岗位。"
+                       "注意：岗位库有「公司名称」但没有公司规模/融资/行业字段。",
+        "parameters": {"type": "object", "properties": {
+            "name": {"type": "string", "description": "公司名或关键词，如「软通动力」「三一」。留空则返回招人最多的公司"},
+            "top": {"type": "integer", "description": "不传 name 时返回的公司数，默认 10"},
+            "city": {"type": "string", "description": "可选，只看该公司在该城市有在招岗位的"},
+            "category": {"type": "string", "description": "可选，岗位大类，如 测试/后端/算法"}},
+            "required": []}}},
+    {"type": "function", "function": {
+        "name": "home_stats",
+        "description": "首页各类榜单的**确定性**版本（同一次提问结果稳定、可复现）：kind=分类（8 个热门分类及岗位数）｜"
+                       "地区（岗位数 Top5 城市及公司数/平均薪资）｜企业（在招最多的公司 Top10）｜技能（热门技能 Top-N）｜"
+                       "高薪岗位（按薪资上限降序 Top-N）｜热门岗位（按招聘者今日回复数降序 Top-N）。"
+                       "问「热门/高薪/地区/技能」类问题时用它，一次调用即可，不要逐项去调别的工具。",
+        "parameters": {"type": "object", "properties": {
+            "kind": {"type": "string", "enum": ["分类", "地区", "企业", "技能", "高薪岗位", "热门岗位"],
+                     "description": "要哪一类榜单"},
+            "n": {"type": "integer", "description": "返回条数，默认 10"}},
+            "required": ["kind"]}}},
+    {"type": "function", "function": {
+        "name": "generic_agg",
+        "description": "**通用分组统计**：按任意维度下钻，回答「按 X 统计岗位数/占比/薪资」这类任意切分的问题。"
+                       "field 可选：城市、省份、区县、学历要求、经验要求、岗位大类、公司、来源关键词、一级簇名、招聘者职位、技能标签。"
+                       "可叠加筛选条件（city/keyword/edu/salary_min/category）。返回每组的岗位数、占比、平均薪资上限与薪资中位数。"
+                       "例：field=学历要求 → 各学历岗位数；field=公司 → 招人最多的公司；field=经验要求&city=苏州 → 苏州各经验段分布。",
+        "parameters": {"type": "object", "properties": {
+            "field": {"type": "string", "description": "分组维度，见工具说明"},
+            "top": {"type": "integer", "description": "返回前几组，默认 15"},
+            "city": {"type": "string", "description": "可选，城市筛选"},
+            "keyword": {"type": "string", "description": "可选，关键词（岗位名/公司/技能/描述）"},
+            "edu": {"type": "string", "description": "可选，学历筛选，如 大专"},
+            "salary_min": {"type": "integer", "description": "可选，薪资上限门槛（元/月）"},
+            "category": {"type": "string", "description": "可选，岗位大类，如 测试"}},
+            "required": ["field"]}}},
 ]
 
 _MATCHER = None
+_STORE = None
 
 
 def _matcher():
@@ -224,9 +265,130 @@ def t_kb_stats():
             "来源": ["RAG_入库说明.md", "RAG召回评估.md"]}
 
 
+def _job_store():
+    """复用 API 层的岗位/公司库单例（只读）——保证 Agent 与页面口径完全一致"""
+    global _STORE
+    if _STORE is None:
+        if ROOT not in sys.path:
+            sys.path.insert(0, ROOT)
+        from src.api.jobs import get_store
+        _STORE = get_store()
+    return _STORE
+
+
+def t_company_query(name=None, top=10, city=None, category=None):
+    st = _job_store()
+    if name:
+        key = str(name).strip()
+        # 先按公司名精确/包含匹配，找不到再退回模糊
+        hit = st.company_by_name.get(key)
+        if not hit:
+            cands = [c for c in st.companies if key and key in c["公司名称"]]
+            if city:
+                cands = [c for c in cands if any(x["名称"] == city for x in c["城市列表"])]
+            if category:
+                cands = [c for c in cands if any(x["名称"] == category for x in c["岗位大类"])]
+            if not cands:
+                return {"ok": False, "data": None,
+                        "summary": "没有找到公司名含「%s」的公司（岗位库共 %d 家公司）" % (key, len(st.companies)),
+                        "来源": ["zhaopin_jobs_cleaned_seg.csv（公司名称去重）"]}
+            hit = cands[0]
+        detail = st.company_get(hit["公司ID"])
+        jobs = [{"岗位ID": j["岗位ID"], "岗位名称": j["岗位名称"], "城市": j["城市"], "区县": j["区县"],
+                 "薪资": j["薪资"], "经验要求": j["经验要求"], "学历要求": j["学历要求"],
+                 "技能标签": j["技能标签"][:6]} for j in detail["在招岗位"][:20]]
+        return {"ok": True,
+                "summary": "%s：在招 %d 个岗位（主要城市 %s、主要大类 %s、薪资下限中位数 %d 元、上限中位数 %d 元），"
+                           "下面给出前 %d 个岗位" % (detail["公司名称"], detail["在招岗位数"], detail["主要城市"],
+                                                detail["主要大类"], detail["薪资下限中位数"],
+                                                detail["薪资上限中位数"], len(jobs)),
+                "data": jobs,
+                "公司档案": {k: detail[k] for k in ("公司名称", "公司ID", "在招岗位数", "主要城市", "主要大类",
+                                               "城市列表", "岗位大类", "技能需求", "学历要求", "经验要求",
+                                               "薪资下限中位数", "薪资上限中位数", "招聘者数", "今日回复总数")},
+                "其他候选": [c["公司名称"] for c in st.companies
+                          if key and key in c["公司名称"] and c["公司名称"] != detail["公司名称"]][:5],
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（按公司名聚合）"]}
+
+    res = st.company_query(page=1, size=int(top), city=city, category=category, sort="jobs_desc")
+    data = [{"公司名称": c["公司名称"], "公司ID": c["公司ID"], "在招岗位数": c["在招岗位数"],
+             "主要城市": c["主要城市"], "城市数": c["城市数"], "主要大类": c["主要大类"],
+             "薪资下限中位数": c["薪资下限中位数"], "薪资上限中位数": c["薪资上限中位数"],
+             "招聘者数": c["招聘者数"], "热招职位": [j["岗位名称"] for j in c["热招职位"]]}
+            for c in res["公司"]]
+    cond = "、".join(x for x in [city and "城市=%s" % city, category and "大类=%s" % category] if x) or "无筛选"
+    return {"ok": bool(data), "summary": "命中 %d 家公司（%s），下面按在招岗位数降序给出前 %d 家" %
+            (res["总数"], cond, len(data)), "data": data,
+            "来源": ["zhaopin_jobs_cleaned_seg.csv（按公司名聚合）"]}
+
+
+def t_home_stats(kind, n=10):
+    st = _job_store()
+    kind = (kind or "").strip()
+    if kind == "分类":
+        h = st.home()
+        data = [{"分类": c["分类"], "岗位数": c["岗位数"], "公司数": c["公司数"],
+                 "平均薪资上限": c["平均薪资上限"], "热门技能": c["热门技能"][:5]}
+                for c in h["热门分类"]]
+        return {"ok": True, "summary": "共 %d 个热门分类，岗位数合计 %d" %
+                (len(data), sum(x["岗位数"] for x in data)), "data": data,
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（来源关键词列）"]}
+    if kind == "地区":
+        h = st.home()
+        data = h["地区推荐"][:int(n)]
+        return {"ok": True, "summary": "岗位数 Top%d 城市：%s" %
+                (len(data), "、".join("%s(%d)" % (x["城市"], x["岗位数"]) for x in data)), "data": data,
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（按城市聚合）"]}
+    if kind == "企业":
+        data = st.company_query(page=1, size=int(n), sort="jobs_desc")["公司"]
+        return {"ok": True, "summary": "在招岗位最多的 %d 家公司，第一名 %s（%d 个岗位）" %
+                (len(data), data[0]["公司名称"], data[0]["在招岗位数"]) if data else "没有数据",
+                "data": [{"公司名称": c["公司名称"], "在招岗位数": c["在招岗位数"], "主要城市": c["主要城市"],
+                          "主要大类": c["主要大类"]} for c in data],
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（按公司名聚合）"]}
+    if kind == "技能":
+        data = st.stats()["热门技能"][:int(n)]
+        return {"ok": True, "summary": "热门技能 Top%d：%s" %
+                (len(data), "、".join(x["名称"] for x in data[:6])), "data": data,
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（技能标签列）"]}
+    if kind == "高薪岗位":
+        data, total = st.top_jobs(by="salary", n=int(n))
+        return {"ok": True, "summary": "全库按薪资上限降序的前 %d 个岗位（共 %d 个岗位参与排序）" % (len(data), total),
+                "data": [{"岗位名称": x["岗位名称"], "公司": x["公司"], "城市": x["城市"],
+                          "薪资": x["薪资"], "技能标签": x["技能标签"][:5]} for x in data],
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（薪资数值列）"]}
+    if kind == "热门岗位":
+        data, total = st.top_jobs(by="reply", n=int(n))
+        return {"ok": True, "summary": "按招聘者今日回复数降序的前 %d 个岗位（共 %d 个岗位参与排序）" % (len(data), total),
+                "data": [{"岗位名称": x["岗位名称"], "公司": x["公司"], "城市": x["城市"], "薪资": x["薪资"],
+                          "今日回复数": x["今日回复数"], "招聘者": x["招聘者"]} for x in data],
+                "来源": ["zhaopin_jobs_cleaned_seg.csv（今日回复数列）"]}
+    return {"ok": False, "data": None,
+            "summary": "kind 只能是：分类 / 地区 / 企业 / 技能 / 高薪岗位 / 热门岗位", "来源": []}
+
+
+def t_generic_agg(field, top=15, city=None, keyword=None, edu=None, salary_min=None, category=None):
+    st = _job_store()
+    try:
+        res = st.group_by(field, top=int(top), city=city, keyword=keyword, edu=edu,
+                          salary_min=salary_min, category=category)
+    except ValueError as e:
+        return {"ok": False, "data": None, "summary": str(e),
+                "可选维度": st.GROUP_FIELDS, "来源": []}
+    cond = "、".join(x for x in [city and "城市=%s" % city, category and "大类=%s" % category,
+                                 keyword and "关键词=%s" % keyword, edu and "学历=%s" % edu,
+                                 salary_min and "薪资上限≥%d" % salary_min] if x) or "无筛选"
+    head = "、".join("%s %d 个(%.1f%%)" % (d["分组"], d["岗位数"], d["占比"]) for d in res["明细"][:5])
+    return {"ok": bool(res["明细"]),
+            "summary": "按「%s」分组（%s，样本 %d 个岗位，共 %d 组）：%s" %
+                       (field, cond, res["筛选后岗位总数"], res["分组数"], head or "无数据"),
+            "data": res["明细"], "来源": ["zhaopin_jobs_cleaned_seg.csv（%s 列聚合）" % field]}
+
+
 DISPATCH = {"search_jobs": t_search_jobs, "filter_jobs": t_filter_jobs, "salary_stats": t_salary_stats,
             "salary_rank": t_salary_rank, "city_list": t_city_list, "match_resume": t_match_resume,
-            "cluster_profile": t_cluster_profile, "search_kb": t_search_kb, "kb_stats": t_kb_stats}
+            "cluster_profile": t_cluster_profile, "search_kb": t_search_kb, "kb_stats": t_kb_stats,
+            "company_query": t_company_query, "home_stats": t_home_stats, "generic_agg": t_generic_agg}
 
 
 def call_tool(name, args):

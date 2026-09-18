@@ -294,9 +294,14 @@ def cluster_profile(name: str = ""):
 # ---------------------------------------------------------------- ⑤ 对话
 @app.post("/api/chat", response_model=schemas.ChatResponse, tags=["⑤ 对话"])
 def chat(req: schemas.ChatRequest, user=Depends(optional_user)):
-    """Agent 智能问答：Function Calling + 9 工具，答案带来源与工具轨迹（登录后自动存问答记录）"""
+    """Agent 智能问答：Function Calling + 12 工具，答案带来源与工具轨迹
+
+    · `use_cache=false` → 忽略缓存、强制真实调用大模型（前端「重新回答」用这个）
+    · `history=[{role,content}...]` → 带上最近几轮对话，支持追问
+    · 登录后自动把问答写入问答记录
+    """
     try:
-        out = SVC.chat(req.question, use_cache=req.use_cache)
+        out = SVC.chat(req.question, use_cache=req.use_cache, history=req.history)
         if user:
             db.add_chat(user["id"], req.question, out["回答"], out["来源"], out["工具序列"])
             out["已存历史"] = True

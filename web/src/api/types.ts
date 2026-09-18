@@ -136,6 +136,8 @@ export interface ChatResp {
   prompt版本: string
   模型: string
   缓存命中: boolean
+  /** 命中缓存时：该答案的生成时间（缓存 TTL 7 天，过期会自动重新真实调用） */
+  缓存时间?: string
   服务耗时秒: number
   已存历史?: boolean
 }

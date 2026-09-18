@@ -275,9 +275,9 @@ class Services:
         }
 
     # ------------------------------------------------ ⑤ 对话
-    def chat(self, question, use_cache=True):
+    def chat(self, question, use_cache=True, history=None):
         t = time.time()
-        rec = self.agent.ask(question, use_cache=use_cache)
+        rec = self.agent.ask(question, use_cache=use_cache, history=history)
         src = []
         for x in rec.get("tools", []):
             src += [s for s in (x.get("来源") or []) if s]
@@ -292,6 +292,7 @@ class Services:
             "轮数": rec["rounds"], "耗时秒": rec["seconds"],
             "tokens": rec["tokens"], "prompt版本": rec["prompt_version"],
             "模型": rec["model"], "缓存命中": rec["cached"],
+            "缓存时间": rec.get("cached_at", "") if rec["cached"] else "",
             "服务耗时秒": round(time.time() - t, 2),
         }
 

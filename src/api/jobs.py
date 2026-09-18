@@ -492,6 +492,82 @@ class JobStore:
                    "岗位聚类_标签.csv（任务7 聚类结果）"],
         }
 
+    # ------------------------------------------------ 通用聚合（Agent 工具用）
+    GROUP_FIELDS = ["城市", "省份", "区县", "学历要求", "经验要求", "岗位大类",
+                    "公司", "来源关键词", "一级簇名", "招聘者职位", "技能标签"]
+
+    def _filtered(self, city=None, district=None, category=None, keyword=None,
+                  edu=None, salary_min=None, source_kw=None):
+        """与 query() 同一套筛选语义，但不分页（给聚合用）"""
+        rows = self.items
+        if city:
+            rows = [x for x in rows if x["城市"] == city]
+        if district:
+            rows = [x for x in rows if x["区县"] == district]
+        if category:
+            rows = [x for x in rows if x["岗位大类"] == category]
+        if source_kw:
+            rows = [x for x in rows if x["来源关键词"] == source_kw]
+        if edu:
+            rows = [x for x in rows if edu in x["学历要求"]]
+        if salary_min:
+            rows = [x for x in rows if x["薪资上限"] >= int(salary_min)]
+        if keyword:
+            k = str(keyword).strip().lower()
+            rows = [x for x in rows if k in x["_blob"]]
+        return rows
+
+    def group_by(self, field, top=15, **filters):
+        """按任意维度分组统计（岗位数 / 占比 / 平均薪资上限 / 薪资上限中位数）
+
+        `field` 取 GROUP_FIELDS 之一；`技能标签` 是多值列，会拆成单个标签分别计数。
+        """
+        if field not in self.GROUP_FIELDS:
+            raise ValueError("不支持的分组维度：%s（可选：%s）" % (field, "、".join(self.GROUP_FIELDS)))
+        rows = self._filtered(**filters)
+
+        def key_of(x):
+            if field == "技能标签":
+                return list(x["技能标签"])
+            return [(x.get(field) or "（空）")]
+
+        buckets = defaultdict(list)
+        for x in rows:
+            for k in key_of(x):
+                buckets[k].append(x)
+
+        total = len(rows)
+        out = []
+        for name, group in buckets.items():
+            ups = [g["薪资上限"] for g in group if g["薪资上限"] > 0]
+            out.append({
+                "分组": name, "岗位数": len(group),
+                "占比": round(len(group) / total * 100, 1) if total else 0,
+                "平均薪资上限": int(sum(ups) / len(ups)) if ups else 0,
+                "薪资上限中位数": _median(ups),
+                "有回复岗位数": sum(1 for g in group if g["今日回复数"] > 0),
+            })
+        out.sort(key=lambda d: (-d["岗位数"], d["分组"]))
+        return {"分组维度": field, "筛选后岗位总数": total, "分组数": len(out),
+                "明细": out[:int(top)] if top else out}
+
+    def top_jobs(self, by="salary", n=10, **filters):
+        """确定性 Top 榜单（Agent 用；与首页的"随机推荐"区分开，保证可复现）
+
+        by = salary（薪资上限降序）｜ reply（招聘者今日回复数降序）｜ online
+        """
+        rows = self._filtered(**filters)
+        if by == "salary":
+            rows = sorted(rows, key=lambda x: (-(x["薪资上限"] if x["薪资上限"] > 0 else -1),
+                                              -x["今日回复数"]))
+        elif by == "reply":
+            rows = sorted(rows, key=lambda x: (-x["今日回复数"], -x["是否在线"], -x["薪资上限"]))
+        elif by == "online":
+            rows = sorted(rows, key=lambda x: (-x["是否在线"], -x["今日回复数"]))
+        else:
+            raise ValueError("不支持的排序：%s（可选 salary / reply / online）" % by)
+        return [self._job_brief(x) for x in rows[:int(n)]], len(rows)
+
     # ------------------------------------------------ 分类统计（首页图表用）
     def stats(self):
         n = len(self.items)

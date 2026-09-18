@@ -200,6 +200,19 @@ if (!b0) {
     failed++
     console.log('  ❌ 对话框没弹出或缺少输入框')
   }
+  // ①b 「重新回答」按钮：必须存在，且在还没提问时是禁用状态（避免误导）
+  const regen = await page.evaluate(() => {
+    const b = Array.from(document.querySelectorAll('.panel .phead button'))
+      .find((x) => x.innerText.includes('重新回答'))
+    return b ? { found: true, disabled: b.disabled } : { found: false }
+  })
+  if (regen.found && regen.disabled) {
+    console.log('  ✅ 有「🔄 重新回答」按钮，且未提问时禁用')
+  } else {
+    failed++
+    console.log(`  ❌ 重新回答按钮异常：${JSON.stringify(regen)}`)
+  }
+
   // ② 拖动：位置变化 + 位置持久化 + 拖动不会误关对话框
   await page.mouse.move(b0.x + 27, b0.y + 27)
   await page.mouse.down()
@@ -233,8 +246,12 @@ if (!b0) {
     }
   }
 
-  // ③ 收起后再点开（开关正常）
-  await page.click('.panel .phead button')
+  // ③ 收起后再点开（开关正常）—— 表头有两个按钮（重新回答 / 收起），按文字找
+  await page.evaluate(() => {
+    const b = Array.from(document.querySelectorAll('.panel .phead button'))
+      .find((x) => x.innerText.includes('收起'))
+    if (b) b.click()
+  })
   await new Promise((r) => setTimeout(r, 600))
   const closed = !(await page.$('.panel'))
   await page.click('.ball')

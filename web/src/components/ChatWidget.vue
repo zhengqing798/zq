@@ -12,6 +12,8 @@
       <div class="phead">
         <b>智能问答</b>
         <span class="spacer" />
+        <el-button link size="small" :disabled="!lastQuestion || loading"
+                   @click="regenerate">🔄 重新回答</el-button>
         <el-button link size="small" @click="open = false">收起</el-button>
       </div>
 
@@ -23,11 +25,13 @@
         </div>
 
         <div v-for="(m, i) in msgs" :key="i" class="row" :class="m.role">
-          <div class="bubble">{{ m.text }}</div>
+          <div class="bubble" :class="{ err: m.err }">{{ m.text }}</div>
           <div v-if="m.resp" class="meta">
             <div class="muted">
-              {{ m.resp.工具序列 || '（未调用工具）' }} ｜ {{ m.resp.轮数 }} 轮
-              ｜ {{ m.resp.耗时秒 }}s{{ m.resp.缓存命中 ? ' ｜ 缓存命中' : '' }}
+              {{ m.resp.模型 }} · {{ m.resp.工具序列 || '未调用工具' }} · {{ m.resp.轮数 }} 轮
+              · {{ m.resp.耗时秒 }}s · {{ m.resp.tokens.prompt + m.resp.tokens.completion }} tokens
+              <template v-if="m.resp.缓存命中"> · 缓存（{{ m.resp.缓存时间 }}）</template>
+              <template v-else> · 实时返回</template>
             </div>
             <el-collapse>
               <el-collapse-item :title="'🔧 工具轨迹（' + m.resp.工具轨迹.length + ' 步）'">
@@ -48,7 +52,8 @@
           </div>
         </div>
 
-        <div v-if="loading" class="muted" style="padding:6px 2px">正在检索…</div>
+        <div v-if="loading" class="muted" style="padding:6px 2px">
+          正在检索{{ modelHint }}…</div>
       </div>
 
       <div class="pfoot">
@@ -87,9 +92,13 @@ const PH = 520
 const open = ref(false)
 const q = ref('')
 const loading = ref(false)
-const msgs = ref<{ role: 'me' | 'ai'; text: string; resp?: ChatResp }[]>([])
+const msgs = ref<{ role: 'me' | 'ai'; text: string; resp?: ChatResp; err?: boolean }[]>([])
 const bodyEl = ref<HTMLElement | null>(null)
 const samples = SAMPLES
+/** 最近几轮对话（发给后端做追问上下文），以及最后一次提问（供「重新回答」用） */
+const hist = ref<{ role: string; content: string }[]>([])
+const lastQuestion = ref('')
+const modelHint = ref('')
 
 const vw = ref(window.innerWidth)
 const vh = ref(window.innerHeight)
@@ -177,22 +186,48 @@ function onResize() {
   vh.value = window.innerHeight
 }
 
-async function ask(text?: string) {
+/**
+ * 提问。
+ * · 默认 use_cache=true（服务端缓存 TTL 7 天，命中就秒回并标注缓存时间）
+ * · `force=true` → use_cache=false，**强制真实调用大模型**（「重新回答」用）
+ * · 每次都把最近几轮对话作为 history 发过去，追问才接得上
+ * · 失败时把**后端真实错误**显示出来，不再用固定句子掩盖
+ */
+async function ask(text?: string, opts: { force?: boolean; pushUser?: boolean } = {}) {
   const question = (text ?? q.value).trim()
   if (!question || loading.value) return
-  q.value = ''
-  msgs.value.push({ role: 'me', text: question })
+  const pushUser = opts.pushUser !== false
+  if (pushUser) {
+    q.value = ''
+    msgs.value.push({ role: 'me', text: question })
+  }
+  lastQuestion.value = question
   loading.value = true
   await scrollDown()
   try {
-    const resp = await api.ask(question)
+    const resp = await api.ask(question, !opts.force, hist.value.slice(-12))
     msgs.value.push({ role: 'ai', text: resp.回答, resp })
-  } catch {
-    msgs.value.push({ role: 'ai', text: '这次没查到结果，换个说法再试试。' })
+    modelHint.value = '（' + resp.模型 + '）'
+    hist.value.push({ role: 'user', content: question },
+                    { role: 'assistant', content: resp.回答 })
+    if (hist.value.length > 12) hist.value = hist.value.slice(-12)
+  } catch (e) {
+    // 拦截器已弹提示；这里把真实原因留在对话框里，方便判断是 Key、网络还是超时
+    const msg = e instanceof Error ? e.message : String(e)
+    msgs.value.push({ role: 'ai', text: '调用失败：' + msg, err: true })
   } finally {
     loading.value = false
     await scrollDown()
   }
+}
+
+/** 忽略缓存，重新回答上一个问题（会先移除旧答案） */
+async function regenerate() {
+  if (!lastQuestion.value || loading.value) return
+  for (let i = msgs.value.length - 1; i >= 0; i--) {
+    if (msgs.value[i].role === 'ai') { msgs.value.splice(i, 1); break }
+  }
+  await ask(lastQuestion.value, { force: true, pushUser: false })
 }
 
 async function scrollDown() {
@@ -248,6 +283,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
   line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
 .row.me .bubble { background: var(--el-color-primary-light-9); border: 1px solid #cdeeee; }
 .row.ai .bubble { background: #fbfcfe; border: 1px solid var(--zq-border); }
+.row.ai .bubble.err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
 .meta { max-width: 100%; margin-top: 6px; font-size: 12px; }
 .meta .muted { font-size: 11.5px; }
 .meta :deep(.el-collapse-item__header) { height: 32px; line-height: 32px; font-size: 12.5px; }
