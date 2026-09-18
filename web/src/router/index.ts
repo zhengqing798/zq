@@ -24,8 +24,6 @@ const router = createRouter({
           meta: { title: '简历' } },
         { path: 'jobs', name: 'jobs', component: () => import('../views/JobsView.vue'),
           meta: { title: '职位推荐' } },
-        { path: 'clusters', name: 'clusters', component: () => import('../views/ClustersView.vue'),
-          meta: { title: '岗位聚类' } },
         { path: 'chat', name: 'chat', component: () => import('../views/ChatView.vue'),
           meta: { title: '智能问答' } },
         { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue'),

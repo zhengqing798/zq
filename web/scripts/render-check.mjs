@@ -53,17 +53,27 @@ try {
 
 const ROUTES = [
   ['home', ['人岗匹配推荐', '热门职位', '区域：', '薪资：', '学历：', '排序：']],
-  ['companies', ['公司广场', '在招职位', '热门企业', '最活跃企业', '口径说明', '规模分档']],
+  ['companies', ['公司广场', '在招职位', '热门企业', '最活跃企业',
+                 '在招职位数：', '排序：', '技能需求：', '热招职位：']],
   ...(companyId
     ? [['company/' + companyId,
         ['在招职位', '岗位大类分布', '技能需求', '招聘者', '相似公司', '数据来源']]]
     : []),
   ['resume', ['简历输入', '解析这份文本', '上传 PDF 简历']],
   ['jobs', ['职位推荐', '开始匹配']],
-  ['clusters', ['岗位聚类', 'K=9']],
   ['chat', ['智能问答', '提问']],
   ['profile', ['个人中心', '我的简历', '我的收藏', '匹配历史', '问答记录', '账号设置']],
 ]
+
+/**
+ * 必须**不出现**的内容（防止"删了但没删干净"）：
+ * 每个路由的断言 + `*` 全局断言（对每个路由都检查）
+ */
+const FORBIDDEN = {
+  '*': ['岗位聚类', 'ClusterList'],
+  home: ['职位分类导航面板'],
+  companies: ['口径说明'],
+}
 
 const errors = []
 const browser = await puppeteer.launch({
@@ -95,14 +105,17 @@ for (const [route, expects] of ROUTES) {
     title: document.title,
   }))
   const missing = expects.filter((t) => !info.text.includes(t))
+  const forbidden = [...(FORBIDDEN[route] || []), ...(FORBIDDEN['*'] || [])]
+  const leaked = forbidden.filter((t) => info.text.includes(t))
   if (shots) await page.screenshot({ path: `${SHOT_DIR}/${route.replace(/\//g, '_')}.png`, fullPage: true })
   console.log(`\n--- /#/${route} ---`)
   console.log(`  导航=[${info.links.join(' | ')}] ｜ DOM 元素=${info.els} ｜ 标题="${info.title}"`)
-  if (missing.length) {
+  if (missing.length || leaked.length) {
     failed++
-    console.log('  ❌ 缺少关键文本：', missing)
+    if (missing.length) console.log('  ❌ 缺少关键文本：', missing)
+    if (leaked.length) console.log('  ❌ 不该出现的内容（已删除的模块又出现了）：', leaked)
   } else {
-    console.log('  ✅ 关键文本齐全')
+    console.log('  ✅ 关键文本齐全，无遗留内容')
   }
 }
 

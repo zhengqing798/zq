@@ -48,13 +48,6 @@
             <em>回复 {{ c.今日回复总数 }}</em>
           </a>
         </div>
-
-        <div class="zq-card pad panel">
-          <div class="zq-section">口径说明</div>
-          <ul class="notes">
-            <li v-for="s in st.口径说明" :key="s">{{ s }}</li>
-          </ul>
-        </div>
       </aside>
 
       <!-- ③ 右栏：筛选 + 公司卡列表 -->
@@ -206,7 +199,6 @@ onMounted(async () => {
 .rank b.top3 { background: linear-gradient(135deg, #00a6a7, #12c2b4); }
 .rank .rn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rank em { font-style: normal; color: #ff6a00; font-size: 12.5px; white-space: nowrap; }
-.notes { margin: 0; padding-left: 16px; color: #6b7a90; font-size: 12px; line-height: 1.7; }
 
 /* ---------- 筛选 ---------- */
 .filters { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;

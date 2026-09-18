@@ -49,10 +49,13 @@ web/
         ├── CompanyView.vue     # ★ 公司详情：全部在招岗位 + 公司画像 + 招聘者 + 相似公司
         ├── ResumeView.vue      # 粘贴 / 上传 PDF + 解析结果
         ├── JobsView.vue        # ★ 左侧筛选栏 + 右侧岗位卡列表 + 抽屉详情（雷达图 + 双口径评分）
-        ├── ClustersView.vue    # ECharts 环形图 + 簇表格 + 画像查询
         ├── ChatView.vue        # 对话 + 工具轨迹时间线 + 来源
         └── ProfileView.vue     # 个人中心（5 个子页签：简历/收藏/历史/问答/设置）
 ```
+
+> **已移除的页面**：`ClustersView.vue`（岗位聚类）于 2026-09-18 按使用者反馈删除——路由 `/clusters`、
+> 顶部导航入口、渲染检查断言一并移除；**后端 `/api/cluster/list`、`/api/cluster/profile` 与 Streamlit 保底版聚类页保留**，
+> `EChart.vue` 也被「职位推荐」页的六维雷达图继续使用，故均未删除。要恢复该页时把文件与路由加回即可。
 
 ## 运行
 
@@ -84,11 +87,11 @@ npm run preview       # 本地预览构建产物，端口 4173
 | `npm run typecheck`（vue-tsc） | ✅ 0 错误 |
 | `npm run build` | ✅ 成功（~0.6s，产物 dist/） |
 | 后端接口 | ✅ **153 项 pytest 全绿**（含新增 `tests/test_companies.py` 37 项：公司统计/列表/筛选/排序/详情/跨接口对账） |
-| **无头真实渲染**（本机 Chrome headless，**8 个路由**） | ✅ 全部渲染出正确内容，**控制台 0 error**（新增 `companies`、`company/:id` 两个路由） |
+| **无头真实渲染**（本机 Chrome headless，**7 个路由**） | ✅ 全部渲染出正确内容，**控制台 0 error**；脚本还会断言「**不该出现的内容**」（`岗位聚类` / `口径说明` / `职位分类导航面板` 一旦回流即报错） |
 | **真实点击链路**（额外的一次性脚本验证） | ✅ 点公司卡 → 公司详情；点岗位行/热招职位 → 职位详情抽屉；首页点公司名 → 公司详情（且不误触抽屉）；导航高亮正确 |
 | 登录态渲染 | ✅ 导航出现「个人中心」，个人中心页含统计卡与 5 个子页签 |
 | 路由守卫 | ✅ 未登录访问 `#/profile` 被弹回登录页 |
-| 截图 | `web/screenshots/*.png`（home / companies / company_C1875D776 / resume / jobs / clusters / chat / profile） |
+| 截图 | `web/screenshots/*.png`（home / companies / company_C1875D776 / resume / jobs / chat / profile） |
 
 > **说明**：以上验证由脚本完成（`puppeteer-core` + 本机 Chrome），
 > 目的是在**看不见画面的情况下**确认页面真的渲染、且无运行时报错。

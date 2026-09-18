@@ -71,7 +71,6 @@ const menus = computed(() => {
     { path: '/companies', label: '🏬 公司', match: ['/companies', '/company/'] },
     { path: '/resume', label: '📄 简历', match: ['/resume'] },
     { path: '/jobs', label: '🎯 职位推荐', match: ['/jobs'] },
-    { path: '/clusters', label: '🏢 岗位聚类', match: ['/clusters'] },
     { path: '/chat', label: '💬 智能问答', match: ['/chat'] },
   ]
   if (auth.isLogged()) base.push({ path: '/profile', label: '👤 个人中心', match: ['/profile'] })
