@@ -114,23 +114,6 @@
         </div>
       </el-tab-pane>
 
-      <!-- 匹配历史 -->
-      <el-tab-pane label="🕘 匹配历史" name="matches">
-        <div v-for="h in matches" :key="h.id" class="zq-card pad" style="margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between">
-            <b>{{ h.summary }}</b><span class="muted">{{ h.created_at }}</span>
-          </div>
-          <div class="muted" style="margin:6px 0">
-            简历：{{ h.resume_title }} ｜ 返回 Top-{{ h.top_n }}
-          </div>
-          <el-tag v-for="x in h.推荐" :key="x.岗位ID" effect="plain"
-                  style="margin:0 6px 6px 0" :type="x.排名 <= 3 ? 'success' : 'info'">
-            #{{ x.排名 }} {{ x.岗位名称 }}（{{ Number(x.总分 || 0).toFixed(1) }} 分）
-          </el-tag>
-        </div>
-        <el-empty v-if="!matches.length" description="还没有匹配记录：使用「岗位推荐」会自动保存" />
-      </el-tab-pane>
-
       <!-- 账号设置 -->
       <el-tab-pane label="⚙️ 账号设置" name="setting">
         <div class="zq-card pad" style="max-width:640px">
@@ -169,7 +152,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import * as api from '../api'
-import type { FavoriteRow, MatchHistoryRow, ResumeRow } from '../api/types'
+import type { FavoriteRow, ResumeRow } from '../api/types'
 import { useAuthStore } from '../stores/auth'
 import { useResumeStore } from '../stores/resume'
 
@@ -201,7 +184,6 @@ const loading = ref(false)
 const stats = ref<Record<string, number>>({})
 const resumes = ref<ResumeRow[]>([])
 const favorites = ref<FavoriteRow[]>([])
-const matches = ref<MatchHistoryRow[]>([])
 
 /** 一个用户只有一份简历：取唯一的那条（没有则 null） */
 const myResume = computed<ResumeRow | null>(() => resumes.value[0] || null)
@@ -220,14 +202,14 @@ const pw = reactive({ old_password: '', new_password: '', confirm: '' })
 async function refresh() {
   loading.value = true
   try {
-    // 注意：问答记录页签已删除，这里不再拉 /api/user/chats（接口仍在，需要时可恢复）
-    const [s, r, f, m] = await Promise.all([
-      api.getStats(), api.listResumes(), api.listFavorites(), api.listMatches(),
+    // 注意：问答记录、匹配历史两个页签已删除，这里不再拉 /api/user/chats、/api/user/matches
+    // （接口与入库逻辑都还在，需要时恢复列表即可）
+    const [s, r, f] = await Promise.all([
+      api.getStats(), api.listResumes(), api.listFavorites(),
     ])
     stats.value = s.统计
     resumes.value = r.简历
     favorites.value = f.收藏
-    matches.value = m.历史
     pf.nickname = s.用户.nickname
     pf.phone = s.用户.phone
     pf.email = s.用户.email

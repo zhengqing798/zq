@@ -7,7 +7,8 @@ import { useAuthStore } from '../stores/auth'
  * 导航结构（2026-09-18 改版）：
  * · 游客可见：首页（推荐）/ 岗位（浏览筛选）/ 公司
  * · 需登录：岗位推荐（简历匹配）、个人中心（简历粘贴/上传 PDF 也在这里，不再有独立「简历」页）
- * · 没有导航入口但保留页面：智能问答（#/chat）
+ * · 没有导航入口但保留页面：无
+ * · 智能问答已改为**全局悬浮球**（`components/ChatWidget.vue`，挂在 AppLayout 上），不再有独立页面
  * · 旧地址兼容：/resume → /profile（简历已并入个人中心）
  */
 const router = createRouter({
@@ -29,8 +30,6 @@ const router = createRouter({
           meta: { title: '公司详情' } },
         { path: 'match', name: 'match', component: () => import('../views/MatchView.vue'),
           meta: { title: '岗位推荐', requiresAuth: true } },
-        { path: 'chat', name: 'chat', component: () => import('../views/ChatView.vue'),
-          meta: { title: '智能问答' } },
         { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue'),
           meta: { title: '个人中心', requiresAuth: true } },
         // 旧地址兼容：简历页已并入个人中心

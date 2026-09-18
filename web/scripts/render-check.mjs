@@ -64,8 +64,7 @@ const ROUTES = [
         ['在招职位', '岗位大类分布', '技能需求', '招聘者', '相似公司']]]
     : []),
   ['profile', ['个人中心', '我的简历', '粘贴简历正文', '上传 PDF 简历',
-               '我的收藏', '匹配历史', '账号设置']],
-  ['chat', ['智能问答', '提问']],
+               '我的收藏', '账号设置']],
 ]
 
 /**
@@ -78,7 +77,7 @@ const FORBIDDEN = {
   // 注意：这里用「🏢 岗位聚类」（旧导航项）而不是裸的「岗位聚类」——
   // 首页底部「数据来源」会如实列出 data/processed/岗位聚类_标签.csv 这个文件名，属正当出处。
   // 2026-09-18 追加：页面上不再放任何「口径 / 数据来源 / 数据规模」描述文字（接口与文档保留）。
-  '*': ['🏢 岗位聚类', 'ClusterList', '职位推荐', '问答记录',
+  '*': ['🏢 岗位聚类', 'ClusterList', '职位推荐', '问答记录', '匹配历史',
         '口径说明', '数据来源', '每个结论都带', '按岗位数排序', '排序（在线优先）',
         '按在招职位数排序', '可追溯到数据文件', '如实说明', 'PBKDF2',
         '8,836 岗位 / 500 简历'],
@@ -161,6 +160,103 @@ if (clustersGone) {
 } else {
   failed++
   console.log(`  ❌ 岗位聚类页面仍然可达（当前 URL=${page.url()}）`)
+}
+
+// 智能问答已改成全局悬浮球：/#/chat 不再有页面
+await page.goto(`${URL}/#/chat`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 1200))
+const chatGone = page.url().includes('/home')
+console.log(`\n--- /#/chat（已改悬浮球） ---`)
+if (chatGone) {
+  console.log('  ✅ 独立问答页已移除，兜底路由回首页')
+} else {
+  failed++
+  console.log(`  ❌ 问答页仍可达（当前 URL=${page.url()}）`)
+}
+
+// ---------------- 智能问答悬浮球：存在 / 可拖动 / 可点开 ----------------
+await page.goto(`${URL}/#/home`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 1500))
+console.log(`\n--- 智能问答悬浮球 ---`)
+const ballAt = async () => page.$eval('.ball', (e) => {
+  const r = e.getBoundingClientRect()
+  return { x: Math.round(r.left), y: Math.round(r.top) }
+}).catch(() => null)
+
+const b0 = await ballAt()
+if (!b0) {
+  failed++
+  console.log('  ❌ 页面上找不到悬浮球')
+} else {
+  console.log(`  初始位置 (${b0.x}, ${b0.y})`)
+  // ① 单击打开小对话框
+  await page.click('.ball')
+  await new Promise((r) => setTimeout(r, 700))
+  const hasInput = !!(await page.$('.panel input'))
+  const hasSamples = (await page.$$('.panel .tag')).length > 0
+  if (hasInput && hasSamples) {
+    console.log('  ✅ 单击悬浮球 → 弹出小对话框（含输入框与示例问题）')
+  } else {
+    failed++
+    console.log('  ❌ 对话框没弹出或缺少输入框')
+  }
+  // ② 拖动：位置变化 + 位置持久化 + 拖动不会误关对话框
+  await page.mouse.move(b0.x + 27, b0.y + 27)
+  await page.mouse.down()
+  await page.mouse.move(b0.x - 220, b0.y - 300, { steps: 12 })
+  await page.mouse.up()
+  await new Promise((r) => setTimeout(r, 500))
+  const b1 = await ballAt()
+  const saved = await page.evaluate(() => localStorage.getItem('zq_chat_ball'))
+  const stillOpen = !!(await page.$('.panel input'))
+  const movedFar = b1 && Math.abs(b1.x - b0.x) > 80 && Math.abs(b1.y - b0.y) > 80
+  if (movedFar && saved && stillOpen) {
+    console.log(`  ✅ 可拖动：(${b0.x}, ${b0.y}) → (${b1.x}, ${b1.y})，位置已存 localStorage，且未误关对话框`)
+  } else {
+    failed++
+    console.log(`  ❌ 拖动异常：新位置=${JSON.stringify(b1)} ｜ localStorage=${saved} ｜ 对话框仍在=${stillOpen}`)
+  }
+  // ②b 视口被临时改小再恢复：位置不能被永久压到角落
+  //     （截图工具、切开发者工具设备、手机旋转都会触发 resize；这条曾经真的踩到过）
+  if (movedFar) {
+    await page.setViewport({ width: 800, height: 600 })
+    await new Promise((r) => setTimeout(r, 500))
+    await page.setViewport({ width: 1440, height: 950 })
+    await new Promise((r) => setTimeout(r, 600))
+    const b2 = await ballAt()
+    const restored = b2 && Math.abs(b2.x - b1.x) < 3 && Math.abs(b2.y - b1.y) < 3
+    if (restored) {
+      console.log(`  ✅ 视口改小再恢复后位置不变：(${b1.x}, ${b1.y}) → (${b2.x}, ${b2.y})`)
+    } else {
+      failed++
+      console.log(`  ❌ 视口变化把位置弄丢了：拖动后 (${b1.x}, ${b1.y}) → 恢复后 ${JSON.stringify(b2)}`)
+    }
+  }
+
+  // ③ 收起后再点开（开关正常）
+  await page.click('.panel .phead button')
+  await new Promise((r) => setTimeout(r, 600))
+  const closed = !(await page.$('.panel'))
+  await page.click('.ball')
+  await new Promise((r) => setTimeout(r, 600))
+  const reopened = !!(await page.$('.panel input'))
+  if (closed && reopened) {
+    console.log('  ✅ 收起 / 再次点开都正常')
+  } else {
+    failed++
+    console.log(`  ❌ 开关异常：收起后=${closed}，再点开=${reopened}`)
+  }
+  // ④ 悬浮球是全局的：切到别的页面仍然在，且沿用拖动后的位置
+  await page.goto(`${URL}/#/companies`, { waitUntil: 'networkidle2', timeout: 60000 })
+  await new Promise((r) => setTimeout(r, 1200))
+  const onOther = await ballAt()
+  const keptPos = onOther && b1 && Math.abs(onOther.x - b1.x) < 3 && Math.abs(onOther.y - b1.y) < 3
+  if (onOther && keptPos) {
+    console.log('  ✅ 其他页面同样存在，且沿用拖动后的位置')
+  } else {
+    failed++
+    console.log(`  ❌ 其他页面异常：${JSON.stringify(onOther)}`)
+  }
 }
 
 // 游客态：必须用**独立无痕上下文**——同浏览器的普通新页面与本页同源、共享 localStorage，

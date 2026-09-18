@@ -48,6 +48,9 @@
   <div class="zq-main">
     <router-view />
   </div>
+
+  <!-- 全局智能问答悬浮球（可拖动，点开是小对话框） -->
+  <ChatWidget />
 </template>
 
 <script setup lang="ts">
@@ -55,6 +58,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
+import ChatWidget from '../components/ChatWidget.vue'
 
 const route = useRoute()
 const router = useRouter()
