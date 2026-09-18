@@ -44,8 +44,20 @@ if (!reg.ok) {
 }
 const { token } = await reg.json()
 
+// 公司详情路由需要「真实存在的公司ID」：从接口取第一家，避免把 ID 写死在脚本里
+let companyId = ''
+try {
+  const rc = await fetch(API + '/api/companies?size=1')
+  companyId = (await rc.json()).公司?.[0]?.公司ID || ''
+} catch { /* 后端不可用会由断言/错误计数暴露 */ }
+
 const ROUTES = [
   ['home', ['人岗匹配推荐', '热门职位', '区域：', '薪资：', '学历：', '排序：']],
+  ['companies', ['公司广场', '在招职位', '热门企业', '最活跃企业', '口径说明', '规模分档']],
+  ...(companyId
+    ? [['company/' + companyId,
+        ['在招职位', '岗位大类分布', '技能需求', '招聘者', '相似公司', '数据来源']]]
+    : []),
   ['resume', ['简历输入', '解析这份文本', '上传 PDF 简历']],
   ['jobs', ['职位推荐', '开始匹配']],
   ['clusters', ['岗位聚类', 'K=9']],
@@ -83,7 +95,7 @@ for (const [route, expects] of ROUTES) {
     title: document.title,
   }))
   const missing = expects.filter((t) => !info.text.includes(t))
-  if (shots) await page.screenshot({ path: `${SHOT_DIR}/${route}.png`, fullPage: true })
+  if (shots) await page.screenshot({ path: `${SHOT_DIR}/${route.replace(/\//g, '_')}.png`, fullPage: true })
   console.log(`\n--- /#/${route} ---`)
   console.log(`  导航=[${info.links.join(' | ')}] ｜ DOM 元素=${info.els} ｜ 标题="${info.title}"`)
   if (missing.length) {

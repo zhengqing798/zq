@@ -10,10 +10,11 @@
 · 岗位大类复用任务5 的同一套规则 `job_category()`，保证与模型特征口径一致
 · 只做**只读**浏览，不涉及数据库
 """
+import hashlib
 import os
 import re
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -39,6 +40,41 @@ SORTS = {
     "reply": "回复最积极",
     "online": "在线优先",
 }
+
+# 公司列表排序（BOSS直聘「公司」页的排序维度）
+COMPANY_SORTS = {
+    "jobs_desc": "在招职位最多",
+    "salary_desc": "薪资最高",
+    "reply_desc": "回复最积极",
+    "name": "公司名 A-Z",
+}
+
+# 规模分档：数据里**没有**「公司规模」列，这里用「在招职位数」分档代理，
+# 页面与文档必须写明口径，不能当成注册资本/员工人数（见《系统设计文档》§3.9）。
+SIZE_BUCKETS = [
+    ("1个", 1, 1),
+    ("2-4个", 2, 4),
+    ("5-9个", 5, 9),
+    ("10-49个", 10, 49),
+    ("50个以上", 50, 10 ** 9),
+]
+
+
+def _comp_id(name):
+    """公司名的稳定短 ID（UTF-8 中文公司名直接进 URL 易踩编码坑，用 sha1 前 8 位）"""
+    return "C" + hashlib.sha1((name or "").encode("utf-8")).hexdigest()[:8].upper()
+
+
+def _median(arr):
+    a = sorted(x for x in arr if x > 0)
+    return a[len(a) // 2] if a else 0
+
+
+def _size_bucket(n):
+    for label, lo, hi in SIZE_BUCKETS:
+        if lo <= n <= hi:
+            return label
+    return SIZE_BUCKETS[-1][0]
 
 
 def _num(v, default=-1):
@@ -116,9 +152,88 @@ class JobStore:
         self.categories = [c for c in CATS if any(it["岗位大类"] == c for it in self.items)]
         self.edus = sorted({it["学历要求"] for it in self.items if it["学历要求"]})
         self.provinces = sorted({it["省份"] for it in self.items if it["省份"]})
+        self._build_companies()
 
     def __len__(self):
         return len(self.items)
+
+    # ------------------------------------------------ 公司维度聚合（任务11 公司页）
+    def _build_companies(self):
+        """把 8,836 个岗位按「公司名称」聚成 4,096 家公司。
+
+        只用真实存在的列：公司名称 / 岗位地区 / 岗位大类 / 技能标签 / 薪资区间 /
+        学历 / 经验 / 发布者 / 在线状态 / 今日回复数。**没有**行业、规模、融资阶段列，
+        因此不编造这些字段（规模用「在招职位数」分档代理，口径见 SIZE_BUCKETS）。
+        """
+        groups = defaultdict(list)
+        for it in self.items:
+            if it["公司"]:
+                groups[it["公司"]].append(it)
+
+        comps = []
+        for name, rows in groups.items():
+            cid = _comp_id(name)
+            for r in rows:
+                r["公司ID"] = cid          # 让岗位卡片能一键跳到该公司详情页
+            cities = Counter(r["城市"] for r in rows if r["城市"])
+            cats = Counter(r["岗位大类"] for r in rows)
+            skills = Counter(s for r in rows for s in r["技能标签"])
+            edus = Counter(r["学历要求"] or "不限" for r in rows)
+            exps = Counter(_exp_bucket(r["经验要求"]) for r in rows)
+            hrs, seen = [], set()
+            for r in rows:
+                key = (r["招聘者"], r["招聘者职位"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                hrs.append({"姓名": r["招聘者"], "职位": r["招聘者职位"],
+                            "回复文案": r["回复文案"] or "暂无回复数据",
+                            "回复数": r["今日回复数"]})
+            hrs.sort(key=lambda h: -h["回复数"])
+            n_jobs = len(rows)
+            # 「热招职位」口径：先按招聘者「今日回复数」再按薪资上限——都是真实列，
+            # 没有回复数据的公司退化为「薪资最高」，页面/文档写明该口径。
+            top_jobs = sorted(rows, key=lambda r: (-r["今日回复数"], -r["薪资上限"]))[:3]
+            up_med, lo_med = _median([r["薪资上限"] for r in rows]), _median([r["薪资下限"] for r in rows])
+            comps.append({
+                "公司ID": cid,
+                "公司名称": name,
+                "在招岗位数": n_jobs,
+                "规模分档": _size_bucket(n_jobs),
+                "城市数": len(cities),
+                "主要城市": cities.most_common(1)[0][0] if cities else "",
+                "城市列表": [{"名称": k, "数量": v} for k, v in cities.most_common()],
+                "区县数": len({r["区县"] for r in rows if r["区县"]}),
+                "主要大类": cats.most_common(1)[0][0] if cats else "",
+                "岗位大类": [{"名称": k, "数量": v} for k, v in cats.most_common()],
+                "技能需求": [{"名称": k, "数量": v} for k, v in skills.most_common(12)],
+                "学历要求": [{"名称": k, "数量": v} for k, v in edus.most_common()],
+                "经验要求": [{"名称": k, "数量": v} for k, v in exps.most_common()],
+                "薪资下限中位数": lo_med,
+                "薪资上限中位数": up_med,
+                "最高薪资上限": max([r["薪资上限"] for r in rows] + [0]),
+                "招聘者": hrs,
+                "招聘者数": len(hrs),
+                "在线岗位数": sum(1 for r in rows if r["是否在线"]),
+                "有回复岗位数": sum(1 for r in rows if r["今日回复数"] > 0),
+                "今日回复总数": sum(r["今日回复数"] for r in rows),
+                "来源关键词": [{"名称": k, "数量": v} for k, v in
+                            Counter(r["来源关键词"] for r in rows if r["来源关键词"]).most_common(5)],
+                "热招职位": [{"岗位ID": r["岗位ID"], "岗位名称": r["岗位名称"],
+                            "薪资": r["薪资"], "城市": r["城市"], "区县": r["区县"]}
+                           for r in top_jobs],
+                "_rows": rows,          # 详情接口用；列表接口会剔除
+            })
+        comps.sort(key=lambda c: (-c["在招岗位数"], c["公司名称"]))
+        self.companies = comps
+        self.company_index = {c["公司ID"]: c for c in comps}
+        self.company_by_name = {c["公司名称"]: c for c in comps}
+        self.company_cities = sorted({c["主要城市"] for c in comps if c["主要城市"]})
+
+    @staticmethod
+    def _card(c):
+        """公司列表的卡片字段（不含全部在招岗位，避免列表接口过大）"""
+        return {k: v for k, v in c.items() if k != "_rows"}
 
     # ------------------------------------------------ 浏览与筛选
     def query(self, page=1, size=20, city=None, district=None, category=None, keyword=None,
@@ -172,6 +287,107 @@ class JobStore:
                 out["职位描述"] = out["职位描述"][:1200]
                 return out
         return None
+
+    # ------------------------------------------------ 公司浏览（任务11 公司页）
+    def company_query(self, page=1, size=20, city=None, category=None, keyword=None,
+                      bucket=None, sort="jobs_desc"):
+        rows = self.companies
+        if city:
+            rows = [c for c in rows if any(x["名称"] == city for x in c["城市列表"])]
+        if category:
+            rows = [c for c in rows if any(x["名称"] == category for x in c["岗位大类"])]
+        if bucket:
+            rows = [c for c in rows if c["规模分档"] == bucket]
+        if keyword:
+            k = str(keyword).strip().lower()
+            rows = [c for c in rows if k in c["公司名称"].lower()]
+
+        rows = list(rows)                       # 拷贝，避免 sort 弄乱主列表
+        if sort == "salary_desc":
+            rows.sort(key=lambda c: (-c["薪资上限中位数"], -c["在招岗位数"]))
+        elif sort == "reply_desc":
+            rows.sort(key=lambda c: (-c["今日回复总数"], -c["在招岗位数"]))
+        elif sort == "name":
+            rows.sort(key=lambda c: c["公司名称"])
+        else:                                   # jobs_desc：主列表默认已是这个顺序
+            rows.sort(key=lambda c: (-c["在招岗位数"], c["公司名称"]))
+
+        total = len(rows)
+        page = max(1, int(page))
+        size = min(max(1, int(size)), 100)
+        start = (page - 1) * size
+        return {
+            "总数": total,
+            "页码": page,
+            "每页": size,
+            "总页数": max(1, (total + size - 1) // size),
+            "公司": [self._card(c) for c in rows[start:start + size]],
+        }
+
+    def company_get(self, key):
+        """公司详情：支持公司ID（C+8位）或公司名（URL 里建议用 ID）"""
+        k = str(key or "").strip()
+        c = self.company_index.get(k.upper()) or self.company_by_name.get(k)
+        if not c:
+            return None
+        out = self._card(c)
+        rows = list(c["_rows"])
+        rows.sort(key=lambda r: (-r["今日回复数"], -r["薪资上限"]))
+        out["在招岗位"] = [{kk: vv for kk, vv in r.items() if kk != "_blob"} for r in rows]
+        # 同城同类公司（详情页底部「相似公司」，用真实同城+同最主大类匹配）
+        sim = [x for x in self.companies
+               if x["公司ID"] != c["公司ID"] and x["主要城市"] == c["主要城市"]
+               and x["主要大类"] == c["主要大类"]]
+        out["相似公司"] = [self._card(x) for x in sim[:6]]
+        return out
+
+    def company_stats(self):
+        """公司页顶部统计（全部基于公司聚合，口径与岗位页一致）"""
+        comps = self.companies
+        n_comp, n_jobs = len(comps), sum(c["在招岗位数"] for c in comps)
+        by_city = Counter()
+        for c in comps:
+            for x in c["城市列表"]:
+                by_city[x["名称"]] += 1
+        by_cat = Counter()
+        for c in comps:
+            for x in c["岗位大类"]:
+                by_cat[x["名称"]] += 1
+        buckets = Counter(c["规模分档"] for c in comps)
+        top = comps[0] if comps else None
+        return {
+            "总体": {
+                "公司总数": n_comp,
+                "在招岗位总数": n_jobs,
+                "平均每司岗位数": round(n_jobs / n_comp, 2) if n_comp else 0,
+                "只招1个岗位的公司数": buckets.get("1个", 0),
+                "在招10个以上的公司数": sum(v for k, v in buckets.items()
+                                       if k in ("10-49个", "50个以上")),
+                "城市数": len(by_city),
+                "岗位数最多公司": top["公司名称"] if top else "",
+                "岗位数最多公司岗位数": top["在招岗位数"] if top else 0,
+                "有回复活跃的公司数": sum(1 for c in comps if c["今日回复总数"] > 0),
+            },
+            "规模分档": [{"名称": k, "数量": buckets.get(k, 0),
+                       "说明": "在招职位数 %s" % k} for k, _, _ in SIZE_BUCKETS],
+            "按城市": [{"名称": k, "数量": v} for k, v in by_city.most_common(16)],
+            "按大类": [{"名称": k, "数量": v} for k, v in by_cat.most_common()],
+            "热门企业": [self._card(c) for c in comps[:20]],
+            "最活跃企业": [self._card(c) for c in
+                       sorted(comps, key=lambda c: -c["今日回复总数"])[:10]],
+            "筛选项": {"城市": self.company_cities, "大类": self.categories,
+                     "规模分档": [k for k, _, _ in SIZE_BUCKETS],
+                     "排序": [{"value": k, "label": v} for k, v in COMPANY_SORTS.items()]},
+            "口径说明": [
+                "公司 = 「公司名称」列去重；数据里没有行业/规模/融资阶段列，故不展示这些字段。",
+                "「规模分档」用该公司的在招职位数代理，不等于员工人数或注册资本。",
+                "「按城市/按大类」统计的是「该公司在该城市/大类有在招职位」的公司数，"
+                "同一公司可计入多个城市/大类，故合计大于公司总数 %d。" % n_comp,
+                "「热招职位」取该公司前 3 个岗位，排序为「今日回复数 → 薪资上限」（均为真实列）。",
+                "薪资中位数由该公司的真实薪资上下限（元/月）计算，剔除无薪资的岗位。",
+            ],
+            "来源": ["zhaopin_jobs_cleaned_seg.csv（%d 个岗位 → %d 家公司）" % (n_jobs, n_comp)],
+        }
 
     # ------------------------------------------------ 分类统计（首页图表用）
     def stats(self):
@@ -298,3 +514,16 @@ if __name__ == "__main__":
     print("\n按大类：", s["按大类"])
     print("总体：", s["总体"])
     print("热门技能 Top5：", [x["名称"] for x in s["热门技能"][:5]])
+    cs = st.company_stats()
+    print("\n公司：", cs["总体"])
+    print("规模分档：", [(x["名称"], x["数量"]) for x in cs["规模分档"]])
+    c = cs["热门企业"][0]
+    print("在招最多：%s（%d 个岗位，%s）" % (c["公司名称"], c["在招岗位数"], c["规模分档"]))
+    crow = st.company_query(city="厦门", category="测试", size=2)
+    print("厦门+测试 公司：共 %d 家，前 2 家：" % crow["总数"])
+    for x in crow["公司"]:
+        print("   %s ｜ %s ｜ 在招 %d 个 ｜ %s" % (x["公司ID"], x["公司名称"],
+                                              x["在招岗位数"], x["主要城市"]))
+    one = st.company_get(c["公司ID"])
+    print("详情：%s ｜ 在招岗位 %d 个 ｜ 相似公司 %d 家"
+          % (one["公司名称"], len(one["在招岗位"]), len(one["相似公司"])))

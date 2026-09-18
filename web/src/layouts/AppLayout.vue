@@ -12,8 +12,7 @@
 
       <!-- 中：导航 -->
       <nav class="zq-nav">
-        <router-link v-for="m in menus" :key="m.path" :to="m.path"
-                     :class="{ active: route.path.startsWith(m.path) }">
+        <router-link v-for="m in menus" :key="m.path" :to="m.path" :class="{ active: isActive(m) }">
           {{ m.label }}
         </router-link>
       </nav>
@@ -68,15 +67,19 @@ const auth = useAuthStore()
 
 const menus = computed(() => {
   const base = [
-    { path: '/home', label: '🏠 首页' },
-    { path: '/resume', label: '📄 简历' },
-    { path: '/jobs', label: '🎯 职位推荐' },
-    { path: '/clusters', label: '🏢 岗位聚类' },
-    { path: '/chat', label: '💬 智能问答' },
+    { path: '/home', label: '🏠 首页', match: ['/home'] },
+    { path: '/companies', label: '🏬 公司', match: ['/companies', '/company/'] },
+    { path: '/resume', label: '📄 简历', match: ['/resume'] },
+    { path: '/jobs', label: '🎯 职位推荐', match: ['/jobs'] },
+    { path: '/clusters', label: '🏢 岗位聚类', match: ['/clusters'] },
+    { path: '/chat', label: '💬 智能问答', match: ['/chat'] },
   ]
-  if (auth.isLogged()) base.push({ path: '/profile', label: '👤 个人中心' })
+  if (auth.isLogged()) base.push({ path: '/profile', label: '👤 个人中心', match: ['/profile'] })
   return base
 })
+
+/** 导航高亮：公司列表与公司详情属于同一个栏目 */
+const isActive = (m: { match: string[] }) => m.match.some((p) => route.path.startsWith(p))
 
 async function onCommand(cmd: string) {
   if (cmd === 'profile') router.push('/profile')

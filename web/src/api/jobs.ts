@@ -3,6 +3,8 @@ export interface JobItem {
   岗位ID: string
   岗位名称: string
   公司: string
+  /** 公司详情页的 ID（由后端按公司名生成，可跳转 /company/:id） */
+  公司ID?: string
   城市: string
   区县: string
   省份: string

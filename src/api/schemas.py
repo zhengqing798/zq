@@ -200,3 +200,27 @@ class JobStatsResponse(BaseModel):
     分类导航: List[Dict[str, Any]] = []
     筛选项: Dict[str, Any]
     来源: List[str] = []
+
+
+# ================================================================ 公司浏览（公司页）
+class CompanyListResponse(BaseModel):
+    ok: bool = True
+    总数: int
+    页码: int
+    每页: int
+    总页数: int
+    公司: List[Dict[str, Any]]
+    来源: List[str] = []
+
+
+class CompanyStatsResponse(BaseModel):
+    ok: bool = True
+    总体: Dict[str, Any]
+    规模分档: List[Dict[str, Any]] = []
+    按城市: List[Dict[str, Any]] = []
+    按大类: List[Dict[str, Any]] = []
+    热门企业: List[Dict[str, Any]] = []
+    最活跃企业: List[Dict[str, Any]] = []
+    筛选项: Dict[str, Any]
+    口径说明: List[str] = []
+    来源: List[str] = []

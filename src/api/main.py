@@ -149,6 +149,46 @@ def job_detail(job_id: str):
         _err(e)
 
 
+# ================================================================ 公司浏览（公司页）
+@app.get("/api/companies/stats", response_model=schemas.CompanyStatsResponse, tags=["⓪ 首页"])
+def companies_stats():
+    """4,096 家公司的分类统计（规模分档 / 按城市 / 按大类 / 热门企业 / 最活跃企业）"""
+    try:
+        from src.api.jobs import get_store
+        s = get_store().company_stats()
+        return {"ok": True, **s}
+    except Exception as e:
+        _err(e)
+
+
+@app.get("/api/companies", response_model=schemas.CompanyListResponse, tags=["⓪ 首页"])
+def companies_list(page: int = 1, size: int = 20, city: str = "", category: str = "",
+                   keyword: str = "", bucket: str = "", sort: str = "jobs_desc"):
+    """分页浏览全部公司，支持城市/大类/规模分档/公司名关键词筛选与排序"""
+    try:
+        from src.api.jobs import get_store
+        r = get_store().company_query(page=page, size=size, city=city or None,
+                                      category=category or None, keyword=keyword or None,
+                                      bucket=bucket or None, sort=sort)
+        r["来源"] = ["zhaopin_jobs_cleaned_seg.csv（公司名称去重）"]
+        return {"ok": True, **r}
+    except Exception as e:
+        _err(e, "筛选参数拼错时会忽略该条件；size 上限 100")
+
+
+@app.get("/api/companies/{company_id}", tags=["⓪ 首页"])
+def company_detail(company_id: str):
+    """单个公司详情：档案 + 全部在招岗位 + 相似公司（传 C+8位公司ID，兼容公司名）"""
+    try:
+        from src.api.jobs import get_store
+        x = get_store().company_get(company_id)
+        if not x:
+            raise ValueError("公司不存在：%s（可先调 /api/companies 取 公司ID）" % company_id)
+        return {"ok": True, **x}
+    except Exception as e:
+        _err(e)
+
+
 # ---------------------------------------------------------------- ① 简历解析
 @app.post("/api/resume/parse", response_model=schemas.ParseResponse, tags=["① 简历"])
 async def resume_parse(

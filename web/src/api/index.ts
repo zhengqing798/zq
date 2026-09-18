@@ -4,8 +4,9 @@ import type {
   JobRec, MatchHistoryRow, MatchResp, ParsedResume, ResumeRow, ScoreResp, TokenResp, ApiUser,
 } from './types'
 import type { JobListResp, JobStatsResp } from './jobs'
+import type { CompanyDetail, CompanyListResp, CompanyStatsResp } from './companies'
 
-/** 后端 30 个接口的前端封装（与 src/api/schemas.py 一一对应） */
+/** 后端 33 个接口的前端封装（与 src/api/schemas.py 一一对应） */
 
 // ---------------- 首页：岗位浏览
 export interface JobQuery {
@@ -26,6 +27,24 @@ export const jobStats = () =>
   client.get<JobStatsResp>('/api/jobs/stats').then((r) => r.data)
 export const jobDetail = (jobId: string) =>
   client.get('/api/jobs/' + jobId).then((r) => r.data)
+
+// ---------------- 公司浏览（公司页）
+export interface CompanyQuery {
+  page?: number
+  size?: number
+  city?: string
+  category?: string
+  keyword?: string
+  /** 规模分档（口径：在招职位数），如「1个」「2-4个」「5-9个」「10-49个」「50个以上」 */
+  bucket?: string
+  sort?: string
+}
+export const listCompanies = (q: CompanyQuery = {}) =>
+  client.get<CompanyListResp>('/api/companies', { params: q }).then((r) => r.data)
+export const companyStats = () =>
+  client.get<CompanyStatsResp>('/api/companies/stats').then((r) => r.data)
+export const companyDetail = (companyId: string) =>
+  client.get<CompanyDetail>('/api/companies/' + companyId).then((r) => r.data)
 
 // ---------------- 健康检查
 export const getHealth = () => client.get<HealthResp>('/api/health').then((r) => r.data)
