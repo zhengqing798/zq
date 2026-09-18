@@ -47,6 +47,7 @@ try {
 }
 
 let hist = []
+let linkAnswers = 0
 for (const [i, question] of QUESTIONS.slice(0, only).entries()) {
   const t0 = Date.now()
   let j
@@ -74,6 +75,9 @@ for (const [i, question] of QUESTIONS.slice(0, only).entries()) {
     ['有来源', (j.来源 || []).length > 0, `${(j.来源 || []).length} 条`],
     ['回答非空', (j.回答 || '').length > 30, `${(j.回答 || '').length} 字`],
   ]
+  // 岗位页链接：提到了具体岗位的回答应当带 /#/job/Jxxxx（前端会渲染成可点链接）
+  const hasLink = /(?:#\/|\/#\/)job\/J\d{4}/.test(j.回答 || '')
+  if (hasLink) linkAnswers++
   const failed = checks.filter(([, ok]) => !ok)
   if (failed.length) bad++
 
@@ -81,6 +85,10 @@ for (const [i, question] of QUESTIONS.slice(0, only).entries()) {
   console.log(`   回答：${(j.回答 || '').replace(/\n/g, ' ').slice(0, 110)}…`)
   console.log(`   ${pad('检查项', 12)}${checks.map(([n, ok]) => (ok ? '✅' : '❌') + n).join('  ')}`)
   console.log(`   ${pad('运行', 12)}模型=${j.模型} ｜ ${j.轮数} 轮 ｜ ${j.耗时秒}s（服务端）/${secs}s（端到端）｜ ${tokens} tokens ｜ prompt ${j.prompt版本}`)
+  if (hasLink) {
+    const m = (j.回答 || '').match(/(?:#\/|\/#\/)job\/(J\d{4})/g) || []
+    console.log(`   ${pad('岗位链接', 12)}✅ ${m.length} 个：${[...new Set(m)].slice(0, 4).join('、')}`)
+  }
   checks.filter(([n]) => n === '有工具轨迹' || n === '有来源')
     .forEach(([, , extra]) => console.log(`   ${pad('', 12)}${extra}`))
   if (failed.length) console.log(`   ❌ 未通过：${failed.map(([n]) => n).join('、')}`)
@@ -93,6 +101,7 @@ const newTools = ['company_query', 'home_stats', 'generic_agg']
 const usedNew = newTools.filter((t) => toolTally[t])
 console.log('工具使用统计：' + (Object.entries(toolTally).map(([k, v]) => `${k}×${v}`).join(' ｜ ') || '（无）'))
 console.log(`新工具是否被用上：${usedNew.length ? '✅ ' + usedNew.join('、') : '❌ 三个新工具都没被调用'}`)
+console.log(`岗位页链接（/#/job/Jxxxx）：${linkAnswers}/${only} 条回答带链接 ${linkAnswers ? '✅' : '❌'}`)
 console.log(`结果：${only - bad}/${only} 个问题通过${bad ? ' ❌' : ' ✅'}`)
 console.log('='.repeat(84))
-process.exit(bad || !usedNew.length ? 1 : 0)
+process.exit(bad || !usedNew.length || !linkAnswers ? 1 : 0)

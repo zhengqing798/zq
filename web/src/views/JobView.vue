@@ -1,0 +1,285 @@
+<template>
+  <div v-loading="loading" class="jobpage">
+    <div class="back">
+      <el-button link @click="goBack">← 返回</el-button>
+      <span class="muted">岗位ID：{{ job?.岗位ID }}</span>
+    </div>
+
+    <template v-if="job">
+      <!-- ① 头部 -->
+      <div class="zq-card pad head">
+        <div class="row1">
+          <div class="hmain">
+            <div class="jname">{{ job.岗位名称 }}</div>
+            <div class="meta">
+              <span>{{ job.地区 || job.城市 }}</span><i>·</i>
+              <span>{{ job.经验要求 || '经验不限' }}</span><i>·</i>
+              <span>{{ job.学历要求 || '学历不限' }}</span>
+              <el-tag v-if="job.是否在线" size="small" type="success" effect="light" class="ml">在线</el-tag>
+            </div>
+            <div class="tags">
+              <el-tag size="small" effect="dark" type="primary">{{ job.岗位大类 }}</el-tag>
+              <el-tag v-if="job.一级簇名" size="small" type="success" effect="light" class="ml">
+                {{ job.一级簇名 }}</el-tag>
+              <el-tag v-if="job.二级簇名" size="small" type="warning" effect="light" class="ml">
+                {{ job.二级簇名 }}</el-tag>
+            </div>
+          </div>
+          <div class="hright">
+            <div class="salary">{{ job.薪资 || '薪资面议' }}</div>
+            <div class="acts">
+              <el-button type="primary" :disabled="!auth.isLogged()" @click="fav">⭐ 收藏</el-button>
+              <el-button :disabled="!resume.canMatch()" :loading="scoring" @click="doScore">
+                用我的简历算匹配分</el-button>
+            </div>
+            <div v-if="!auth.isLogged()" class="muted">登录后可收藏</div>
+            <div v-else-if="!resume.canMatch()" class="muted">
+              还没有简历 → 去
+              <el-button link type="primary" @click="router.push('/profile')">个人中心</el-button>
+              粘贴或上传 PDF
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <main class="main">
+          <!-- ② 与我简历的匹配（本次会话做过匹配才显示） -->
+          <template v-if="match">
+            <div class="zq-card pad">
+              <div class="zq-section" style="margin-top:0">与我简历的匹配（第 {{ match.排名 }} 名，{{ match.总分.toFixed(1) }} 分）</div>
+              <EChart :option="radarOption" height="260px" />
+              <div style="margin-top:6px">
+                <el-tag v-for="d in DIMS" :key="d" effect="plain" style="margin:0 6px 6px 0">
+                  {{ d }} {{ Number(match[d as keyof JobRec]).toFixed(1) }}</el-tag>
+                <el-tag size="small" type="info" effect="plain" style="margin:0 6px 6px 0">
+                  技能命中 {{ match.技能命中数 }}/{{ match.岗位技能要求数 }}</el-tag>
+                <el-tag size="small" type="success" effect="light" style="margin:0 6px 6px 0">
+                  余弦 {{ match.余弦分 }}</el-tag>
+                <el-tag size="small" type="info" effect="plain" style="margin:0 6px 6px 0">
+                  距离 {{ match.距离km }} km</el-tag>
+              </div>
+              <div class="reason">💡 {{ match.推荐理由 }}</div>
+            </div>
+          </template>
+
+          <!-- ③ 评分双口径 -->
+          <div v-if="score" class="zq-card pad" style="margin-top:12px">
+            <div class="zq-section" style="margin-top:0">评分对比</div>
+            <el-descriptions :column="2" border size="small">
+              <el-descriptions-item label="规则总分">{{ score.规则口径.总分 }}</el-descriptions-item>
+              <el-descriptions-item label="模型预测分">
+                {{ score.模型口径.可用 ? score.模型口径.T1回归_预测总分 : '不可用' }}</el-descriptions-item>
+              <el-descriptions-item label="匹配概率">
+                {{ score.模型口径.可用 ? score.模型口径.T2分类_匹配概率 + '%' : '—' }}</el-descriptions-item>
+              <el-descriptions-item label="两者差异">{{ score.差异 ?? '—' }} 分</el-descriptions-item>
+            </el-descriptions>
+          </div>
+
+          <!-- ④ 技能标签 + 职位描述 -->
+          <div class="zq-card pad" style="margin-top:12px">
+            <div class="zq-section" style="margin-top:0">技能标签</div>
+            <el-tag v-for="s in job.技能标签" :key="s" effect="light" class="ml0">{{ s }}</el-tag>
+            <div v-if="!job.技能标签.length" class="muted">该岗位未标注技能标签</div>
+            <el-divider />
+            <div class="zq-section">职位描述</div>
+            <div class="desc">{{ job.职位描述 || '（无描述）' }}</div>
+          </div>
+        </main>
+
+        <aside class="side">
+          <!-- ⑤ 公司与招聘者 -->
+          <div class="zq-card pad panel">
+            <div class="zq-section" style="margin-top:0">公司</div>
+            <div class="comname" @click="goCompany">{{ job.公司 }}</div>
+            <div class="muted" style="margin-top:6px">
+              <template v-if="job.同公司岗位数 > 1">在招 {{ job.同公司岗位数 }} 个职位</template>
+              <template v-else>当前在招 1 个职位</template>
+            </div>
+            <div class="hrbox">
+              <div class="avatar">{{ job.招聘者.slice(0, 1) }}</div>
+              <div>
+                <div><b>{{ job.招聘者 }}</b> <span class="muted">{{ job.招聘者职位 }}</span></div>
+                <div class="muted">{{ job.回复文案 || '暂无回复数据' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ⑥ 同公司其他在招岗位 -->
+          <div v-if="siblings.length" class="zq-card pad panel">
+            <div class="zq-section" style="margin-top:0">该公司其他在招岗位（{{ siblings.length }}）</div>
+            <div v-for="s in siblings" :key="s.岗位ID" class="sib" @click="openJob(s.岗位ID)">
+              <span class="sibname">{{ s.岗位名称 }}</span>
+              <span class="sibsal">{{ s.薪资 }}</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </template>
+
+    <el-empty v-else-if="!loading" description="岗位不存在（ID 可能有误）" />
+  </div>
+</template>
+
+<script setup lang="ts">
+/**
+ * 岗位详情页（每个岗位一个独立 URL：`#/job/J0020`）
+ *
+ * · 从各列表页点岗位都跳到这里，不再用右侧抽屉
+ * · 如果本次会话做过人岗匹配、且该岗位在结果里，就额外展示「与我简历的匹配」（雷达图 + 推荐理由）
+ * · 支持收藏、用规则/模型双口径算分、跳该公司详情页、看同公司其他在招岗位
+ */
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import * as api from '../api'
+import type { JobItem } from '../api/jobs'
+import type { JobRec, ScoreResp } from '../api/types'
+import EChart from '../components/EChart.vue'
+import { useAuthStore } from '../stores/auth'
+import { useResumeStore } from '../stores/resume'
+
+const DIMS = ['技能', '经验', '学历', '地域', '薪资', '专业证书']
+
+const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const resume = useResumeStore()
+
+const loading = ref(false)
+const job = ref<JobItem | null>(null)
+const score = ref<ScoreResp | null>(null)
+const scoring = ref(false)
+const siblings = ref<{ 岗位ID: string; 岗位名称: string; 薪资: string }[]>([])
+
+/** 本次会话的匹配结果里如果有这个岗位，就把匹配详情带出来 */
+const match = computed<JobRec | null>(() => {
+  const list = resume.matchResult?.推荐 || []
+  return list.find((x) => x.岗位ID === job.value?.岗位ID) || null
+})
+
+const radarOption = computed(() => {
+  const m = match.value
+  const v = DIMS.map((d) => Number((m as unknown as Record<string, number>)?.[d] ?? 0))
+  return {
+    tooltip: {},
+    radar: {
+      indicator: DIMS.map((d) => ({ name: d, max: 100 })),
+      radius: '62%', splitNumber: 4,
+      axisName: { color: '#41506b', fontSize: 12 },
+      splitLine: { lineStyle: { color: '#e8eef6' } },
+      splitArea: { areaStyle: { color: ['#fff', '#f8fbfb'] } },
+      axisLine: { lineStyle: { color: '#e8eef6' } },
+    },
+    series: [{
+      type: 'radar', symbolSize: 5,
+      areaStyle: { color: 'rgba(0,166,167,.28)' },
+      lineStyle: { color: '#00a6a7', width: 2 },
+      itemStyle: { color: '#00a6a7' },
+      data: [{ value: v, name: '六维得分' }],
+    }],
+  }
+})
+
+function goBack() {
+  if (window.history.length > 1) router.back()
+  else router.push('/jobs')
+}
+function goCompany() {
+  if (job.value?.公司ID) router.push('/company/' + job.value.公司ID)
+}
+function openJob(jobId: string) { router.push('/job/' + jobId) }
+
+async function load() {
+  const id = String(route.params.id || '')
+  loading.value = true
+  score.value = null
+  siblings.value = []
+  job.value = null
+  try {
+    job.value = (await api.jobDetail(id)) as JobItem
+    // 同公司其他在招岗位（有公司ID时才能取）
+    if (job.value.公司ID) {
+      try {
+        const c = await api.companyDetail(job.value.公司ID)
+        siblings.value = (c.在招岗位 || [])
+          .filter((x) => x.岗位ID !== job.value?.岗位ID)
+          .slice(0, 8)
+          .map((x) => ({ 岗位ID: x.岗位ID, 岗位名称: x.岗位名称, 薪资: x.薪资 }))
+      } catch { /* 公司详情不可用不影响主内容 */ }
+    }
+  } catch { job.value = null }
+  finally { loading.value = false }
+}
+
+async function doScore() {
+  if (!job.value) return
+  scoring.value = true
+  try {
+    score.value = await api.runScore(job.value.岗位ID, resume.resumeId || null, resume.text || null)
+  } catch { /* 拦截器已提示 */ }
+  finally { scoring.value = false }
+}
+
+async function fav() {
+  if (!job.value) return
+  try {
+    const r = await api.addFavorite(job.value.岗位ID)
+    ElMessage.success(r.message || '已收藏')
+  } catch { /* 拦截器已提示 */ }
+}
+
+watch(() => route.params.id, load)
+onMounted(load)
+</script>
+
+<style scoped>
+.jobpage { max-width: 1180px; margin: 0 auto; }
+.back { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.muted { color: #8896ab; font-size: 12.5px; }
+.ml { margin-left: 6px; }
+.ml0 { margin: 0 6px 6px 0; }
+
+.head { padding: 18px 20px; }
+.row1 { display: flex; gap: 20px; align-items: flex-start; }
+.hmain { flex: 1; min-width: 0; }
+.jname { font-size: 22px; font-weight: 800; color: #16233a; line-height: 1.35; }
+.meta { margin-top: 8px; color: #5b6b7f; font-size: 13px; display: flex; align-items: center;
+  flex-wrap: wrap; gap: 6px; }
+.meta i { color: #c9d3e0; font-style: normal; }
+.tags { margin-top: 10px; }
+.hright { flex: none; text-align: right; }
+.salary { font-size: 24px; font-weight: 800; color: #ff6a00; white-space: nowrap; }
+.acts { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.acts :deep(.el-button) { margin-left: 0; }
+
+.layout { display: flex; gap: 16px; align-items: flex-start; margin-top: 14px; }
+.main { flex: 1; min-width: 0; }
+.side { width: 330px; flex: none; }
+.panel { border-radius: 12px; }
+.panel + .panel { margin-top: 12px; }
+.comname { font-size: 15.5px; font-weight: 700; color: #41506b; cursor: pointer; }
+.comname:hover { color: var(--el-color-primary); }
+.hrbox { display: flex; align-items: center; gap: 10px; margin-top: 12px; background: #f7fbfb;
+  border: 1px solid #e6f4f4; border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; flex: none; color: #fff; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+  background: linear-gradient(135deg, #00a6a7, #12c2b4); }
+.desc { background: #fbfcfe; border: 1px solid var(--zq-border); border-radius: 10px;
+  padding: 14px 16px; white-space: pre-wrap; line-height: 1.85; font-size: 14px; }
+.reason { margin-top: 6px; color: #5b6b7f; font-size: 13px; }
+.sib { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; cursor: pointer;
+  border-bottom: 1px dashed #eef3f9; font-size: 13px; }
+.sib:last-child { border-bottom: none; }
+.sib:hover .sibname { color: var(--el-color-primary); }
+.sibname { color: #41506b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sibsal { color: #ff6a00; font-weight: 700; white-space: nowrap; }
+
+@media (max-width: 980px) {
+  .layout { flex-direction: column; }
+  .side { width: 100%; }
+  .row1 { flex-direction: column; }
+  .hright { text-align: left; }
+  .acts { align-items: flex-start; }
+}
+</style>

@@ -8,10 +8,10 @@
   </div>
   <!-- 小对话框：贴着球的一侧弹出 -->
   <transition name="pop">
-    <div v-if="open" class="panel" :style="panelStyle">
+    <div v-if="open" class="panel chat-panel" :style="panelStyle">
       <div class="phead">
         <b>智能问答</b>
-        <span class="spacer" />
+        <span class="spacer"></span>
         <el-button link size="small" :disabled="!lastQuestion || loading"
                    @click="regenerate">🔄 重新回答</el-button>
         <el-button link size="small" @click="open = false">收起</el-button>
@@ -25,7 +25,12 @@
         </div>
 
         <div v-for="(m, i) in msgs" :key="i" class="row" :class="m.role">
-          <div class="bubble" :class="{ err: m.err }">{{ m.text }}</div>
+          <!-- 回答里可能带岗位/公司页链接（/#/job/J0020），渲染成可点链接；纯文本先做转义。
+               注意：原生元素必须写完整闭合标签——写成自闭合 <div ... /> 时
+               Vue 编译器会把后面的兄弟节点当作它的子节点，@click 也不会被挂上（这里踩过一次）。 -->
+          <div v-if="m.role === 'ai'" class="bubble" :class="{ err: m.err }"
+               v-html="linkify(m.text)" @click="onBubbleClick"></div>
+          <div v-else class="bubble" :class="{ err: m.err }">{{ m.text }}</div>
           <div v-if="m.resp" class="meta">
             <div class="muted">
               {{ m.resp.模型 }} · {{ m.resp.工具序列 || '未调用工具' }} · {{ m.resp.轮数 }} 轮
@@ -236,6 +241,35 @@ async function scrollDown() {
   if (el) el.scrollTop = el.scrollHeight
 }
 
+/**
+ * 把回答里的岗位/公司页链接变成可点链接
+ *
+ * 支持三种写法（模型可能混用）：`[岗位名](/#/job/J0020)`、裸的 `/#/job/J0020`、裸岗位ID `J0020`。
+ * 安全做法：**先转义 HTML**，再只替换我们自己生成的白名单链接，避免把模型输出当 HTML 执行。
+ */
+const ID_RE = /(<a [^>]*>[\s\S]*?<\/a>)|(?:#\/|\/#\/)job\/(J\d{4})|(?<![\w#/-])(J\d{4})(?![\w-])/g
+function linkify(raw: string): string {
+  const esc = String(raw || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+  // ① Markdown 链接 [文字](/#/job/J0020)
+  let out = esc.replace(/\[([^\]\n]{1,60})\]\((?:#)?\/?job\/(J\d{4})\)/g,
+    (_m, text, id) => `<a class="jlink" href="#/job/${id}">${text}</a>`)
+  // ② 裸链接与裸岗位ID（跳过已生成的 <a> 内部）
+  out = out.replace(ID_RE, (m, anchor, id1, id2) => {
+    if (anchor) return anchor
+    const id = id1 || id2
+    return `<a class="jlink" href="#/job/${id}">${id}</a>`
+  })
+  return out.replace(/\n/g, '<br />')
+}
+
+/** 点回答里的岗位链接 → 关掉对话框，让用户直接看岗位页 */
+function onBubbleClick(e: MouseEvent) {
+  const el = e.target as HTMLElement
+  if (el && el.classList.contains('jlink')) open.value = false
+}
+
 onMounted(() => {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null')
@@ -284,6 +318,9 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .row.me .bubble { background: var(--el-color-primary-light-9); border: 1px solid #cdeeee; }
 .row.ai .bubble { background: #fbfcfe; border: 1px solid var(--zq-border); }
 .row.ai .bubble.err { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+.bubble :deep(.jlink) { color: var(--el-color-primary); font-weight: 600; text-decoration: none;
+  border-bottom: 1px dashed var(--el-color-primary-light-5); }
+.bubble :deep(.jlink):hover { border-bottom-style: solid; }
 .meta { max-width: 100%; margin-top: 6px; font-size: 12px; }
 .meta .muted { font-size: 11.5px; }
 .meta :deep(.el-collapse-item__header) { height: 32px; line-height: 32px; font-size: 12.5px; }

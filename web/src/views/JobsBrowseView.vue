@@ -113,9 +113,6 @@
     <el-pagination v-if="list.总页数 > 1" background layout="prev, pager, next, jumper"
                    :total="list.总数" :page-size="size" :current-page="page"
                    class="pager" @current-change="turn" />
-
-    <!-- ⑤ 职位详情抽屉（首页/公司页/公司详情共用同一组件） -->
-    <JobDetailDrawer v-model="drawer" :job-id="curJob" />
   </div>
 </template>
 
@@ -131,7 +128,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import * as api from '../api'
 import type { JobItem, JobListResp, JobStatsResp } from '../api/jobs'
-import JobDetailDrawer from '../components/JobDetailDrawer.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -163,9 +159,6 @@ const empty: JobStatsResp = {
 }
 const st = ref<JobStatsResp>(empty)
 const list = ref<JobListResp>({ ok: true, 总数: 0, 页码: 1, 每页: 20, 总页数: 1, 岗位: [], 来源: [] })
-
-const drawer = ref(false)
-const curJob = ref('')
 
 const fmt = (n: number) => (n || 0).toLocaleString('en-US')
 const districts = computed(() => (city.value ? st.value.按城市区县[city.value] || [] : [])
@@ -207,8 +200,8 @@ function initFromQuery() {
 }
 
 async function open(j: JobItem) {
-  curJob.value = j.岗位ID
-  drawer.value = true
+  // 点岗位 → 跳独立详情页（每个岗位有自己的 URL），不再弹右侧抽屉
+  router.push('/job/' + j.岗位ID)
 }
 
 /** 点公司名 → 该公司详情页（全部在招职位） */

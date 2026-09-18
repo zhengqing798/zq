@@ -96,8 +96,7 @@
       </main>
     </div>
 
-    <!-- ④ 职位详情抽屉（点「热招职位」直接看岗位，不用先跳公司页） -->
-    <JobDetailDrawer v-model="drawer" :job-id="curJob" />
+    <!-- 岗位详情已改为独立页面（点热招职位 → /job/:id） -->
   </div>
 </template>
 
@@ -108,7 +107,6 @@ import { Search } from '@element-plus/icons-vue'
 import * as api from '../api'
 import type { CompanyItem, CompanyListResp, CompanyStatsResp } from '../api/companies'
 import CompanyCard from '../components/CompanyCard.vue'
-import JobDetailDrawer from '../components/JobDetailDrawer.vue'
 import { fmtNum } from '../utils/format'
 
 const router = useRouter()
@@ -134,9 +132,6 @@ const st = ref<CompanyStatsResp>(emptySt)
 const list = ref<CompanyListResp>({ ok: true, 总数: 0, 页码: 1, 每页: 12, 总页数: 1,
                                    公司: [], 来源: [] })
 
-const drawer = ref(false)
-const curJob = ref('')
-
 function load(pageNo = 1) {
   loading.value = true
   return api.listCompanies({
@@ -154,7 +149,7 @@ function pickCategory(c: string) { category.value = category.value === c ? '' : 
 function pickBucket(b: string) { bucket.value = bucket.value === b ? '' : b; search() }
 
 const go = (c: CompanyItem) => router.push('/company/' + c.公司ID)
-function openJob(jobId: string) { curJob.value = jobId; drawer.value = true }
+function openJob(jobId: string) { router.push('/job/' + jobId) }
 
 onMounted(async () => {
   try { st.value = await api.companyStats() } catch { /* 拦截器已提示 */ }

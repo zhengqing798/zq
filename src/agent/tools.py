@@ -354,14 +354,14 @@ def t_home_stats(kind, n=10):
     if kind == "高薪岗位":
         data, total = st.top_jobs(by="salary", n=int(n))
         return {"ok": True, "summary": "全库按薪资上限降序的前 %d 个岗位（共 %d 个岗位参与排序）" % (len(data), total),
-                "data": [{"岗位名称": x["岗位名称"], "公司": x["公司"], "城市": x["城市"],
+                "data": [{"岗位ID": x["岗位ID"], "岗位名称": x["岗位名称"], "公司": x["公司"], "城市": x["城市"],
                           "薪资": x["薪资"], "技能标签": x["技能标签"][:5]} for x in data],
                 "来源": ["zhaopin_jobs_cleaned_seg.csv（薪资数值列）"]}
     if kind == "热门岗位":
         data, total = st.top_jobs(by="reply", n=int(n))
         return {"ok": True, "summary": "按招聘者今日回复数降序的前 %d 个岗位（共 %d 个岗位参与排序）" % (len(data), total),
-                "data": [{"岗位名称": x["岗位名称"], "公司": x["公司"], "城市": x["城市"], "薪资": x["薪资"],
-                          "今日回复数": x["今日回复数"], "招聘者": x["招聘者"]} for x in data],
+                "data": [{"岗位ID": x["岗位ID"], "岗位名称": x["岗位名称"], "公司": x["公司"], "城市": x["城市"],
+                          "薪资": x["薪资"], "今日回复数": x["今日回复数"], "招聘者": x["招聘者"]} for x in data],
                 "来源": ["zhaopin_jobs_cleaned_seg.csv（今日回复数列）"]}
     return {"ok": False, "data": None,
             "summary": "kind 只能是：分类 / 地区 / 企业 / 技能 / 高薪岗位 / 热门岗位", "来源": []}

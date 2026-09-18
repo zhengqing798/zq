@@ -108,57 +108,6 @@
     </div>
 
     <el-empty v-else description="点击「开始匹配」，查看与你简历最匹配的岗位" />
-
-    <!-- 岗位详情抽屉 -->
-    <el-drawer v-model="drawer" size="46%" :title="cur?.岗位名称 || ''">
-      <template v-if="cur">
-        <div class="job-top">
-          <div>
-            <div class="job-title">{{ cur.岗位名称 }}</div>
-            <div class="job-co">{{ cur.公司 }} ｜ {{ cur.城市 }}</div>
-          </div>
-          <div class="job-salary">{{ cur.岗位薪资 }}</div>
-        </div>
-        <div class="job-meta">
-          {{ cur.经验要求 || '经验不限' }} ｜ {{ cur.学历要求 || '学历不限' }}
-          ｜ 技能标签：{{ cur.技能标签 || '—' }}
-        </div>
-
-        <el-divider />
-        <div class="zq-section" style="margin-top:0">六维得分（雷达图）</div>
-        <EChart :option="radarOption" height="290px" />
-        <div style="margin-top:6px">
-          <el-tag v-for="d in DIMS" :key="d" effect="plain" style="margin:0 6px 6px 0">
-            {{ d }} {{ Number(cur[d as keyof typeof cur]).toFixed(1) }}</el-tag>
-        </div>
-
-        <el-divider />
-        <div class="zq-section" style="margin-top:0">推荐理由</div>
-        <div class="chat-bubble">{{ cur.推荐理由 }}</div>
-
-        <el-divider />
-        <div class="zq-section" style="margin-top:0">评分对比</div>
-        <el-button size="small" :loading="scoring" @click="doScore">计算该岗位的模型分</el-button>
-        <div v-if="score" style="margin-top:10px">
-          <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="规则总分（主）">
-              <b class="salary">{{ score.规则口径.总分 }}</b></el-descriptions-item>
-            <el-descriptions-item label="模型预测分（T1）">
-              {{ score.模型口径.可用 ? score.模型口径.T1回归_预测总分 : '不可用' }}</el-descriptions-item>
-            <el-descriptions-item label="匹配概率（T2）">
-              {{ score.模型口径.可用 ? score.模型口径.T2分类_匹配概率 + '%' : '—' }}</el-descriptions-item>
-            <el-descriptions-item label="两者差异">
-              {{ score.差异 ?? '—' }} 分</el-descriptions-item>
-          </el-descriptions>
-        </div>
-
-        <el-divider />
-        <el-button type="primary" :disabled="!auth.isLogged()" @click="fav">
-          ⭐ 收藏这个岗位
-        </el-button>
-        <span v-if="!auth.isLogged()" class="muted" style="margin-left:8px">登录后可收藏</span>
-      </template>
-    </el-drawer>
   </div>
 </template>
 
@@ -168,26 +117,22 @@
  * 简历不在本页输入——统一在个人中心粘贴/上传（见 ProfileView）。
  */
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as api from '../api'
-import type { JobRec, ResumeRow, ScoreResp } from '../api/types'
-import EChart from '../components/EChart.vue'
+import type { JobRec, ResumeRow } from '../api/types'
 import { useAuthStore } from '../stores/auth'
 import { useResumeStore } from '../stores/resume'
 
-const DIMS = ['技能', '经验', '学历', '地域', '薪资', '专业证书']
 const auth = useAuthStore()
 const resume = useResumeStore()
+const router = useRouter()
 
 const loading = ref(false)
-const scoring = ref(false)
 const src = ref('current')
 const topN = ref(20)
 const savedList = ref<ResumeRow[]>([])
 const result = ref(resume.matchResult)
-const drawer = ref(false)
-const cur = ref<JobRec | null>(null)
-const score = ref<ScoreResp | null>(null)
 
 const fCity = ref('')
 const fKw = ref('')
@@ -215,28 +160,6 @@ const filtered = computed(() => {
   list = list.filter((x) => x.总分 >= fScore.value)
   list.sort((a, b) => sortBy.value === 'score' ? b.总分 - a.总分 : salaryMid(b.岗位薪资) - salaryMid(a.岗位薪资))
   return list
-})
-
-const radarOption = computed(() => {
-  const v = DIMS.map((d) => Number((cur.value as never as Record<string, number>)?.[d] ?? 0))
-  return {
-    tooltip: {},
-    radar: {
-      indicator: DIMS.map((d) => ({ name: d, max: 100 })),
-      radius: '62%', splitNumber: 4,
-      axisName: { color: '#41506b', fontSize: 12 },
-      splitLine: { lineStyle: { color: '#e8eef6' } },
-      splitArea: { areaStyle: { color: ['#fff', '#f8fbfb'] } },
-      axisLine: { lineStyle: { color: '#e8eef6' } },
-    },
-    series: [{
-      type: 'radar', symbolSize: 5,
-      areaStyle: { color: 'rgba(0,166,167,.28)' },
-      lineStyle: { color: '#00a6a7', width: 2 },
-      itemStyle: { color: '#00a6a7' },
-      data: [{ value: v, name: '六维得分' }],
-    }],
-  }
 })
 
 onMounted(async () => {
@@ -273,27 +196,9 @@ function resetFilter() {
   fCity.value = ''; fKw.value = ''; fScore.value = 0; sortBy.value = 'score'
 }
 
+/** 点岗位 → 跳独立详情页（匹配明细/雷达图会显示在那边） */
 function openDetail(j: JobRec) {
-  cur.value = j
-  score.value = null
-  drawer.value = true
-}
-
-async function doScore() {
-  if (!cur.value) return
-  scoring.value = true
-  try {
-    score.value = await api.runScore(cur.value.岗位ID, resume.resumeId || null, resume.text || null)
-  } catch { /* 拦截器已提示 */ }
-  finally { scoring.value = false }
-}
-
-async function fav() {
-  if (!cur.value) return
-  try {
-    const r = await api.addFavorite(cur.value.岗位ID)
-    ElMessage.success(r.message || '已收藏')
-  } catch { /* 拦截器已提示 */ }
+  router.push('/job/' + j.岗位ID)
 }
 </script>
 

@@ -121,8 +121,6 @@
     </div>
 
     <!-- 数据来源与口径不再展示在页面上（接口仍返回，文档里仍记录） -->
-
-    <JobDetailDrawer v-model="drawer" :job-id="curJob" />
   </div>
 </template>
 
@@ -140,7 +138,6 @@ import * as api from '../api'
 import type { HomeJob, HomeResp } from '../api/home'
 import type { CompanyItem } from '../api/companies'
 import CompanyCard from '../components/CompanyCard.vue'
-import JobDetailDrawer from '../components/JobDetailDrawer.vue'
 import { fmtNum, fmtSalaryK } from '../utils/format'
 
 const router = useRouter()
@@ -151,8 +148,6 @@ const empty: HomeResp = {
   口径说明: [], 来源: [],
 }
 const st = ref<HomeResp>(empty)
-const drawer = ref(false)
-const curJob = ref('')
 
 const fmt = fmtNum
 
@@ -160,7 +155,7 @@ const fmt = fmtNum
 function goJobs(q: Record<string, string>) {
   router.push({ path: '/jobs', query: q })
 }
-function openJob(jobId: string) { curJob.value = jobId; drawer.value = true }
+function openJob(jobId: string) { router.push('/job/' + jobId) }
 function goCompany(j: HomeJob) { if (j.公司ID) router.push('/company/' + j.公司ID) }
 function goCompanyCard(c: CompanyItem) { router.push('/company/' + c.公司ID) }
 

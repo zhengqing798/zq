@@ -51,11 +51,21 @@ try {
   companyId = (await rc.json()).公司?.[0]?.公司ID || ''
 } catch { /* 后端不可用会由断言/错误计数暴露 */ }
 
+// 岗位详情路由需要「真实存在的岗位ID」：从接口取第一条
+let jobId = ''
+try {
+  const rj = await fetch(API + '/api/jobs?size=1')
+  jobId = (await rj.json()).岗位?.[0]?.岗位ID || ''
+} catch { /* 后端不可用会由断言暴露 */ }
+
 const ROUTES = [
   // 首页 = 推荐页（热门分类轮播 / 地区推荐 / 高薪岗位 / 热门岗位 / 热门企业 / 热门技能）
   ['home', ['热门分类', '地区推荐', '高薪岗位推荐', '热门岗位推荐', '热门企业', '热门技能']],
   ['login', ['人岗匹配推荐系统', '登录', '注册', '先以游客身份逛逛']],
   ['jobs', ['热门职位：', '区域：', '薪资：', '学历：', '排序：']],
+  ...(jobId
+    ? [['job/' + jobId, ['岗位ID', '技能标签', '职位描述', '公司', '该公司其他在招岗位']]]
+    : []),
   ['match', ['岗位推荐', '使用简历', '开始匹配']],
   ['companies', ['公司广场', '在招职位', '热门企业', '最活跃企业',
                  '在招职位数：', '排序：', '技能需求：', '热招职位：']],
@@ -192,8 +202,8 @@ if (!b0) {
   // ① 单击打开小对话框
   await page.click('.ball')
   await new Promise((r) => setTimeout(r, 700))
-  const hasInput = !!(await page.$('.panel input'))
-  const hasSamples = (await page.$$('.panel .tag')).length > 0
+  const hasInput = !!(await page.$('.chat-panel input'))
+  const hasSamples = (await page.$$('.chat-panel .tag')).length > 0
   if (hasInput && hasSamples) {
     console.log('  ✅ 单击悬浮球 → 弹出小对话框（含输入框与示例问题）')
   } else {
@@ -202,7 +212,7 @@ if (!b0) {
   }
   // ①b 「重新回答」按钮：必须存在，且在还没提问时是禁用状态（避免误导）
   const regen = await page.evaluate(() => {
-    const b = Array.from(document.querySelectorAll('.panel .phead button'))
+    const b = Array.from(document.querySelectorAll('.chat-panel .phead button'))
       .find((x) => x.innerText.includes('重新回答'))
     return b ? { found: true, disabled: b.disabled } : { found: false }
   })
@@ -221,7 +231,7 @@ if (!b0) {
   await new Promise((r) => setTimeout(r, 500))
   const b1 = await ballAt()
   const saved = await page.evaluate(() => localStorage.getItem('zq_chat_ball'))
-  const stillOpen = !!(await page.$('.panel input'))
+  const stillOpen = !!(await page.$('.chat-panel input'))
   const movedFar = b1 && Math.abs(b1.x - b0.x) > 80 && Math.abs(b1.y - b0.y) > 80
   if (movedFar && saved && stillOpen) {
     console.log(`  ✅ 可拖动：(${b0.x}, ${b0.y}) → (${b1.x}, ${b1.y})，位置已存 localStorage，且未误关对话框`)
@@ -248,15 +258,15 @@ if (!b0) {
 
   // ③ 收起后再点开（开关正常）—— 表头有两个按钮（重新回答 / 收起），按文字找
   await page.evaluate(() => {
-    const b = Array.from(document.querySelectorAll('.panel .phead button'))
+    const b = Array.from(document.querySelectorAll('.chat-panel .phead button'))
       .find((x) => x.innerText.includes('收起'))
     if (b) b.click()
   })
   await new Promise((r) => setTimeout(r, 600))
-  const closed = !(await page.$('.panel'))
+  const closed = !(await page.$('.chat-panel'))
   await page.click('.ball')
   await new Promise((r) => setTimeout(r, 600))
-  const reopened = !!(await page.$('.panel input'))
+  const reopened = !!(await page.$('.chat-panel input'))
   if (closed && reopened) {
     console.log('  ✅ 收起 / 再次点开都正常')
   } else {
@@ -274,6 +284,22 @@ if (!b0) {
     failed++
     console.log(`  ❌ 其他页面异常：${JSON.stringify(onOther)}`)
   }
+}
+
+// 点岗位 → 必须跳到独立详情页（每个岗位有自己的 URL），而不是弹右侧抽屉
+await page.goto(`${URL}/#/jobs`, { waitUntil: 'networkidle2', timeout: 60000 })
+await new Promise((r) => setTimeout(r, 1600))
+console.log(`\n--- 岗位列表点岗位 → 独立 URL ---`)
+await page.click('.jcard')
+await new Promise((r) => setTimeout(r, 1800))
+const jobUrlOk = /#\/job\/J\d{4}$/.test(page.url())
+const drawerGone = !(await page.$('.el-drawer'))
+const detailText = await page.evaluate(() => document.body.innerText)
+if (jobUrlOk && drawerGone && detailText.includes('职位描述')) {
+  console.log(`  ✅ 跳到 ${page.url().replace(URL, '')}，页面有职位描述，且没有弹出抽屉`)
+} else {
+  failed++
+  console.log(`  ❌ 跳转异常：URL=${page.url().replace(URL, '')} ｜ 抽屉存在=${!drawerGone}`)
 }
 
 // 游客态：必须用**独立无痕上下文**——同浏览器的普通新页面与本页同源、共享 localStorage，

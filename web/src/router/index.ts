@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth'
  * 路由（hash 模式：nginx 托管时无需额外 rewrite 配置，静态托管即可）
  *
  * 导航结构（2026-09-18 改版）：
- * · 游客可见：首页（推荐）/ 岗位（浏览筛选）/ 公司
+ * · 游客可见：首页（推荐）/ 岗位（浏览筛选）/ 公司 / **岗位详情（每个岗位一个 URL：/job/J0020）**
  * · 需登录：岗位推荐（简历匹配）、个人中心（简历粘贴/上传 PDF 也在这里，不再有独立「简历」页）
  * · 没有导航入口但保留页面：无
  * · 智能问答已改为**全局悬浮球**（`components/ChatWidget.vue`，挂在 AppLayout 上），不再有独立页面
@@ -24,6 +24,8 @@ const router = createRouter({
           meta: { title: '首页' } },
         { path: 'jobs', name: 'jobs', component: () => import('../views/JobsBrowseView.vue'),
           meta: { title: '岗位' } },
+        { path: 'job/:id', name: 'job', component: () => import('../views/JobView.vue'),
+          meta: { title: '岗位详情' } },
         { path: 'companies', name: 'companies', component: () => import('../views/CompaniesView.vue'),
           meta: { title: '公司' } },
         { path: 'company/:id', name: 'company', component: () => import('../views/CompanyView.vue'),

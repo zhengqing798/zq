@@ -122,7 +122,7 @@
 
     <el-empty v-else-if="!loading" description="公司不存在（ID 可能有误）" />
 
-    <JobDetailDrawer v-model="drawer" :job-id="curJob" />
+    <!-- 岗位详情已改为独立页面（点岗位行 → /job/:id） -->
   </div>
 </template>
 
@@ -132,7 +132,6 @@ import { useRoute, useRouter } from 'vue-router'
 import * as api from '../api'
 import type { CompanyDetail, CompanyItem } from '../api/companies'
 import CompanyCard from '../components/CompanyCard.vue'
-import JobDetailDrawer from '../components/JobDetailDrawer.vue'
 import { fmtSalaryK, logoBg, logoChar } from '../utils/format'
 
 const route = useRoute()
@@ -141,8 +140,6 @@ const router = useRouter()
 const loading = ref(false)
 const c = ref<CompanyDetail | null>(null)
 const limit = ref(20)
-const drawer = ref(false)
-const curJob = ref('')
 
 const sizeTip = '数据里没有「公司规模」列，这里用该公司的在招职位数分档代理'
 const shown = computed(() => (c.value?.在招岗位 || []).slice(0, limit.value))
@@ -157,7 +154,7 @@ async function load() {
   finally { loading.value = false }
 }
 
-function openJob(jobId: string) { curJob.value = jobId; drawer.value = true }
+function openJob(jobId: string) { router.push('/job/' + jobId) }
 const go = (x: CompanyItem) => router.push('/company/' + x.公司ID)
 
 watch(() => route.params.id, load)
