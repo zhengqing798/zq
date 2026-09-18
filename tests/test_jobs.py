@@ -176,3 +176,82 @@ class TestJobDetail:
         """详情应带上任务7 的簇归属（首页抽屉要展示）"""
         j = client.get("/api/jobs/J0001").json()
         assert "一级簇名" in j and "二级簇名" in j
+
+
+# ================================================================ 模拟 BOSS直聘：招聘者 / 区域 / 热门职位
+class TestBossStyle:
+    """首页按 BOSS直聘 城市职位列表改造后新增的能力"""
+
+    def test_job_has_recruiter_fields(self):
+        """正常：每个岗位都带「招聘者」行所需字段（全部来自真实数据）"""
+        j = client.get("/api/jobs", params={"size": 5}).json()
+        for x in j["岗位"]:
+            assert x["招聘者"], "招聘者姓名不能为空（发布者姓名非空率 100%）"
+            assert x["招聘者职位"], "招聘者职位应有兜底文案"
+            assert "在线状态" in x and "回复文案" in x and "来源关键词" in x
+            assert isinstance(x["同公司岗位数"], int) and x["同公司岗位数"] >= 1
+        # 「区县」应从岗位地区里拆出来
+        assert any(x["区县"] for x in j["岗位"])
+
+    def test_reply_count_parsed(self):
+        """正常：今日回复数是**从文本解析出的数字**（如「今日回复40次」→40），不能恒为 0"""
+        st = client.get("/api/jobs/stats").json()
+        assert st["总体"]["有回复数据岗位数"] == 4624          # 与数据探查一致
+        j = client.get("/api/jobs", params={"sort": "reply", "size": 5}).json()
+        assert j["岗位"][0]["今日回复数"] > 0
+        nums = [x["今日回复数"] for x in j["岗位"]]
+        assert nums == sorted(nums, reverse=True)
+
+    def test_district_filter(self):
+        """正常：按区县筛选（厦门·思明）"""
+        j = client.get("/api/jobs", params={"city": "厦门", "district": "思明", "size": 5}).json()
+        assert j["总数"] == 303
+        assert all(x["城市"] == "厦门" and x["区县"] == "思明" for x in j["岗位"])
+        # 与城市总数对比：区县是城市的子集
+        total = client.get("/api/jobs", params={"city": "厦门", "size": 1}).json()["总数"]
+        assert 0 < j["总数"] < total
+
+    def test_abnormal_unknown_district(self):
+        """边界：不存在的区县 → 空结果而不是报错"""
+        j = client.get("/api/jobs", params={"city": "厦门", "district": "不存在区"}).json()
+        assert j["总数"] == 0 and j["岗位"] == []
+
+    def test_stats_district_index(self):
+        """正常：统计里的「按城市区县」索引可支撑区域筛选下拉"""
+        st = client.get("/api/jobs/stats").json()
+        assert "厦门" in st["按城市区县"]
+        xm = st["按城市区县"]["厦门"]
+        assert xm[0]["名称"] == "思明" and xm[0]["数量"] == 303
+        total = client.get("/api/jobs", params={"city": "厦门", "size": 1}).json()["总数"]
+        covered = sum(x["数量"] for x in xm)
+        # 少数岗位的「岗位地区」没有区县段（厦门 1169 个里有 11 个），故只要求覆盖率 >99%
+        assert covered <= total and (total - covered) < total * 0.01
+        assert st["总体"]["区县数"] == 203
+
+    def test_stats_hot_keywords(self):
+        """正常：热门职位来自「来源关键词」列（爬虫当初用的 8 个搜索关键词）"""
+        st = client.get("/api/jobs/stats").json()
+        names = [x["名称"] for x in st["热门搜索"]]
+        assert len(names) == 8                       # 数据里只有 8 个不同来源关键词
+        assert "数据分析" in names and "测试" in names and "Java" in names
+        assert st["热门搜索"][0]["名称"] == "数据分析"
+        assert st["热门搜索"][0]["数量"] == 2564
+
+    def test_stats_category_nav(self):
+        """正常：分类导航 = 大类 → 该大类下的高频子职位（模拟 BOSS 分类面板）"""
+        st = client.get("/api/jobs/stats").json()
+        nav = st["分类导航"]
+        assert len(nav) == 9
+        assert sum(g["数量"] for g in nav) == 8836
+        test_grp = next(g for g in nav if g["大类"] == "测试")
+        subs = [s["名称"] for s in test_grp["子职位"]]
+        assert "测试工程师" in subs
+        assert all(s["数量"] >= 3 for s in test_grp["子职位"])   # 低于 3 个的不展示
+
+    def test_stats_hr_coverage(self):
+        """正常：招聘者职位覆盖率应如实反映数据（发布者身份非空率 74%）"""
+        st = client.get("/api/jobs/stats").json()
+        total = st["总体"]["岗位总数"]
+        assert st["总体"]["有招聘者职位数"] == 6549
+        assert 0.7 < st["总体"]["有招聘者职位数"] / total < 0.8
+

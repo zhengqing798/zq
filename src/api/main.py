@@ -120,13 +120,13 @@ def jobs_stats():
 
 
 @app.get("/api/jobs", response_model=schemas.JobListResponse, tags=["⓪ 首页"])
-def jobs_list(page: int = 1, size: int = 20, city: str = "", category: str = "",
-              keyword: str = "", salary_min: int = 0, edu: str = "", cluster: str = "",
-              sort: str = "default"):
-    """分页浏览全部岗位，支持城市/大类/学历/关键词/薪资下限/簇筛选与排序"""
+def jobs_list(page: int = 1, size: int = 20, city: str = "", district: str = "",
+              category: str = "", keyword: str = "", salary_min: int = 0, edu: str = "",
+              cluster: str = "", sort: str = "default"):
+    """分页浏览全部岗位，支持城市/区县/大类/学历/关键词/薪资下限/簇筛选与排序"""
     try:
         from src.api.jobs import get_store
-        r = get_store().query(page=page, size=size, city=city or None,
+        r = get_store().query(page=page, size=size, city=city or None, district=district or None,
                               category=category or None, keyword=keyword or None,
                               salary_min=salary_min or None, edu=edu or None,
                               cluster=cluster or None, sort=sort)

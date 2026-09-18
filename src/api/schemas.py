@@ -195,5 +195,8 @@ class JobStatsResponse(BaseModel):
     按经验: List[Dict[str, Any]]
     按簇: List[Dict[str, Any]]
     热门技能: List[Dict[str, Any]]
+    热门搜索: List[Dict[str, Any]] = []
+    按城市区县: Dict[str, List[Dict[str, Any]]] = {}
+    分类导航: List[Dict[str, Any]] = []
     筛选项: Dict[str, Any]
     来源: List[str] = []

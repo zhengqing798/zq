@@ -12,6 +12,7 @@ export interface JobQuery {
   page?: number
   size?: number
   city?: string
+  district?: string
   category?: string
   keyword?: string
   salary_min?: number

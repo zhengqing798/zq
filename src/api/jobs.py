@@ -49,6 +49,12 @@ def _num(v, default=-1):
         return default
 
 
+def _reply_num(s):
+    """「今日回复40次」/「今日回复50+次」→ 40 / 50（原始列是文本，不能直接 float）"""
+    m = re.search(r"(\d+)", s or "")
+    return int(m.group(1)) if m else 0
+
+
 class JobStore:
     """岗位浏览单例（进程内只加载一次）"""
 
@@ -63,13 +69,18 @@ class JobStore:
             jid = "J%04d" % (i + 1)
             region = (r["岗位地区"] or "").strip().split()
             city = region[0] if region else ""
+            district = region[1] if len(region) > 1 else ""
             tags = [t.strip() for t in (r["技能标签"] or "").split("|") if t.strip()]
             c1, c2 = clusters.get(jid, ("", ""))
+            # 「发布者身份」形如「人事经理 · 三一集团有限公司」→ 拆出招聘者职位
+            ident = (r["发布者身份"] or "").strip()
+            hr_title = ident.split("·")[0].strip() if ident else ""
             self.items.append({
                 "岗位ID": jid,
                 "岗位名称": (r["岗位名称"] or "").strip(),
                 "公司": (r["公司名称"] or "").strip(),
                 "城市": city,
+                "区县": district,
                 "省份": PROVINCE.get(city, ""),
                 "地区": (r["岗位地区"] or "").strip(),
                 "薪资": (r["岗位薪资"] or "").strip(),
@@ -83,9 +94,19 @@ class JobStore:
                 "岗位大类": job_category(r["岗位名称"]),
                 "一级簇名": c1,
                 "二级簇名": c2 if c2 and c2 != "—" else "",
-                "今日回复数": _num(r["今日回复数"], 0),
+                "今日回复数": _reply_num(r["今日回复数"]),
                 "是否在线": 1 if "在线" in (r["在线状态"] or "") else 0,
+                # —— 模拟 BOSS直聘「招聘者」行所需字段（全部来自真实数据）——
+                "招聘者": (r["发布者姓名"] or "").strip() or "招聘者",
+                "招聘者职位": hr_title or "招聘者",
+                "在线状态": (r["在线状态"] or "").strip(),
+                "回复文案": (r["今日回复数"] or "").strip(),
+                "来源关键词": (r["来源关键词"] or "").strip(),
+                "同公司岗位数": 0,
             })
+        comp_cnt = Counter(x["公司"] for x in self.items if x["公司"])
+        for it in self.items:
+            it["同公司岗位数"] = comp_cnt.get(it["公司"], 0)
         # 预计算筛选用的检索文本（岗位名称 + 公司 + 技能 + 描述）
         for it in self.items:
             it["_blob"] = (it["岗位名称"] + it["公司"] + it["技能标签原文"] +
@@ -100,11 +121,13 @@ class JobStore:
         return len(self.items)
 
     # ------------------------------------------------ 浏览与筛选
-    def query(self, page=1, size=20, city=None, category=None, keyword=None,
+    def query(self, page=1, size=20, city=None, district=None, category=None, keyword=None,
               salary_min=None, edu=None, cluster=None, sort="default"):
         rows = self.items
         if city:
             rows = [x for x in rows if x["城市"] == city]
+        if district:
+            rows = [x for x in rows if x["区县"] == district]
         if category:
             rows = [x for x in rows if x["岗位大类"] == category]
         if edu:
@@ -168,6 +191,29 @@ class JobStore:
         def q(arr, p):
             return arr[min(len(arr) - 1, int(len(arr) * p))] if arr else 0
 
+        # —— 按城市的区县分布（BOSS直聘 筛选项「区域」用）——
+        district_by_city = {}
+        for city in self.cities:
+            sub = [x["区县"] for x in self.items if x["城市"] == city and x["区县"]]
+            district_by_city[city] = [{"名称": k, "数量": v}
+                                     for k, v in Counter(sub).most_common()]
+
+        # —— 热门职位（用「来源关键词」，即这批岗位当初是用什么词搜到的）——
+        hot_kw = Counter(x["来源关键词"] for x in self.items if x["来源关键词"])
+
+        # —— 分类导航：大类 → 该大类下的高频岗位名（模拟 BOSS 的职位分类面板）——
+        nav = []
+        for cat, cnt in cats.most_common():
+            names = Counter(_norm_job_name(x["岗位名称"]) for x in self.items
+                            if x["岗位大类"] == cat)
+            subs = [{"名称": k, "数量": v} for k, v in names.most_common(8) if v >= 3]
+            nav.append({"大类": cat, "数量": cnt, "子职位": subs})
+
+        # —— 招聘者活跃度（BOSS直聘 卡片右侧那一行）——
+        online = sum(1 for x in self.items if x["是否在线"])
+        has_hr = sum(1 for x in self.items if x["招聘者职位"] != "招聘者")
+        replied = sum(1 for x in self.items if x["今日回复数"] > 0)
+
         return {
             "总体": {
                 "岗位总数": n,
@@ -177,7 +223,10 @@ class JobStore:
                 "平均薪资上限": int(sum(up) / len(up)) if up else 0,
                 "薪资下限中位数": q(lo, 0.5),
                 "薪资上限中位数": q(up, 0.5),
-                "在线岗位数": sum(x["是否在线"] for x in self.items),
+                "在线岗位数": online,
+                "区县数": len({x["区县"] for x in self.items if x["区县"]}),
+                "有招聘者职位数": has_hr,
+                "有回复数据岗位数": replied,
             },
             "按城市": [{"名称": k, "数量": v} for k, v in cities.most_common(16)],
             "按大类": [{"名称": k, "数量": v} for k, v in cats.most_common()],
@@ -185,12 +234,27 @@ class JobStore:
             "按经验": [{"名称": k, "数量": v} for k, v in exps.most_common()],
             "按簇": [{"名称": k, "数量": v} for k, v in clusters.most_common()],
             "热门技能": [{"名称": k, "数量": v} for k, v in skills.most_common(20)],
+            "热门搜索": [{"名称": k, "数量": v} for k, v in hot_kw.most_common(12)],
+            "按城市区县": district_by_city,
+            "分类导航": nav,
             "筛选项": {"城市": self.cities, "大类": self.categories,
                      "学历": self.edus, "省份": self.provinces,
                      "排序": [{"value": k, "label": v} for k, v in SORTS.items()]},
             "来源": ["zhaopin_jobs_cleaned_seg.csv（%d 个清洗后岗位）" % n,
                    "岗位聚类_标签.csv（任务7 聚类结果）"],
         }
+
+
+def _norm_job_name(name):
+    """岗位名称归一：去掉括号后缀、城市后缀与常见修饰词，便于统计"高频职位" """
+    s = (name or "").strip()
+    s = re.sub(r"[（(\[【][^）)\]】]*[）)\]】]", "", s)          # 去括号内容
+    s = re.sub(r"[-—_·|/]\s*(厦门|福州|泉州|漳州|莆田|宁德|南平|三明|龙岩|"
+               r"苏州|南京|无锡|常州|徐州|南通|扬州|镇江|"
+               r"杭州|宁波|温州|绍兴|嘉兴|金华|台州|湖州|丽水|舟山|"
+               r"合肥|芜湖|蚌埠|马鞍山|安庆|黄山|滁州|阜阳).*$", "", s)
+    s = re.sub(r"\s+", " ", s).strip(" -—_·|/")
+    return s or (name or "").strip()
 
 
 def _exp_bucket(s):
