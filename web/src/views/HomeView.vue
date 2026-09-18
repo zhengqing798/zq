@@ -31,21 +31,7 @@
       </div>
     </div>
 
-    <!-- ② 职位分类导航（分组面板） -->
-    <div class="catpanel">
-      <div v-for="g in st.分类导航.slice(0, 6)" :key="g.大类" class="row">
-        <div class="cat">
-          <a :class="{ on: category === g.大类 }" @click="pickCat(g.大类)">
-            {{ g.大类 }}<em>{{ g.数量 }}</em></a>
-        </div>
-        <div class="subs">
-          <a v-for="s in g.子职位" :key="s.名称" @click="kw = s.名称; category = ''; search()">
-            {{ s.名称 }}<em>{{ s.数量 }}</em></a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ③ 筛选栏 -->
+    <!-- ② 筛选栏 -->
     <div class="filters">
       <div class="frow">
         <span class="flb">区域：</span>
@@ -73,7 +59,7 @@
       </div>
     </div>
 
-    <!-- ④ 结果统计 -->
+    <!-- ③ 结果统计 -->
     <div class="resultbar">
       <span>共 <b class="num">{{ fmt(list.总数) }}</b> 个职位</span>
       <span class="muted">{{ city || '全部城市' }}{{ district ? ' · ' + district : '' }}{{ category ? ' · ' + category : '' }}{{ kw ? ' · ' + kw : '' }}</span>
@@ -85,7 +71,7 @@
       </span>
     </div>
 
-    <!-- ⑤ 职位列表（左：职位 / 右：公司 + 招聘者） -->
+    <!-- ④ 职位列表（左：职位 / 右：公司 + 招聘者） -->
     <div v-loading="loading" class="joblist">
       <div v-for="j in list.岗位" :key="j.岗位ID" class="jcard" @click="open(j)">
         <div class="left">
@@ -125,7 +111,7 @@
                    :total="list.总数" :page-size="size" :current-page="page"
                    class="pager" @current-change="turn" />
 
-    <!-- ⑥ 职位详情抽屉 -->
+    <!-- ⑤ 职位详情抽屉 -->
     <el-drawer v-model="drawer" size="46%" :title="cur?.岗位名称 || ''">
       <template v-if="cur">
         <div class="dt1">
@@ -251,10 +237,6 @@ function pickCity(c: string) {
   district.value = ''
   search()
 }
-function pickCat(c: string) {
-  category.value = category.value === c ? '' : c
-  search()
-}
 function setDistrict(d: string) { district.value = d; search() }
 function setSalary(v: number) { salaryMin.value = salaryMin.value === v ? 0 : v; search() }
 function setEdu(e: string) { edu.value = edu.value === e ? '' : e; search() }
@@ -314,18 +296,8 @@ onMounted(async () => {
 .hot a { color: #41506b; margin-right: 14px; cursor: pointer; }
 .hot a:hover { color: var(--el-color-primary); }
 
-/* ---------- 分类面板 ---------- */
-.catpanel { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
-  padding: 12px 18px; margin-top: 12px; }
-.catpanel .row { display: flex; padding: 6px 0; border-bottom: 1px dashed #f2f6fb; }
-.catpanel .row:last-child { border-bottom: none; }
-.catpanel .cat { width: 120px; flex: none; }
-.catpanel .cat a { font-weight: 700; color: #16233a; cursor: pointer; font-size: 14px; }
-.catpanel .cat a.on { color: var(--el-color-primary); }
-.catpanel .subs { display: flex; flex-wrap: wrap; gap: 4px 14px; flex: 1; }
-.catpanel .subs a { color: #5b6b7f; font-size: 13px; cursor: pointer; }
-.catpanel .subs a:hover { color: var(--el-color-primary); }
-.catpanel em, .filters em { font-style: normal; color: #b3bfd0; font-size: 11.5px; margin-left: 3px; }
+/* ---------- 筛选栏 ---------- */
+.filters em { font-style: normal; color: #b3bfd0; font-size: 11.5px; margin-left: 3px; }
 
 /* ---------- 筛选栏 ---------- */
 .filters { background: #fff; border: 1px solid var(--zq-border); border-radius: 12px;
