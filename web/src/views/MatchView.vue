@@ -103,23 +103,6 @@
             </div>
             <div class="muted" style="margin-top:8px">💡 {{ j.推荐理由 }}</div>
           </div>
-
-          <el-collapse style="margin-top:12px">
-            <el-collapse-item title="📎 来源（可追溯到数据文件/报告）">
-              <div class="src-list">
-                <div v-for="s in result.来源" :key="s"><code>{{ s }}</code></div>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="⚠️ 已知局限（如实说明）">
-              <div class="muted" style="line-height:1.95">
-                · <b>无人工金标</b>：真值都由规则生成，不能宣称「准确率 X%」<br />
-                · 简历侧为合成数据（500 份），岗位侧 8,836 条为真实抓取<br />
-                · 只覆盖 16 城 / 4 省（闽浙苏皖）<br />
-                · <code>经验要求</code> 字段 24.69% 错位，系统按「信息缺失」处理<br />
-                · 在线推荐用规则口径（可解释）；模型口径是规则的蒸馏（Spearman 0.9909）
-              </div>
-            </el-collapse-item>
-          </el-collapse>
         </section>
       </div>
     </div>
@@ -154,7 +137,7 @@
         <div class="chat-bubble">{{ cur.推荐理由 }}</div>
 
         <el-divider />
-        <div class="zq-section" style="margin-top:0">评分双口径（任务5 模型 / 任务6 规则）</div>
+        <div class="zq-section" style="margin-top:0">评分对比</div>
         <el-button size="small" :loading="scoring" @click="doScore">计算该岗位的模型分</el-button>
         <div v-if="score" style="margin-top:10px">
           <el-descriptions :column="2" border size="small">
@@ -167,7 +150,6 @@
             <el-descriptions-item label="两者差异">
               {{ score.差异 ?? '—' }} 分</el-descriptions-item>
           </el-descriptions>
-          <div class="muted" style="margin-top:8px">{{ score.模型口径.口径说明 }}</div>
         </div>
 
         <el-divider />

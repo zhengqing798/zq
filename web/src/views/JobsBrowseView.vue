@@ -1,9 +1,6 @@
 <template>
   <div class="jobs">
     <div class="zq-page-title">岗位</div>
-    <div class="zq-page-desc">
-      全部 <b>{{ fmt(st.总体.岗位总数) }}</b> 个真实岗位 ｜ 支持城市 / 区域 / 薪资 / 学历 / 关键词筛选
-    </div>
 
     <!-- ① 顶部：城市切换 + 搜索 + 热门职位 -->
     <div class="topbar">

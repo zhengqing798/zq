@@ -5,9 +5,7 @@
       <div class="trow">
         <div>
           <div class="h1">公司广场</div>
-          <div class="sub">
-            数据来源：{{ st.来源[0] || '真实抓取岗位表' }} ｜ 点公司卡片查看该公司的<b>全部在招职位</b>
-          </div>
+          <div class="sub">点公司卡片查看该公司的<b>全部在招职位</b></div>
         </div>
         <el-input v-model="kw" size="large" class="sinput" placeholder="搜索公司名称，如 软通动力"
                   clearable @keyup.enter="search">
@@ -30,7 +28,7 @@
       <!-- ② 左栏：榜单 + 口径 -->
       <aside class="side">
         <div class="zq-card pad panel">
-          <div class="zq-section" style="margin-top:0">热门企业 · 在招职位最多</div>
+          <div class="zq-section" style="margin-top:0">热门企业</div>
           <a v-for="(c, i) in st.热门企业.slice(0, 10)" :key="c.公司ID" class="rank"
              @click="go(c)">
             <b :class="{ top3: i < 3 }">{{ i + 1 }}</b>
@@ -40,7 +38,7 @@
         </div>
 
         <div class="zq-card pad panel">
-          <div class="zq-section">最活跃企业 · 今日回复最多</div>
+          <div class="zq-section">最活跃企业</div>
           <a v-for="(c, i) in st.最活跃企业.slice(0, 6)" :key="c.公司ID" class="rank"
              @click="go(c)">
             <b :class="{ top3: i < 3 }">{{ i + 1 }}</b>

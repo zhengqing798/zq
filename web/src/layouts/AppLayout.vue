@@ -47,11 +47,6 @@
 
   <div class="zq-main">
     <router-view />
-    <el-divider />
-    <div class="muted" style="text-align:center">
-      岗位-简历人岗匹配推荐系统 ｜ 任务11 前后端集成（Vue3 + Element Plus 前端 · FastAPI 后端）
-      ｜ 数据：8,836 岗位 / 500 简历 / 8,852 知识卡片 ｜ 每个结论都带 <b>来源</b>
-    </div>
   </div>
 </template>
 

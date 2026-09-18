@@ -47,7 +47,7 @@
     </div>
 
     <!-- ③ 地区推荐 -->
-    <div class="zq-section">地区推荐<em class="sub">按岗位数排序，点卡片看该地区岗位</em></div>
+    <div class="zq-section">地区推荐</div>
     <div class="regions">
       <div v-for="r in st.地区推荐" :key="r.城市" class="rcard" @click="goJobs({ city: r.城市 })">
         <div class="rc1"><b>{{ r.城市 }}</b><em>{{ r.省份 }}</em></div>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- ④ 高薪岗位推荐 -->
-    <div class="zq-section">高薪岗位推荐<em class="sub">按该岗位薪资上限（元/月）排序</em></div>
+    <div class="zq-section">高薪岗位推荐</div>
     <div class="jobgrid">
       <div v-for="(j, i) in st.高薪岗位" :key="j.岗位ID" class="jmini" @click="openJob(j.岗位ID)">
         <div class="jm1">
@@ -85,8 +85,7 @@
     </div>
 
     <!-- ⑤ 热门岗位推荐 -->
-    <div class="zq-section">热门岗位推荐
-      <em class="sub">按招聘者「今日回复数」排序（在线优先）</em></div>
+    <div class="zq-section">热门岗位推荐</div>
     <div class="jobgrid">
       <div v-for="j in st.热门岗位" :key="j.岗位ID" class="jmini" @click="openJob(j.岗位ID)">
         <div class="jm1">
@@ -108,24 +107,20 @@
     </div>
 
     <!-- ⑥ 热门企业 -->
-    <div class="zq-section">热门企业<em class="sub">按在招职位数排序，点卡片看全部在招岗位</em></div>
+    <div class="zq-section">热门企业</div>
     <div class="compgrid">
       <CompanyCard v-for="c in st.热门企业" :key="c.公司ID" :c="c" compact
                    @open="goCompanyCard" @job="openJob" />
     </div>
 
     <!-- ⑦ 热门技能 -->
-    <div class="zq-section">热门技能<em class="sub">点标签搜相关岗位</em></div>
+    <div class="zq-section">热门技能</div>
     <div class="skills">
       <a v-for="s in st.热门技能" :key="s.名称" class="skill" @click="goJobs({ keyword: s.名称 })">
         {{ s.名称 }}<em>{{ s.数量 }}</em></a>
     </div>
 
-    <!-- 数据来源与口径（一行小字，完整说明见《系统设计文档》§3.9/§3.10） -->
-    <div class="foot">
-      <span class="muted">{{ st.口径说明.join(' ') }}</span>
-      <span class="muted">数据来源：{{ st.来源.join('、') }}</span>
-    </div>
+    <!-- 数据来源与口径不再展示在页面上（接口仍返回，文档里仍记录） -->
 
     <JobDetailDrawer v-model="drawer" :job-id="curJob" />
   </div>
@@ -136,8 +131,8 @@
  * 首页 = 推荐页（游客可用）：热门分类 hero 轮播 → 地区推荐 → 高薪岗位 →
  * 热门岗位 → 热门企业 → 热门技能。
  *
- * 所有榜单都来自真实列，排序口径写在每节标题旁 + 页面底部（接口也返回 `口径说明`）。
- * 点任意岗位/公司都会跳到对应详情，形成"首页 → 岗位/公司 → 职位详情"的动线。
+ * 所有榜单都来自真实列；排序口径由接口 `口径说明` 返回并记录在《系统设计文档》§3.10，
+ * 页面上不再展示这类说明文字（按使用者要求：页面上不放口径/来源描述）。
  */
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -177,7 +172,6 @@ onMounted(async () => {
 <style scoped>
 .home { max-width: 1180px; margin: 0 auto; }
 .muted { color: #8896ab; font-size: 12.5px; }
-.zq-section .sub { font-weight: 500; font-size: 12.5px; color: #8896ab; margin-left: 10px; }
 
 /* ---------- Hero 轮播 ---------- */
 .hero { border-radius: 14px; overflow: hidden; }
@@ -274,9 +268,6 @@ onMounted(async () => {
 .skill em { font-style: normal; color: #b3bfd0; font-size: 11.5px; margin-left: 5px; }
 
 /* ---------- 底部 ---------- */
-.foot { margin-top: 20px; display: flex; flex-direction: column; gap: 4px;
-  line-height: 1.7; }
-
 @media (max-width: 900px) {
   .slide { flex-direction: column; padding: 16px; }
   .sright { width: auto; }

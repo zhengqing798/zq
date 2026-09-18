@@ -167,8 +167,6 @@
               <el-button type="primary" @click="savePw">修改密码</el-button>
             </el-form-item>
           </el-form>
-          <el-alert type="info" :closable="false"
-                    title="口令以 PBKDF2-HMAC-SHA256（20 万次迭代 + 每用户随机盐）存储，不保存明文；登录令牌 7 天有效，退出即失效" />
         </div>
       </el-tab-pane>
     </el-tabs>

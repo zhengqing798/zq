@@ -116,16 +116,6 @@
                          @open="go" @job="openJob" />
             <div v-if="!c.相似公司.length" class="muted">没有同为「{{ c.主要城市 }} · {{ c.主要大类 }}」的其他公司</div>
           </div>
-
-          <div class="zq-card pad panel">
-            <div class="zq-section">数据来源</div>
-            <ul class="notes">
-              <li>公司档案由该公司在招的 {{ c.在招岗位数 }} 个真实岗位聚合而来（不含行业/融资等未采集字段）。</li>
-              <li v-if="c.来源关键词.length">
-                这些岗位当初由以下关键词搜到：{{ c.来源关键词.map((x) => x.名称).join('、') }}。</li>
-              <li>{{ sizeTip }}。</li>
-            </ul>
-          </div>
         </aside>
       </div>
     </template>
