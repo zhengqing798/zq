@@ -1,9 +1,8 @@
 <template>
   <div class="login-wrap">
     <div class="login-box">
-      <!-- 极简品牌头（原来的左栏大面板已按要求删除） -->
+      <!-- 极简品牌头（左栏大面板与 logo 均已按要求删除，只留文字） -->
       <div class="brand">
-        <div class="logo">🎯</div>
         <div class="name">人岗匹配推荐系统</div>
       </div>
 
@@ -103,14 +102,8 @@ async function doRegister() {
 .login-box { width: 100%; max-width: 420px; display: flex; flex-direction: column;
   align-items: center; }
 
-/* 极简品牌头 */
-.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-.brand .logo {
-  width: 40px; height: 40px; border-radius: 11px; font-size: 21px;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #00a6a7, #12c2b4);
-  box-shadow: 0 6px 16px rgba(0, 166, 167, .32);
-}
+/* 极简品牌头（logo 已删除，只居中显示系统名） */
+.brand { display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
 .brand .name { font-size: 19px; font-weight: 800; color: #16233a; letter-spacing: .3px; }
 
 /* 卡片：只留一层柔和投影，去掉多余边框，宽度收敛到 420 */

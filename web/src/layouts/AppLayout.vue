@@ -1,9 +1,8 @@
 <template>
   <div class="zq-header">
     <div class="zq-header-inner">
-      <!-- 左：品牌 -->
+      <!-- 左：品牌（logo 已按反馈删除，只留文字） -->
       <div class="zq-brand" @click="router.push('/jobs')">
-        <div class="logo">🎯</div>
         <div>
           <div class="name">人岗匹配推荐</div>
           <div class="sub">岗位-简历智能匹配系统</div>

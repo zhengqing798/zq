@@ -45,12 +45,6 @@ body {
   display: flex; align-items: center; gap: 26px; padding: 0 20px;
 }
 .zq-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.zq-brand .logo {
-  width: 34px; height: 34px; border-radius: 9px; color: #fff; font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #00a6a7, #12c2b4);
-  box-shadow: 0 4px 12px rgba(0, 166, 167, .35);
-}
 .zq-brand .name { font-size: 16.5px; font-weight: 800; line-height: 1.15; }
 .zq-brand .sub { font-size: 11px; color: var(--zq-sub); }
 .zq-nav { display: flex; align-items: center; gap: 4px; flex: 1; }
