@@ -30,8 +30,13 @@ sys.path.insert(0, HERE)
 from prompts import PROMPT_VERSION, SYSTEM_PROMPT          # noqa: E402
 from tools import TOOLS, call_tool                          # noqa: E402
 
-CACHE_PATH = os.path.join(ROOT, "data", "rag", "agent_cache.json")
-LOG_PATH = os.path.join(ROOT, "data", "rag", "agent_calls.jsonl")
+# 缓存与调用日志的落盘位置。
+# 本地默认写仓库内的 data/rag/；容器化部署（任务12）时由环境变量指到挂卷 /app/var 下 ——
+# 镜像里的 data/ 是只读资产层，运行期数据不该写进去（重建容器就会丢）。
+CACHE_PATH = os.environ.get("AGENT_CACHE",
+                            os.path.join(ROOT, "data", "rag", "agent_cache.json"))
+LOG_PATH = os.environ.get("AGENT_LOG",
+                          os.path.join(ROOT, "data", "rag", "agent_calls.jsonl"))
 MAX_ROUNDS = 6
 MAX_TOOL_CALLS = 12
 TIMEOUT = 90
@@ -42,6 +47,14 @@ MAX_HISTORY_TURNS = 6        # 最多带几轮上下文
 
 
 def load_env():
+    """读取大模型配置：**环境变量优先，`.env` 文件兜底**。
+
+    顺序不能反，容器化部署（任务12）就卡在这里：
+      · docker compose 用 `env_file` 把宿主机的 `.env` 注入成容器内的**环境变量**，
+        镜像里根本不存在 `.env` 文件 —— 若这里只读文件，容器里会直接报"缺少 API Key"；
+      · 本地开发保持原样：只放一个 `.env` 文件即可，行为与之前完全一致；
+      · 两者同时存在时环境变量胜出（12-Factor：配置属于运行环境，不属于代码目录）。
+    """
     env = {}
     path = os.path.join(ROOT, ".env")
     if os.path.exists(path):
@@ -50,6 +63,9 @@ def load_env():
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip()
+    for k in ("DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL", "DEEPSEEK_MODEL"):
+        if os.environ.get(k):
+            env[k] = os.environ[k]
     return env
 
 

@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+# 任务12 · torch 单独钉一个文件，因为它必须走 CPU 专用源
+#
+# 为什么不能跟着 requirements.lock.txt 一起从 PyPI 装：
+#   PyPI 上 Linux 版 torch 默认是 CUDA 构建，会连带装 nvidia-cublas / nvidia-cudnn 等
+#   约 2.5GB 的依赖；本项目只用 CPU 做 BGE 向量推理，这些包一个都用不上。
+#
+# 为什么不用"更小的模型库"绕开 torch：
+#   RAG 的检索口径（BAAI/bge-small-zh-v1.5，512 维，P@5=0.353）是任务10 已经验证并写进
+#   《大模型应用文档》的结论，换掉模型等于换掉口径，本地验证过的数字就不再适用。
+#
+# 版本与本地验证环境一致：torch 2.5.1+cpu（Python 3.12）
+torch==2.5.1

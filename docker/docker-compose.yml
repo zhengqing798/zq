@@ -1,10 +1,88 @@
-# 任务12 docker-compose 多容器编排
-# TODO(2026-09-22)：编排 app（FastAPI）+ 向量库等，示例结构如下，正式实现时补全
-# services:
-#   api:
-#     build: ..
-#     ports: ["8000:8000"]
-#     env_file: .env
-#   chroma:
-#     image: chromadb/chroma
-#     ports: ["8001:8000"]
+# ============================================================================
+# 任务12 · docker-compose 多容器编排
+#
+#   web（Nginx）  对外唯一入口 80：托管前端静态产物 + 把 /api 反向代理到 api
+#   api（FastAPI）仅内网 8000：岗位浏览 / 六维匹配 / XGBoost 评分 / RAG 检索 / Agent 问答
+#
+# 为什么只有两个容器（不硬凑数量）
+#   · 项目用 FAISS IndexFlatIP 做进程内检索：8,852 条 × 512 维只占 17MB，
+#     一次矩阵乘约 30ms。拆成独立"向量库服务"只会多一次网络往返 + 一份向量
+#     序列化开销，没有收益。所以早期占位里写的 chromadb 容器**实际未采用**，
+#     选型对比见 docs/大模型应用文档.md。
+#   · 真正值得独立成容器的是"有状态 + 需要独立扩缩"的组件，本项目只有 Nginx 这一个。
+#   · 若以后要把 Agent 会话态/缓存改成多实例共享，再引入 redis 即可；
+#     本期用「进程内内存 + 磁盘缓存 + 数据卷」已经够用。
+#
+# 数据库不在容器里单开：sqlite 单文件在 /app/var（挂卷），
+# 对这个量级（几百用户、几千条简历）比引入 MySQL/Postgres 更划算，也少一个故障点。
+#
+# 使用（在仓库根目录执行）
+#   docker compose -f docker/docker-compose.yml up -d --build     # 构建并启动
+#   docker compose -f docker/docker-compose.yml ps                # 看健康状态
+#   docker compose -f docker/docker-compose.yml logs -f api       # 看后端日志
+#   docker compose -f docker/docker-compose.yml down              # 停止（保留数据卷）
+#   docker compose -f docker/docker-compose.yml down -v           # 停止并删数据卷
+# ============================================================================
+name: zq
+
+services:
+  # ---------------------------------------------------------------- 后端 API
+  api:
+    build:
+      context: ..                      # 上下文 = 仓库根目录（Dockerfile 要用 data/ 与 models/）
+      dockerfile: docker/Dockerfile
+    image: zq-api:1.0.0
+    container_name: zq-api
+    restart: unless-stopped
+
+    # DEEPSEEK_API_KEY 只从宿主机 .env 注入。
+    # 镜像里没有 .env（.dockerignore 已排除），所以密钥不会留在任何一层里。
+    env_file:
+      - ../.env
+    environment:
+      APP_DB: /app/var/app.db
+      AGENT_CACHE: /app/var/agent_cache.json
+      AGENT_LOG: /app/var/agent_calls.jsonl
+      TZ: Asia/Shanghai
+
+    volumes:
+      # 用户 / 简历 / 收藏 / 匹配历史 / Agent 缓存与调用日志 —— 容器重建不丢
+      - zq-var:/app/var
+
+    # 只在内网暴露：公网入口只有 web 的 80，后端端口不对外
+    expose:
+      - "8000"
+
+    # healthcheck 来自 Dockerfile（curl /api/health），web 依赖它决定何时启动
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------- 前端 + 网关
+  web:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    image: zq-web:1.0.0
+    container_name: zq-web
+    restart: unless-stopped
+
+    # 等后端真正健康（预加载完成）再启动，避免首访用户撞上 502
+    depends_on:
+      api:
+        condition: service_healthy
+
+    ports:
+      - "80:80"
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  zq-var:
+    name: zq-var

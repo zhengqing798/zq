@@ -1,0 +1,62 @@
+# ============================================================================
+# 任务12 · Docker 构建上下文排除清单
+#
+# ⚠️ 这个文件不是可选项：不写的话 build context 会带上 web/node_modules（232MB）
+#    和 .venv，构建一开始就要把 300MB+ 传给 Docker daemon，慢且无意义。
+#    带 . 的密钥文件更是必须排除 —— 绝不能让它进入镜像的任何一层。
+# ============================================================================
+
+# ---------- 版本控制 / 编辑器 ----------
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+*.swp
+
+# ---------- Python 虚拟环境与缓存 ----------
+# 本机是 Windows 版 venv，容器里用不了；容器内依赖由 requirements.lock.txt 装
+.venv
+venv
+env
+__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.coverage
+htmlcov
+
+# ---------- 前端 ----------
+# node_modules 在容器里由 `npm ci` 重装（232MB，且含 Windows 平台二进制）
+# dist 由 frontend.Dockerfile 的 builder 阶段产出，不需要从宿主机传
+web/node_modules
+web/dist
+
+# ---------- 密钥：绝不允许进入镜像 ----------
+# 运行时由 docker compose 的 env_file 从宿主机注入
+.env
+.env.*
+!.env.example
+
+# ---------- 本地数据库：含用户账号与密码哈希，绝不入镜像 ----------
+# 容器内数据库落在 /app/var/app.db（compose 挂卷持久化）
+data/app.db
+**/*.db
+**/*.db-journal
+**/*.sqlite3
+
+# ---------- 本机 Agent 运行痕迹 ----------
+# 这两个文件会在本地每跑一次问答/测试就变化，且含本机提问记录；
+# 容器内由 AGENT_CACHE / AGENT_LOG 指到挂卷 /app/var 下，各写各的
+data/rag/agent_cache.json
+data/rag/agent_calls.jsonl
+
+# ---------- 报表 / 笔记本 / 爬虫临时产物 ----------
+reports
+notebooks
+.zhaopin_anon
+.zhaopin_profile
+.streamlit
+*.log
+*.tmp
+*.tmpdir
