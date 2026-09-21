@@ -6,16 +6,6 @@
       ｜ 注册于 {{ auth.user?.created_at }}
     </div>
 
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="v">{{ myResume ? '已保存' : '未保存' }}</div>
-        <div class="l">我的简历</div>
-      </div>
-      <div class="kpi"><div class="v">{{ stats['收藏岗位数'] ?? 0 }}</div><div class="l">收藏岗位</div></div>
-      <div class="kpi"><div class="v">{{ stats['匹配次数'] ?? 0 }}</div><div class="l">匹配次数</div></div>
-      <div class="kpi"><div class="v">{{ stats['提问次数'] ?? 0 }}</div><div class="l">提问次数</div></div>
-    </div>
-
     <el-tabs v-model="tab" style="margin-top:14px">
       <!-- 我的简历：粘贴 / 上传 PDF → 解析 → 匹配（原来的「简历」页已并入此处） -->
       <el-tab-pane label="📁 我的简历" name="resumes">
@@ -181,7 +171,6 @@ const router = useRouter()
 
 const tab = ref('resumes')
 const loading = ref(false)
-const stats = ref<Record<string, number>>({})
 const resumes = ref<ResumeRow[]>([])
 const favorites = ref<FavoriteRow[]>([])
 
@@ -207,7 +196,7 @@ async function refresh() {
     const [s, r, f] = await Promise.all([
       api.getStats(), api.listResumes(), api.listFavorites(),
     ])
-    stats.value = s.统计
+    // 顶部那 4 个统计卡已按反馈删除；这里仍调 getStats() 是为了拿「用户」资料回填账号设置
     resumes.value = r.简历
     favorites.value = f.收藏
     pf.nickname = s.用户.nickname

@@ -1,31 +1,19 @@
 <template>
   <div>
     <div class="zq-page-title">岗位推荐</div>
-    <div class="zq-page-desc">
-      用你的简历做六维加权匹配 ｜ 简历在
-      <router-link to="/profile">个人中心</router-link> 粘贴或上传 PDF
-    </div>
 
     <!-- ① 顶部控制 + 筛选（全部在顶部，没有侧边栏） -->
     <div class="zq-card pad">
       <div class="ctrl">
         <div class="fld">
           <span class="lb">使用简历</span>
-          <el-select v-model="src" style="width:210px" placeholder="选择简历">
+          <el-select v-model="src" style="width:240px" placeholder="选择简历">
             <el-option label="本次解析的简历" value="current" :disabled="!resume.resumeId" />
             <el-option v-for="r in savedList" :key="r.id"
                        :label="'📁 ' + r.title" :value="'saved:' + r.id" />
           </el-select>
         </div>
-        <div class="fld">
-          <span class="lb">返回条数</span>
-          <el-slider v-model="topN" :min="10" :max="50" :step="10" style="width:150px" />
-          <el-tag effect="plain">{{ topN }} 条</el-tag>
-        </div>
         <el-button type="primary" :loading="loading" @click="doMatch">重新推荐</el-button>
-        <span v-if="!resume.canMatch()" class="muted">
-          还没有简历 → 去 <router-link to="/profile">个人中心</router-link> 粘贴或上传 PDF 简历
-        </span>
       </div>
 
       <!-- 优先维度（点一下换排序口径） -->
@@ -132,7 +120,7 @@ const router = useRouter()
 
 const loading = ref(false)
 const src = ref('current')
-const topN = ref(50)                    // 默认拉满 50 条
+const topN = ref(50)                    // 固定拉满评分最高的 50 条（页面上不再放条数控件）
 const savedList = ref<ResumeRow[]>([])
 const result = ref(resume.matchResult)
 
