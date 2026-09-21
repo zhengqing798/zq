@@ -28,16 +28,22 @@
           <div class="hright">
             <div class="salary">{{ job.薪资 || '薪资面议' }}</div>
             <div class="acts">
-              <el-button type="primary" :disabled="!auth.isLogged()" @click="fav">⭐ 收藏</el-button>
+              <!-- 收藏：未收藏是空心灰星，收藏后变黄星（再点一次取消）
+                   星标颜色用行内样式绑定：Element Plus 的按钮 color / hover 会盖掉 scoped 类选择器 -->
+              <el-button class="favbtn" :class="{ faved }" :disabled="!auth.isLogged()"
+                         :loading="faving"
+                         :style="faved ? { borderColor: '#f7ba2a', color: '#b8860b', background: '#fffbf0' } : {}"
+                         @click="toggleFav">
+                <el-icon :style="{ color: faved ? '#f7ba2a' : '#c8d2e0', fontSize: '16px' }">
+                  <StarFilled v-if="faved" />
+                  <Star v-else />
+                </el-icon>
+                <span>{{ faved ? '已收藏' : '收藏' }}</span>
+              </el-button>
               <el-button :disabled="!resume.canMatch()" :loading="scoring" @click="doScore">
                 用我的简历算匹配分</el-button>
             </div>
             <div v-if="!auth.isLogged()" class="muted">登录后可收藏</div>
-            <div v-else-if="!resume.canMatch()" class="muted">
-              还没有简历 → 去
-              <el-button link type="primary" @click="router.push('/profile')">个人中心</el-button>
-              粘贴或上传 PDF
-            </div>
           </div>
         </div>
       </div>
@@ -132,6 +138,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Star, StarFilled } from '@element-plus/icons-vue'
 import * as api from '../api'
 import type { JobItem } from '../api/jobs'
 import type { JobRec, ScoreResp } from '../api/types'
@@ -150,6 +157,9 @@ const loading = ref(false)
 const job = ref<JobItem | null>(null)
 const score = ref<ScoreResp | null>(null)
 const scoring = ref(false)
+const faving = ref(false)
+/** 当前岗位是否已被我收藏（决定星星是空心灰还是实心黄） */
+const faved = ref(false)
 const siblings = ref<{ 岗位ID: string; 岗位名称: string; 薪资: string }[]>([])
 
 /** 本次会话的匹配结果里如果有这个岗位，就把匹配详情带出来 */
@@ -196,8 +206,16 @@ async function load() {
   score.value = null
   siblings.value = []
   job.value = null
+  faved.value = false
   try {
     job.value = (await api.jobDetail(id)) as JobItem
+    // 是否已收藏（登录时查一次我的收藏列表，决定星星颜色）
+    if (auth.isLogged()) {
+      try {
+        const f = await api.listFavorites()
+        faved.value = (f.收藏 || []).some((x) => x.job_id === job.value?.岗位ID)
+      } catch { /* 拿不到收藏态就按未收藏显示 */ }
+    }
     // 同公司其他在招岗位（有公司ID时才能取）
     if (job.value.公司ID) {
       try {
@@ -221,12 +239,22 @@ async function doScore() {
   finally { scoring.value = false }
 }
 
-async function fav() {
-  if (!job.value) return
+/** 收藏 / 取消收藏：收藏后星星变黄，再点一次取消 */
+async function toggleFav() {
+  if (!job.value || faving.value) return
+  faving.value = true
   try {
-    const r = await api.addFavorite(job.value.岗位ID)
-    ElMessage.success(r.message || '已收藏')
+    if (faved.value) {
+      const r = await api.removeFavorite(job.value.岗位ID)
+      faved.value = false
+      ElMessage.success(r.message || '已取消收藏')
+    } else {
+      const r = await api.addFavorite(job.value.岗位ID)
+      faved.value = true
+      ElMessage.success(r.message || '已收藏')
+    }
   } catch { /* 拦截器已提示 */ }
+  finally { faving.value = false }
 }
 
 watch(() => route.params.id, load)
@@ -252,6 +280,9 @@ onMounted(load)
 .salary { font-size: 24px; font-weight: 800; color: #ff6a00; white-space: nowrap; }
 .acts { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
 .acts :deep(.el-button) { margin-left: 0; }
+
+/* 收藏按钮：类名保留（便于测试选择与主题覆盖），颜色由模板里的行内样式控制 */
+.favbtn .star { font-size: 16px; }
 
 .layout { display: flex; gap: 16px; align-items: flex-start; margin-top: 14px; }
 .main { flex: 1; min-width: 0; }

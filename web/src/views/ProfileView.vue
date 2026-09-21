@@ -50,7 +50,7 @@
                   <el-button @click="goMatch">去岗位推荐 →</el-button>
                 </div>
               </template>
-              <el-empty v-else description="还没有简历：在左边粘贴正文或在这里上传 PDF，然后点保存" />
+              <el-empty v-else description="在左边粘贴正文或在这里上传 PDF，然后点保存" />
             </div>
 
             <div v-if="resume.parsed" class="zq-card pad" style="margin-top:12px">
