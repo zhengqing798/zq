@@ -6,12 +6,12 @@
       <router-link to="/profile">个人中心</router-link> 粘贴或上传 PDF
     </div>
 
-    <!-- 匹配控制条 -->
+    <!-- ① 顶部控制 + 筛选（全部在顶部，没有侧边栏） -->
     <div class="zq-card pad">
       <div class="ctrl">
         <div class="fld">
           <span class="lb">使用简历</span>
-          <el-select v-model="src" style="width:230px" placeholder="选择简历">
+          <el-select v-model="src" style="width:210px" placeholder="选择简历">
             <el-option label="本次解析的简历" value="current" :disabled="!resume.resumeId" />
             <el-option v-for="r in savedList" :key="r.id"
                        :label="'📁 ' + r.title" :value="'saved:' + r.id" />
@@ -19,101 +19,95 @@
         </div>
         <div class="fld">
           <span class="lb">返回条数</span>
-          <el-slider v-model="topN" :min="5" :max="50" :step="5" style="width:170px" />
+          <el-slider v-model="topN" :min="10" :max="50" :step="10" style="width:150px" />
           <el-tag effect="plain">{{ topN }} 条</el-tag>
         </div>
-        <el-button type="primary" :loading="loading" @click="doMatch">开始匹配</el-button>
+        <el-button type="primary" :loading="loading" @click="doMatch">重新推荐</el-button>
         <span v-if="!resume.canMatch()" class="muted">
           还没有简历 → 去 <router-link to="/profile">个人中心</router-link> 粘贴或上传 PDF 简历
         </span>
       </div>
-    </div>
 
-    <!-- 结果区 -->
-    <div v-if="result" style="margin-top:16px">
-      <div class="kpi-row">
-        <div class="kpi"><div class="v">{{ result.推荐数 }}</div><div class="l">推荐岗位数</div></div>
-        <div class="kpi"><div class="v">{{ result.打分范围 }}</div><div class="l">打分范围（个岗位）</div></div>
-        <div class="kpi"><div class="v">{{ result.权重版本 }}</div><div class="l">匹配权重版本</div></div>
-        <div class="kpi"><div class="v">{{ result.耗时秒 }} s</div><div class="l">全量打分耗时</div></div>
-        <div class="kpi"><div class="v">{{ filtered.length }}</div><div class="l">当前筛选后条数</div></div>
+      <!-- 优先维度（点一下换排序口径） -->
+      <div class="frow">
+        <span class="flb">优先：</span>
+        <a v-for="p in PRIORITIES" :key="p.value" :class="{ on: priority === p.value }"
+           @click="priority = p.value">{{ p.label }}</a>
       </div>
 
-      <div class="layout">
-        <!-- 左侧筛选栏（招聘网站风格） -->
-        <aside>
-          <div class="zq-card pad">
-            <div class="zq-section" style="margin-top:0">筛选</div>
-            <div class="lb">城市</div>
-            <el-select v-model="fCity" clearable placeholder="全部城市" style="width:100%">
-              <el-option v-for="c in cities" :key="c" :label="c" :value="c" />
-            </el-select>
-            <div class="lb" style="margin-top:12px">岗位名称含</div>
-            <el-input v-model="fKw" clearable placeholder="如 Java / 测试 / 前端" />
-            <div class="lb" style="margin-top:12px">最低匹配分：{{ fScore }}</div>
-            <el-slider v-model="fScore" :min="0" :max="100" :step="5" />
-            <div class="lb" style="margin-top:4px">排序</div>
-            <el-radio-group v-model="sortBy" size="small">
-              <el-radio-button value="score">匹配分</el-radio-button>
-              <el-radio-button value="salary">薪资</el-radio-button>
-            </el-radio-group>
-            <el-button text style="margin-top:10px" @click="resetFilter">重置筛选</el-button>
-            <div class="muted" style="margin-top:8px">
-              筛选作用于本次返回的 Top-{{ topN }}（前端过滤）
-            </div>
-          </div>
+      <!-- 其他筛选 -->
+      <div class="frow">
+        <span class="flb">城市：</span>
+        <el-select v-model="fCity" clearable placeholder="全部城市" size="small" style="width:150px">
+          <el-option v-for="c in cities" :key="c" :label="c" :value="c" />
+        </el-select>
+        <span class="flb" style="margin-left:10px">岗位名含：</span>
+        <el-input v-model="fKw" clearable size="small" placeholder="如 Java / 测试 / 前端"
+                  style="width:190px" />
+        <span class="flb" style="margin-left:10px">最低匹配分：{{ fScore }}</span>
+        <el-slider v-model="fScore" :min="0" :max="100" :step="5" style="width:150px" />
+        <el-button text size="small" @click="resetFilter">重置</el-button>
+      </div>
 
-          <div class="zq-card pad" style="margin-top:12px">
-            <div class="zq-section" style="margin-top:0">简历摘要</div>
-            <div class="muted" style="line-height:1.9">
-              姓名：{{ result.简历摘要.姓名 }}<br />
-              期望城市：{{ result.简历摘要.期望城市 || '—' }}<br />
-              学历序数：{{ result.简历摘要.学历序数 }}<br />
-              工作年限：{{ result.简历摘要.工作年限 }} 年<br />
-              技能数：{{ result.简历摘要.技能数 }}
-            </div>
-          </div>
-        </aside>
-
-        <!-- 右侧岗位列表 -->
-        <section>
-          <div v-if="!filtered.length" class="zq-card pad" style="text-align:center;color:#8896ab">
-            没有符合筛选条件的岗位，试试放宽条件
-          </div>
-          <div v-for="j in filtered" :key="j.岗位ID" class="job-card" @click="openDetail(j)">
-            <div class="job-top">
-              <div class="job-title">
-                <el-tag v-if="j.排名 <= 3" :type="j.排名 === 1 ? 'danger' : 'warning'"
-                        size="small" effect="dark" style="margin-right:6px">TOP{{ j.排名 }}</el-tag>
-                {{ j.岗位名称 }}
-              </div>
-              <div class="job-salary">{{ j.岗位薪资 || '薪资面议' }}</div>
-            </div>
-            <div class="job-co">{{ j.公司 }}</div>
-            <div class="job-meta">
-              {{ j.城市 || '—' }} ｜ {{ j.经验要求 || '经验不限' }} ｜ {{ j.学历要求 || '学历不限' }}
-              ｜ 匹配度 <b class="salary">{{ j.总分.toFixed(1) }}</b> 分
-            </div>
-            <div class="job-tags">
-              <el-tag size="small" effect="light">技能命中 {{ j.技能命中数 }}/{{ j.岗位技能要求数 }}</el-tag>
-              <el-tag size="small" type="success" effect="light" style="margin-left:6px">
-                余弦 {{ j.余弦分 }}</el-tag>
-              <el-tag size="small" type="info" effect="plain" style="margin-left:6px">
-                距离 {{ j.距离km }} km</el-tag>
-            </div>
-            <div class="muted" style="margin-top:8px">💡 {{ j.推荐理由 }}</div>
-          </div>
-        </section>
+      <!-- 一行摘要：简历 + 结果条数 -->
+      <div v-if="result" class="summary">
+        <span class="muted">
+          {{ result.简历摘要.姓名 }} ｜ 期望城市 {{ result.简历摘要.期望城市 || '—' }}
+          ｜ 工作年限 {{ result.简历摘要.工作年限 }} 年 ｜ 技能 {{ result.简历摘要.技能数 }} 项
+        </span>
+        <span class="right">
+          共 <b class="num">{{ filtered.length }}</b> 条
+        </span>
       </div>
     </div>
 
-    <el-empty v-else description="点击「开始匹配」，查看与你简历最匹配的岗位" />
+    <!-- ② 推荐结果（单列全宽） -->
+    <div v-if="result" v-loading="loading" class="joblist">
+      <el-empty v-if="!filtered.length" description="没有符合筛选条件的岗位，试试放宽条件" />
+      <div v-for="j in filtered" :key="j.岗位ID" class="job-card" @click="openDetail(j)">
+        <div class="job-top">
+          <div class="job-title">
+            <el-tag v-if="j.排名 <= 3" :type="j.排名 === 1 ? 'danger' : 'warning'"
+                    size="small" effect="dark" style="margin-right:6px">TOP{{ j.排名 }}</el-tag>
+            {{ j.岗位名称 }}
+          </div>
+          <div class="job-salary">{{ j.岗位薪资 || '薪资面议' }}</div>
+        </div>
+        <div class="job-co">{{ j.公司 }}</div>
+        <div class="job-meta">
+          {{ j.城市 || '—' }} ｜ {{ j.经验要求 || '经验不限' }} ｜ {{ j.学历要求 || '学历不限' }}
+          ｜ 匹配度 <b class="salary">{{ j.总分.toFixed(1) }}</b> 分
+        </div>
+        <div class="job-tags">
+          <el-tag size="small" :type="priority === 'skill' ? 'success' : 'info'"
+                  :effect="priority === 'skill' ? 'dark' : 'light'">
+            技能 {{ j.技能.toFixed(1) }}</el-tag>
+          <el-tag size="small" :type="priority === 'geo' ? 'success' : 'info'"
+                  :effect="priority === 'geo' ? 'dark' : 'light'" style="margin-left:6px">
+            地域 {{ j.地域.toFixed(1) }}（{{ j.距离km }} km）</el-tag>
+          <el-tag size="small" :type="priority === 'exp' ? 'success' : 'info'"
+                  :effect="priority === 'exp' ? 'dark' : 'light'" style="margin-left:6px">
+            经验 {{ j.经验.toFixed(1) }}</el-tag>
+          <el-tag size="small" effect="plain" style="margin-left:6px">
+            技能命中 {{ j.技能命中数 }}/{{ j.岗位技能要求数 }}</el-tag>
+          <el-tag size="small" effect="plain" style="margin-left:6px">余弦 {{ j.余弦分 }}</el-tag>
+        </div>
+        <div class="muted" style="margin-top:8px">💡 {{ j.推荐理由 }}</div>
+      </div>
+    </div>
+
+    <el-empty v-else-if="!loading" description="先在个人中心粘贴或上传一份简历，这里会自动给出评分最高的岗位" />
   </div>
 </template>
 
 <script setup lang="ts">
 /**
  * 「岗位推荐」页（需登录）：用简历做六维加权匹配。
+ *
+ * · 进入页面**自动拉满评分最高的 50 条**（有简历就自动匹配，不用手动点）
+ * · 顶部可按「优先维度」重排这 50 条：综合评分 / 技能匹配 / 地理位置 / 工作经验
+ * · 顶部另有城市、岗位名关键词、最低匹配分三个筛选；本页**没有侧边栏**
+ * · 点岗位 → 跳该岗位的独立详情页（匹配明细/雷达图在那边）
  * 简历不在本页输入——统一在个人中心粘贴/上传（见 ProfileView）。
  */
 import { computed, onMounted, ref } from 'vue'
@@ -124,59 +118,68 @@ import type { JobRec, ResumeRow } from '../api/types'
 import { useAuthStore } from '../stores/auth'
 import { useResumeStore } from '../stores/resume'
 
+/** 优先维度：默认按综合评分（= 六维加权总分） */
+const PRIORITIES = [
+  { value: 'score', label: '综合评分' },
+  { value: 'skill', label: '技能匹配' },
+  { value: 'geo', label: '地理位置' },
+  { value: 'exp', label: '工作经验' },
+] as const
+
 const auth = useAuthStore()
 const resume = useResumeStore()
 const router = useRouter()
 
 const loading = ref(false)
 const src = ref('current')
-const topN = ref(20)
+const topN = ref(50)                    // 默认拉满 50 条
 const savedList = ref<ResumeRow[]>([])
 const result = ref(resume.matchResult)
 
 const fCity = ref('')
 const fKw = ref('')
 const fScore = ref(0)
-const sortBy = ref<'score' | 'salary'>('score')
+const priority = ref<'score' | 'skill' | 'geo' | 'exp'>('score')
 
 const cities = computed(() => {
   const s = new Set((result.value?.推荐 || []).map((x) => x.城市).filter(Boolean))
   return Array.from(s).sort()
 })
 
-function salaryMid(s: string) {
-  // "10000-15000元·13薪" → 12500
-  const m = String(s || '').match(/(\d+)\D+(\d+)/)
-  return m ? (Number(m[1]) + Number(m[2])) / 2 : 0
-}
+/** 按优先维度排序（同分时用综合评分兜底，保证顺序稳定） */
+const sorted = computed(() => {
+  const list = [...(result.value?.推荐 || [])]
+  const by = {
+    score: (a: JobRec, b: JobRec) => b.总分 - a.总分,
+    skill: (a: JobRec, b: JobRec) => b.技能 - a.技能 || b.总分 - a.总分,
+    geo: (a: JobRec, b: JobRec) => b.地域 - a.地域 || a.距离km - b.距离km || b.总分 - a.总分,
+    exp: (a: JobRec, b: JobRec) => b.经验 - a.经验 || b.总分 - a.总分,
+  }[priority.value]
+  return list.sort(by)
+})
 
 const filtered = computed(() => {
-  let list = [...(result.value?.推荐 || [])]
+  let list = sorted.value
   if (fCity.value) list = list.filter((x) => x.城市 === fCity.value)
   if (fKw.value.trim()) {
     const k = fKw.value.trim()
     list = list.filter((x) => (x.岗位名称 + x.技能标签).includes(k))
   }
-  list = list.filter((x) => x.总分 >= fScore.value)
-  list.sort((a, b) => sortBy.value === 'score' ? b.总分 - a.总分 : salaryMid(b.岗位薪资) - salaryMid(a.岗位薪资))
-  return list
+  return list.filter((x) => x.总分 >= fScore.value)
 })
 
-onMounted(async () => {
-  if (auth.isLogged()) {
-    try {
-      const r = await api.listResumes()
-      savedList.value = r.简历
-      if (!resume.resumeId && savedList.value.length) {
-        const d = savedList.value.find((x) => x.is_default) || savedList.value[0]
-        src.value = 'saved:' + d.id
-      }
-    } catch { /* 忽略 */ }
+function resetFilter() {
+  fCity.value = ''; fKw.value = ''; fScore.value = 0; priority.value = 'score'
+}
+
+async function doMatch(quiet = false) {
+  // 直接用「已保存的简历」匹配时，只要拿到 id 就能匹配（后端按 saved_resume_id 取简历），
+  // 不强制要求 store 里已经有内容——否则"登录后直接进本页"会被判成没有简历
+  const canRun = resume.canMatch() || src.value.startsWith('saved:')
+  if (!canRun) {
+    if (!quiet) ElMessage.warning('请先在个人中心粘贴或上传一份简历')
+    return
   }
-})
-
-async function doMatch() {
-  if (!resume.canMatch()) return ElMessage.warning('请先在个人中心粘贴或上传一份简历')
   loading.value = true
   try {
     const body: api.MatchPayload = { top_n: topN.value }
@@ -186,26 +189,46 @@ async function doMatch() {
     const r = await api.runMatch(body)
     result.value = r
     resume.matchResult = r
-    if (r.已存历史) ElMessage.success('已存入匹配历史')
-    else ElMessage.success('匹配完成')
+    if (!quiet) ElMessage.success(r.已存历史 ? '已重新推荐并存入历史' : '已重新推荐')
   } catch { /* 拦截器已提示 */ }
   finally { loading.value = false }
-}
-
-function resetFilter() {
-  fCity.value = ''; fKw.value = ''; fScore.value = 0; sortBy.value = 'score'
 }
 
 /** 点岗位 → 跳独立详情页（匹配明细/雷达图会显示在那边） */
 function openDetail(j: JobRec) {
   router.push('/job/' + j.岗位ID)
 }
+
+onMounted(async () => {
+  if (auth.isLogged()) {
+    try {
+      const r = await api.listResumes()
+      savedList.value = r.简历
+      if (!resume.resumeId && savedList.value.length) {
+        const d = savedList.value.find((x) => x.is_default) || savedList.value[0]
+        src.value = 'saved:' + d.id
+        // 同步进 store：本页的「用我的简历算匹配分」、岗位详情页的匹配面板都要用
+        resume.useSaved(d.id, d.title, d.text)
+      }
+    } catch { /* 忽略 */ }
+  }
+  // 已有结果就不再打扰；否则自动拉一次 Top-50
+  if (!result.value) await doMatch(true)
+})
 </script>
 
 <style scoped>
 .ctrl { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .fld { display: flex; align-items: center; gap: 10px; }
-.lb { font-size: 12.5px; color: #6b7a90; display: block; margin-bottom: 6px; }
-.layout { display: grid; grid-template-columns: 268px 1fr; gap: 14px; margin-top: 14px; }
-@media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+.lb { font-size: 12.5px; color: #6b7a90; }
+.frow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-top: 10px;
+  margin-top: 10px; border-top: 1px dashed #eef3f9; }
+.flb { color: #8896ab; font-size: 13px; flex: none; }
+.frow a { color: #41506b; font-size: 13.5px; cursor: pointer; }
+.frow a:hover { color: var(--el-color-primary); }
+.frow a.on { color: var(--el-color-primary); font-weight: 700; }
+.summary { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.summary .right { margin-left: auto; }
+.summary .num { color: #ff6a00; font-size: 16px; }
+.joblist { margin-top: 14px; }
 </style>
