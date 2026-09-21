@@ -44,6 +44,20 @@ if (!reg.ok) {
 }
 const { token } = await reg.json()
 
+// 给这个检查用户存一份简历：岗位详情页/岗位推荐页都要用「我的简历」算匹配分
+try {
+  await fetch(API + '/api/user/resumes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({
+      title: '渲染检查简历',
+      text: '姓名：检查\n期望岗位：前端开发工程师\n期望城市：莆田\n期望薪资：14000-15000元\n'
+          + '最高学历：本科\n专业：数字媒体技术\n工作年限：4年\n是否应届：否\n\n'
+          + '【技能特长】\nVue、React、TypeScript、Webpack、CSS3、HTML5',
+    }),
+  })
+} catch { /* 存不上会让岗位页的匹配分断言失败，从而暴露问题 */ }
+
 // 公司详情路由需要「真实存在的公司ID」：从接口取第一家，避免把 ID 写死在脚本里
 let companyId = ''
 try {
@@ -64,7 +78,9 @@ const ROUTES = [
   ['login', ['人岗匹配推荐系统', '登录', '注册', '先以游客身份逛逛']],
   ['jobs', ['热门职位：', '区域：', '薪资：', '学历：', '排序：']],
   ...(jobId
-    ? [['job/' + jobId, ['岗位ID', '技能标签', '职位描述', '公司', '该公司其他在招岗位', '收藏']]]
+    ? [['job/' + jobId, ['岗位ID', '技能标签', '职位描述', '公司', '该公司其他在招岗位', '收藏',
+                         // 进页面自动算「我这份简历 vs 这个岗位」的匹配分
+                         '与我简历的匹配', '规则总分', '技能命中', '通勤距离']]]
     : []),
   ['match', ['岗位推荐', '使用简历', '重新推荐', '优先：', '综合评分', '技能匹配',
              '地理位置', '工作经验', '城市：', '最低匹配分：']],
@@ -211,12 +227,13 @@ if (!b0) {
   await page.click('.ball')
   await new Promise((r) => setTimeout(r, 700))
   const hasInput = !!(await page.$('.chat-panel input'))
-  const hasSamples = (await page.$$('.chat-panel .tag')).length > 0
-  if (hasInput && hasSamples) {
-    console.log('  ✅ 单击悬浮球 → 弹出小对话框（含输入框与示例问题）')
+  const titleOk = (await page.$eval('.chat-panel .phead b', (e) => e.innerText.trim())) === '求职小助手'
+  const sampleCount = (await page.$$('.chat-panel .tag')).length
+  if (hasInput && titleOk && sampleCount === 0) {
+    console.log('  ✅ 单击悬浮球 → 弹出「求职小助手」小对话框（有输入框、无示例提示）')
   } else {
     failed++
-    console.log('  ❌ 对话框没弹出或缺少输入框')
+    console.log(`  ❌ 对话框异常：输入框=${hasInput} ｜ 标题=${titleOk} ｜ 示例标签=${sampleCount} 个`)
   }
   // ①b 「重新回答」按钮：必须存在，且在还没提问时是禁用状态（避免误导）
   const regen = await page.evaluate(() => {

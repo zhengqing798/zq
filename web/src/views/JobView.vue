@@ -50,26 +50,48 @@
 
       <div class="layout">
         <main class="main">
-          <!-- ② 与我简历的匹配（本次会话做过匹配才显示） -->
-          <template v-if="match">
+          <!-- ② 与我简历的匹配（进页面自动算一次；有简历就显示，不限于 Top-50 里的岗位） -->
+          <template v-if="sixDim">
             <div class="zq-card pad">
-              <div class="zq-section" style="margin-top:0">与我简历的匹配（第 {{ match.排名 }} 名，{{ match.总分.toFixed(1) }} 分）</div>
-              <EChart :option="radarOption" height="260px" />
-              <div style="margin-top:6px">
-                <el-tag v-for="d in DIMS" :key="d" effect="plain" style="margin:0 6px 6px 0">
-                  {{ d }} {{ Number(match[d as keyof JobRec]).toFixed(1) }}</el-tag>
-                <el-tag size="small" type="info" effect="plain" style="margin:0 6px 6px 0">
-                  技能命中 {{ match.技能命中数 }}/{{ match.岗位技能要求数 }}</el-tag>
-                <el-tag size="small" type="success" effect="light" style="margin:0 6px 6px 0">
-                  余弦 {{ match.余弦分 }}</el-tag>
-                <el-tag size="small" type="info" effect="plain" style="margin:0 6px 6px 0">
-                  距离 {{ match.距离km }} km</el-tag>
+              <div class="zq-section" style="margin-top:0">
+                与我简历的匹配<template v-if="match">（推荐排名第 {{ match.排名 }}）</template>
               </div>
-              <div class="reason">💡 {{ match.推荐理由 }}</div>
+              <div class="scorebar">
+                <div class="big">
+                  <b class="salary">{{ ruleTotal }}</b><em>分</em>
+                  <span class="lbl">规则口径（主）</span>
+                </div>
+                <div v-if="score?.模型口径.可用" class="cell">
+                  <b>{{ score.模型口径.T1回归_预测总分 }}</b>
+                  <span class="lbl">模型预测分</span>
+                </div>
+                <div v-if="score?.模型口径.可用" class="cell">
+                  <b>{{ score.模型口径.T2分类_匹配概率 }}%</b>
+                  <span class="lbl">匹配概率</span>
+                </div>
+                <div class="cell">
+                  <b>{{ skillHit }}</b>
+                  <span class="lbl">技能命中</span>
+                </div>
+                <div class="cell">
+                  <b>{{ cosText }}</b>
+                  <span class="lbl">技能余弦</span>
+                </div>
+                <div class="cell">
+                  <b>{{ distText }}</b>
+                  <span class="lbl">通勤距离</span>
+                </div>
+              </div>
+              <EChart :option="radarOption" height="255px" />
+              <div>
+                <el-tag v-for="d in DIMS" :key="d" effect="plain" style="margin:0 6px 6px 0">
+                  {{ d }} {{ Number(sixDim[d] ?? 0).toFixed(1) }}</el-tag>
+              </div>
+              <div v-if="match" class="reason">💡 {{ match.推荐理由 }}</div>
             </div>
           </template>
 
-          <!-- ③ 评分双口径 -->
+          <!-- ③ 评分对比 -->
           <div v-if="score" class="zq-card pad" style="margin-top:12px">
             <div class="zq-section" style="margin-top:0">评分对比</div>
             <el-descriptions :column="2" border size="small">
@@ -162,15 +184,44 @@ const faving = ref(false)
 const faved = ref(false)
 const siblings = ref<{ 岗位ID: string; 岗位名称: string; 薪资: string }[]>([])
 
-/** 本次会话的匹配结果里如果有这个岗位，就把匹配详情带出来 */
+/** 本次会话的匹配结果里如果有这个岗位，就把推荐理由/排名带出来 */
 const match = computed<JobRec | null>(() => {
   const list = resume.matchResult?.推荐 || []
   return list.find((x) => x.岗位ID === job.value?.岗位ID) || null
 })
 
+/**
+ * 六维得分：优先用 `/api/score` 的结果（**每个岗位进页面都会算一次**，
+ * 不限于匹配 Top-50 里的岗位）；没有 score 时退回匹配结果里的六维。
+ */
+const sixDim = computed<Record<string, number> | null>(() => {
+  const d = score.value?.规则口径?.六维分 as Record<string, number> | undefined
+  if (d && Object.keys(d).length) return d
+  const m = match.value as unknown as Record<string, number> | null
+  if (m) {
+    return { 技能: m.技能, 经验: m.经验, 学历: m.学历, 地域: m.地域, 薪资: m.薪资, 专业证书: m.专业证书 }
+  }
+  return null
+})
+const ruleTotal = computed(() => score.value?.规则口径?.总分 ?? match.value?.总分 ?? 0)
+const skillHit = computed(() => {
+  const r = score.value?.规则口径 as Record<string, number> | undefined
+  if (r && r.岗位技能要求数 !== undefined) return `${r.技能命中数}/${r.岗位技能要求数}`
+  return match.value ? `${match.value.技能命中数}/${match.value.岗位技能要求数}` : '—'
+})
+const cosText = computed(() => {
+  const r = score.value?.规则口径 as Record<string, number> | undefined
+  return r?.TFIDF余弦 !== undefined ? String(r.TFIDF余弦) : (match.value ? String(match.value.余弦分) : '—')
+})
+const distText = computed(() => {
+  const r = score.value?.规则口径 as Record<string, number> | undefined
+  const km = r?.距离km !== undefined ? r.距离km : match.value?.距离km
+  return km === undefined || km === null || Number(km) < 0 ? '—' : `${km} km`
+})
+
 const radarOption = computed(() => {
-  const m = match.value
-  const v = DIMS.map((d) => Number((m as unknown as Record<string, number>)?.[d] ?? 0))
+  const six = sixDim.value || {}
+  const v = DIMS.map((d) => Number(six[d] ?? 0))
   return {
     tooltip: {},
     radar: {
@@ -216,6 +267,16 @@ async function load() {
         faved.value = (f.收藏 || []).some((x) => x.job_id === job.value?.岗位ID)
       } catch { /* 拿不到收藏态就按未收藏显示 */ }
     }
+    // **进页面就算一次「我这份简历 vs 这个岗位」的匹配分**
+    // 直接用「已保存的简历」时 store 可能是空的（比如刷新后直接打开岗位页），先补灌一次
+    if (!resume.canMatch() && auth.isLogged()) {
+      try {
+        const r = await api.listResumes()
+        const d = (r.简历 || []).find((x) => x.is_default) || (r.简历 || [])[0]
+        if (d) resume.useSaved(d.id, d.title, d.text)
+      } catch { /* 拿不到简历就不显示匹配分 */ }
+    }
+    if (resume.canMatch()) await calcScore()
     // 同公司其他在招岗位（有公司ID时才能取）
     if (job.value.公司ID) {
       try {
@@ -231,6 +292,11 @@ async function load() {
 }
 
 async function doScore() {
+  await calcScore()
+}
+
+/** 算「我这份简历 vs 这个岗位」的规则分（六维）+ 模型分；进页面自动调一次，也可手动重算 */
+async function calcScore() {
   if (!job.value) return
   scoring.value = true
   try {
@@ -299,6 +365,15 @@ onMounted(load)
 .desc { background: #fbfcfe; border: 1px solid var(--zq-border); border-radius: 10px;
   padding: 14px 16px; white-space: pre-wrap; line-height: 1.85; font-size: 14px; }
 .reason { margin-top: 6px; color: #5b6b7f; font-size: 13px; }
+/* 匹配分概览条 */
+.scorebar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 26px; margin: 4px 0 8px; }
+.scorebar .big { display: flex; align-items: baseline; gap: 4px; }
+.scorebar .big b { font-size: 32px; font-weight: 800; }
+.scorebar .big em { font-style: normal; color: #ff6a00; font-weight: 700; }
+.scorebar .cell { display: flex; flex-direction: column; line-height: 1.25; }
+.scorebar .cell b { font-size: 19px; font-weight: 800; color: #16233a; }
+.scorebar .lbl { font-size: 12px; color: #8896ab; }
+.scorebar .big .lbl { margin-left: 6px; }
 .sib { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; cursor: pointer;
   border-bottom: 1px dashed #eef3f9; font-size: 13px; }
 .sib:last-child { border-bottom: none; }

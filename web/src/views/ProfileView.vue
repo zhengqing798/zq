@@ -85,7 +85,8 @@
       <el-tab-pane :label="'⭐ 我的收藏' + (favorites.length ? '(' + favorites.length + ')' : '')"
                    name="favs">
         <div class="zq-card pad">
-          <el-table :data="favorites" v-loading="loading">
+          <el-table :data="favorites" v-loading="loading" row-class-name="fav-row"
+                    @row-click="onFavRow">
             <el-table-column prop="job_id" label="岗位ID" width="100" />
             <el-table-column prop="job_name" label="岗位名称" min-width="170" />
             <el-table-column prop="company" label="公司" min-width="180" show-overflow-tooltip />
@@ -94,9 +95,10 @@
               <template #default="{ row }"><span class="salary">{{ row.salary }}</span></template>
             </el-table-column>
             <el-table-column prop="created_at" label="收藏时间" width="170" />
-            <el-table-column label="操作" width="90">
+            <el-table-column label="操作" width="150">
               <template #default="{ row }">
-                <el-button link type="danger" @click="unfav(row)">取消收藏</el-button>
+                <el-button link type="primary" @click.stop="openJob(row)">查看岗位</el-button>
+                <el-button link type="danger" @click.stop="unfav(row)">取消</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -280,6 +282,14 @@ async function unfav(row: FavoriteRow) {
   try { await api.removeFavorite(row.job_id); ElMessage.success('已取消收藏'); refresh() }
   catch { /* 拦截器已提示 */ }
 }
+
+/** 点收藏行 / 「查看岗位」→ 该岗位的详情页（那里会显示与我简历的匹配分） */
+function openJob(row: FavoriteRow) {
+  if (row?.job_id) router.push('/job/' + row.job_id)
+}
+function onFavRow(row: FavoriteRow) {
+  openJob(row)
+}
 async function saveProfile() {
   try {
     await api.updateProfile({ nickname: pf.nickname, phone: pf.phone, email: pf.email })
@@ -300,5 +310,8 @@ async function savePw() {
 <style scoped>
 .rgrid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
 .racts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+/* 收藏表：整行可点进岗位详情页 */
+:deep(.fav-row) { cursor: pointer; }
+:deep(.fav-row:hover) { background: var(--el-color-primary-light-9); }
 @media (max-width: 1000px) { .rgrid { grid-template-columns: 1fr; } }
 </style>

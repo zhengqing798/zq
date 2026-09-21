@@ -1,7 +1,7 @@
 <template>
   <!-- 悬浮球：按住可拖动，位置记在 localStorage；单击开/关对话框 -->
   <div class="ball" :style="{ left: pos.x + 'px', top: pos.y + 'px' }"
-       :class="{ open }" title="智能问答"
+       :class="{ open }" title="求职小助手"
        @mousedown="startDrag" @touchstart="startDrag"
        @click="onBallClick">
     <span class="ico">{{ open ? '✕' : '💬' }}</span>
@@ -10,7 +10,7 @@
   <transition name="pop">
     <div v-if="open" class="panel chat-panel" :style="panelStyle">
       <div class="phead">
-        <b>智能问答</b>
+        <b>求职小助手</b>
         <span class="spacer"></span>
         <el-button link size="small" :disabled="!lastQuestion || loading"
                    @click="regenerate">🔄 重新回答</el-button>
@@ -18,12 +18,6 @@
       </div>
 
       <div ref="bodyEl" class="pbody">
-        <div v-if="!msgs.length" class="phint">
-          <div class="muted" style="margin-bottom:6px">试试：</div>
-          <el-tag v-for="s in samples" :key="s" effect="plain" class="tag"
-                  @click="ask(s)">{{ s }}</el-tag>
-        </div>
-
         <div v-for="(m, i) in msgs" :key="i" class="row" :class="m.role">
           <!-- 回答里可能带岗位/公司页链接（/#/job/J0020），渲染成可点链接；纯文本先做转义。
                注意：原生元素必须写完整闭合标签——写成自闭合 <div ... /> 时
@@ -72,7 +66,7 @@
 
 <script setup lang="ts">
 /**
- * 智能问答悬浮球（全局挂在 AppLayout 上，每个页面都能用）
+ * 求职小助手悬浮球（全局挂在 AppLayout 上，每个页面都能用）
  *
  * · 悬浮球可**拖动**（鼠标/触摸），位置存 localStorage，刷新后仍在原处
  * · 单击球开/关右侧（或左侧）的**小对话框**，在里面提问并查看检索结果
@@ -83,12 +77,6 @@ import { ElMessage } from 'element-plus'
 import * as api from '../api'
 import type { ChatResp } from '../api/types'
 
-const SAMPLES = [
-  '厦门有哪些 Java 开发岗位？',
-  '岗位可以分成哪几类？',
-  '软件测试类岗位大概是什么样的？',
-  '匹配系统给一份简历打分要多久？',
-]
 const KEY = 'zq_chat_ball'
 const BALL = 54
 const PW = 370
@@ -99,7 +87,6 @@ const q = ref('')
 const loading = ref(false)
 const msgs = ref<{ role: 'me' | 'ai'; text: string; resp?: ChatResp; err?: boolean }[]>([])
 const bodyEl = ref<HTMLElement | null>(null)
-const samples = SAMPLES
 /** 最近几轮对话（发给后端做追问上下文），以及最后一次提问（供「重新回答」用） */
 const hist = ref<{ role: string; content: string }[]>([])
 const lastQuestion = ref('')
@@ -309,7 +296,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .pfoot { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--zq-border);
   background: #fbfcfd; }
 .pfoot :deep(.el-input) { flex: 1; }
-.phint .tag { margin: 0 6px 6px 0; cursor: pointer; }
+.phint { padding: 2px; }
 .row { margin-bottom: 12px; display: flex; flex-direction: column; }
 .row.me { align-items: flex-end; }
 .row.ai { align-items: flex-start; }
