@@ -114,16 +114,29 @@ COPY pytest.ini /app/pytest.ini
 #   APP_DB       用户 / 简历 / 收藏 / 匹配历史（sqlite）
 #   AGENT_CACHE  Agent 问答结果缓存（TTL 7 天）
 #   AGENT_LOG    Agent 每次调用的审计日志（jsonl）
-# 这样镜像里的 data/ 可以当成纯只读资产，容器重建也不丢数据
 ENV APP_DB=/app/var/app.db \
     AGENT_CACHE=/app/var/agent_cache.json \
     AGENT_LOG=/app/var/agent_calls.jsonl \
     PYTHONPATH=/app
 
-# 非 root 运行：即使容器被攻破也拿不到 root
+# 非 root 运行：即使容器被攻破也拿不到 root。
+#
+# ⚠️ 这里必须把 /app/data 的属主也给 appuser —— 这是**首次云上部署时真实踩到的坑**：
+#   应用启动时（SVC.preload → JobIndex → build_skill_dict）会**无条件重写**两个派生缓存文件
+#     · data/processed/技能标签黑名单.csv   （build_labels.py:204）
+#     · data/processed/技能词典_匹配用.csv  （parse_resume.py:130）
+#   即使这些文件构建时已经存在、即使调用方传了 write=False，它照样会重写。
+#   一开始把 data/ 当"纯只读资产层"、只 chown 了 /app/var，结果容器启动即崩：
+#     PermissionError: [Errno 13] Permission denied: '/app/data/processed/技能标签黑名单.csv'
+#   → 容器反复重启 → healthcheck 永远不健康 → web 等不到 api 健康而拒绝启动。
+#
+#   本地等价验证没抓到这个问题，因为它没有复现"只读目录 + 非 root 用户"这个组合
+#   （本机是仓库属主，写当然成功）。见《测试报告》缺陷 16。
+#   现在的取舍：data/ 仍然是构建期烘进去的资产，但运行期可写；重新生成的文件落在容器可写层，
+#   容器重建后再生成一次（这几步很快），不影响正确性。
 RUN useradd --create-home --uid 10001 appuser \
  && mkdir -p /app/var \
- && chown -R appuser:appuser /app/var
+ && chown -R appuser:appuser /app/var /app/data
 USER appuser
 
 
