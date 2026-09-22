@@ -27,8 +27,11 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile   # noqa: E402
+from fastapi.encoders import jsonable_encoder                             # noqa: E402
+from fastapi.exceptions import RequestValidationError                      # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware                        # noqa: E402
 from fastapi.responses import JSONResponse                               # noqa: E402
+from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
 from src.api import db, schemas                                          # noqa: E402
 from src.api.services import SVC                                         # noqa: E402
@@ -472,10 +475,93 @@ def admin_users(user=Depends(require_role("admin"))):
 
 
 # ---------------------------------------------------------------- 错误统一格式
-@app.exception_handler(HTTPException)
+@app.exception_handler(StarletteHTTPException)
 def _http_exc(request, exc):
-    detail = exc.detail if isinstance(exc.detail, dict) else {"ok": False, "error": str(exc.detail)}
+    """统一错误体：`{"ok": false, "error": "...", "hint": "..."}`
+
+    为什么注册在 **Starlette** 的 HTTPException 上而不是 FastAPI 的：
+      · 路由没匹配上（404 Not Found）和方法不允许（405 Method Not Allowed）抛的是
+        **Starlette** 的 HTTPException，不是 FastAPI 的子类；
+      · 原来只注册 FastAPI 那一个，这两类错误就绕过了统一处理器，直接返回
+        `{"detail": "Not Found"}` —— 客户端得同时兼容两种错误体结构；
+      · 注册在父类上，FastAPI 的 HTTPException 也会命中（异常处理器按 MRO 查找）。
+    见《测试报告》缺陷 15。
+    """
+    detail = exc.detail if isinstance(exc.detail, dict) else {
+        "ok": False, "error": str(exc.detail),
+        "hint": "请求的地址或方法不对；接口清单见 /docs"}
     return JSONResponse(status_code=exc.status_code, content=detail)
+
+
+# Pydantic 的校验类型 → 中文说明。
+# `type` 是稳定的机器标识，比去解析 msg 字符串可靠（msg 会随 Pydantic 版本变）。
+_VALIDATION_ZH = {
+    "missing": "缺少必填参数",
+    "string_too_short": "长度不足",
+    "string_too_long": "长度超过上限",
+    "string_type": "必须是字符串",
+    "int_parsing": "必须是整数",
+    "int_type": "必须是整数",
+    "float_parsing": "必须是数字",
+    "float_type": "必须是数字",
+    "bool_parsing": "必须是 true 或 false",
+    "bool_type": "必须是 true 或 false",
+    "list_type": "必须是数组",
+    "dict_type": "必须是对象",
+    "json_invalid": "请求体不是合法 JSON",
+    "greater_than": "须大于限定值",
+    "greater_than_equal": "小于允许的最小值",
+    "less_than": "须小于限定值",
+    "less_than_equal": "超过允许的最大值",
+    "string_pattern_mismatch": "格式不符合要求",
+    "enum": "取值不在允许的选项内",
+    "extra_forbidden": "出现了不支持的参数",
+    "value_error": "取值不合法",
+}
+
+
+def _zh_validation_error(e):
+    """把一条 Pydantic 校验错误翻成人话（并带上约束数值，用户能照着改）
+
+    为什么要翻译：前端 `client.ts` 会把 `error` 原样弹给用户，
+    而 Pydantic 的 `msg` 是英文（`Input should be less than or equal to 50`）。
+    只拼接英文原文等于把"原始 JSON"换成"夹着英文的句子"，没有真正解决。
+    """
+    loc = [str(x) for x in e.get("loc", []) if x not in ("body", "query", "path")]
+    field = ".".join(loc) or "请求体"
+    text = _VALIDATION_ZH.get(e.get("type", ""), "取值不合法（%s）" % e.get("msg", ""))
+    ctx = e.get("ctx") or {}
+    limits = []
+    for key, label in (("ge", "最小"), ("gt", "须大于"), ("le", "上限"), ("lt", "须小于"),
+                       ("min_length", "最短"), ("max_length", "最长")):
+        if key in ctx:
+            limits.append("%s %s" % (label, ctx[key]))
+    if limits:
+        text += "（%s）" % "，".join(limits)
+    return "%s：%s" % (field, text)
+
+
+@app.exception_handler(RequestValidationError)
+def _validation_exc(request, exc):
+    """把 Pydantic 的参数校验错误（422）也纳入统一错误体
+
+    为什么必须改：FastAPI 默认的 422 响应体是
+        {"detail": [{"type": "string_too_long", "loc": ["body", "question"],
+                     "msg": "String should have at most 500 characters", ...}]}
+      · 结构与本项目其它错误的 `{"ok", "error", "hint"}` **不一致**；
+      · 前端 `web/src/api/client.ts` 的错误处理里，`detail` 是数组时落到
+        `JSON.stringify(detail)` 分支 —— 于是**把这段英文 JSON 原样弹给用户**。
+    实测可达：悬浮球的输入框原来没有 maxlength，粘贴一条超过 500 字的问题就会命中 422，
+    用户看到的就是一串英文 JSON（前端已同步加 maxlength 兜住这个入口）。
+    见《测试报告》缺陷 15。
+    """
+    items = [_zh_validation_error(e) for e in exc.errors()]
+    return JSONResponse(status_code=422, content={
+        "ok": False,
+        "error": "参数校验失败 —— " + "；".join(items[:3]),
+        "hint": "请检查参数类型与取值范围（各接口的约束见 /docs）",
+        "校验明细": jsonable_encoder(exc.errors()),
+    })
 
 
 @app.get("/", include_in_schema=False)

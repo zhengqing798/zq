@@ -30,6 +30,16 @@ from build_kb import Embedder, VEC_PATH, CARDS_META, JOBS_CSV, MODEL_NAME   # no
 
 _R = None
 
+# 聚类画像最多返回多少行。
+# 这个上限**只是为了防止工具结果过长撑爆回灌给模型的 payload**，不是业务含义：
+# 三套方案（K=9 的 9 行 + K=5 的 5 行 + 二阶细分的 8 行）合计 22 行，24 足够全放。
+# ⚠️ 曾经写死成 `[:8]`，后果很严重：K=9 主方案本身就有 9 行，第 9 簇（占比 1.55%）
+#    被静默丢掉，而 `/api/cluster/list` 报的是「簇数=9」。于是智能问答拿着 8 条数据回答
+#    「岗位可以分成 8 类」，接口自己却在说 9 类 —— 用户看到的是自相矛盾的答案。
+#    缓存里甚至能查到 Agent 被这个缺陷逼出来的解释：「以上 8 条为工具返回的全部记录，
+#    合计占比约 98.4%，剩余为未展示的小簇」。见《测试报告》缺陷 13。
+MAX_PROFILE_ROWS = 24
+
 # ---------------------------------------------------------------- 关键词匹配
 # 背景（2026-09-15 修复）：原先 filter_jobs 的关键词是**整串子串匹配**
 # （`keyword.lower() not in blob`）。LLM 常把关键词写成组合短语（如「Java 开发工程师」），
@@ -274,13 +284,19 @@ class Retriever:
                 "最大上限": max(b for _, b in pairs)}
 
     def cluster_profile(self, name=None):
-        """任务7 聚类画像（按簇名/方案关键词匹配）"""
+        """任务7 聚类画像（按簇名/方案关键词匹配）
+
+        留空返回全部方案的全部簇（最多 MAX_PROFILE_ROWS 行，上限只为控 payload 长度）。
+        这里**绝不能**把结果截断到少于主方案的簇数，否则会出现「接口说 9 类、
+        工具只给 8 类」的自相矛盾，详见文件顶部 MAX_PROFILE_ROWS 的说明。
+        """
         path = os.path.join(ROOT, "data", "processed", "岗位聚类_簇画像.csv")
         if not os.path.exists(path):
             return []
         rows = load_csv(path)
         key = (name or "").strip()
-        return [r for r in rows if not key or key in r["簇名"] or key in r["方案"]][:8]
+        hit = [r for r in rows if not key or key in r["簇名"] or key in r["方案"]]
+        return hit[:MAX_PROFILE_ROWS]
 
 
 def get_retriever():

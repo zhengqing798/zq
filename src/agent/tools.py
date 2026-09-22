@@ -189,11 +189,31 @@ def t_match_resume(resume_text, top_n=5):
             "来源": ["任务6 人岗匹配（权重版本 %s）" % w["版本"], "简历解析告警：%s" % (parsed.get("解析告警") or "无")]}
 
 
+def _csv_num(x):
+    """把 CSV 里的数字字符串转成真正的数字
+
+    `岗位聚类_簇画像.csv` 读出来每个字段都是字符串，早期直接把 `"4546"`、`"51.45"`
+    原样塞进接口返回，于是 `/api/cluster/profile` 的「岗位数/占比/薪资中位数」是**字符串**，
+    而兄弟接口 `/api/cluster/list` 的「岗位数」是**整数**（`test_api.py` 里能直接 `sum()`）。
+    同一个系统的两个聚类接口字段类型不一致，调用方只能自己猜，属于实打实的接口缺陷
+    （见《测试报告》缺陷 14）。这里统一转成 int/float，转不动就原样返回、不抛异常。
+    """
+    s = str(x).strip().replace(",", "")
+    try:
+        f = float(s)
+        return int(f) if f == int(f) else f
+    except ValueError:
+        return x
+
+
 def t_cluster_profile(name=None):
     from query import get_retriever
     rows = get_retriever().cluster_profile(name)
-    data = [{"方案": r["方案"], "簇名": r["簇名"], "岗位数": r["岗位数"], "占比": r["占比(%)"],
-             "薪资中位数": r["薪资中位数(元)"], "主要岗位": r["主要岗位"][:40],
+    data = [{"方案": r["方案"], "簇名": r["簇名"],
+             "岗位数": _csv_num(r["岗位数"]),
+             "占比": _csv_num(r["占比(%)"]),
+             "薪资中位数": _csv_num(r["薪资中位数(元)"]),
+             "主要岗位": r["主要岗位"][:40],
              "特征技能": r["特征技能(lift Top10)"][:40]} for r in rows]
     return {"ok": bool(data), "summary": "匹配到 %d 条聚类画像记录" % len(data), "data": data,
             "来源": ["岗位聚类_簇画像.csv（任务7 K-Means）"]}

@@ -28,7 +28,14 @@ client.interceptors.response.use(
     const detail = res?.data?.detail
     let msg = '请求失败'
     if (typeof detail === 'string') msg = detail
-    else if (detail && typeof detail === 'object') msg = detail.error || JSON.stringify(detail)
+    else if (Array.isArray(detail)) {
+      // FastAPI/Pydantic 的 422 明细。后端已把 422 纳入统一错误体（见 src/api/main.py 的
+      // RequestValidationError 处理器），正常不会再走到这里；这层兜底是防止将来万一
+      // 又出现数组型 detail 时，把一串英文 JSON 原样弹给用户。
+      const first = detail[0]
+      const where = Array.isArray(first?.loc) ? first.loc.filter((x: unknown) => x !== 'body').join('.') : ''
+      msg = where ? `${where}：${first?.msg ?? '参数不合法'}` : (first?.msg ?? '参数不合法')
+    } else if (detail && typeof detail === 'object') msg = detail.error || JSON.stringify(detail)
     else if (res?.data?.error) msg = res.data.error
     else if (err?.message) msg = err.message
 

@@ -56,7 +56,10 @@
       </div>
 
       <div class="pfoot">
+        <!-- maxlength 与后端 ChatRequest.question 的 max_length=500 对齐：
+             没有它的话，粘贴一条超长问题会打到后端 422，用户白等一次往返才知道太长 -->
         <el-input v-model="q" placeholder="输入问题…" :disabled="loading"
+                  maxlength="500" show-word-limit
                   @keyup.enter="ask()" />
         <el-button type="primary" :loading="loading" @click="ask()">发送</el-button>
       </div>
