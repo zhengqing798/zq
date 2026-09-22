@@ -360,20 +360,23 @@ console.log(`\n--- 岗位默认排序（随机） ---`)
 //   （「测试工程师」67 个、「品质工程师」52 个）。原来比名称，于是"两个不同岗位恰好同名"
 //   被误报成"翻页重复岗位 1 条"，约 1/3 的运行会假失败（2026-09-23 排查结论）。
 //   为此在 JobsBrowseView 的卡片上加了 `data-id`。
-// 另外"读列表"要等**连续两次读取一致**：固定 sleep 在慢机器上会读到没渲染完的列表
-//   （线上出现过"默认排序没变化：undefined / ..."），只等"和上一页不同"又可能读到
-//   Vue 逐节点打补丁的中途状态。两次一致 + 条数够 + ID/名称非空 才算稳定。
-const readCards = async (min = 5) => {
+// 另外"读列表"要同时满足两个条件才算拿到新一页的数据：
+//   ① 与上一页**不同**（公网比本地慢，只等"两次读取一致"会读到"还没翻页"的第 1 页就提前返回 —— 实测线上
+//      出现过"翻页出现重复岗位 20 条"，即整页都和上一页一样）；
+//   ② 连续两次读取一致（避免读到 Vue 逐节点打补丁的中途状态）。
+const readCards = async (min = 5, mustDifferFrom = null) => {
+  const baseline = mustDifferFrom ? mustDifferFrom.map((c) => c.id).join('|') : null
   let prev = ''
-  for (let i = 0; i < 48; i++) {
+  for (let i = 0; i < 60; i++) {
     const now = await page.$$eval('.jcard', (els) => els.map((e) => ({
       id: e.getAttribute('data-id') || '',
       name: (e.querySelector('.jname') ? e.querySelector('.jname').innerText : '').trim(),
     })))
     const ok = now.length >= min && now.every((c) => c.id && c.name)
     const sig = ok ? now.map((c) => c.id).join('|') : ''
-    if (ok && sig === prev) return now
-    prev = sig
+    const changed = baseline === null || (ok && sig !== baseline)
+    if (ok && changed && sig === prev) return now
+    prev = (ok && changed) ? sig : ''
     await new Promise((r) => setTimeout(r, 250))
   }
   return []
@@ -396,8 +399,8 @@ await page.evaluate(() => {
   const b = Array.from(document.querySelectorAll('.el-pager li')).find((x) => x.innerText.trim() === '2')
   if (b) b.click()
 })
-// 翻页后等列表稳定再读
-const page2 = await readCards()
+// 翻页后等"确实换了 + 稳定"再读
+const page2 = await readCards(5, listB)
 const ids2 = new Set(page2.map((c) => c.id))
 const overlap = listB.filter((c) => ids2.has(c.id))
 if (page2.length && overlap.length === 0) {
