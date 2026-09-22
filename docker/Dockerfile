@@ -56,12 +56,22 @@ ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
 RUN pip install --index-url ${TORCH_INDEX} -r /app/docker/requirements.torch.txt
 
 # 其余依赖。
-# 装完顺手卸掉 nvidia-nccl-cu13：xgboost 3.4.1 的元数据在 Linux 上**无条件**依赖它
-#   （nvidia-nccl-cu13; platform_system == "Linux"），
-# 而它是 CUDA 的集合通信库，单个 wheel 就有 241MB —— 纯 CPU 容器里毫无用处。
-# 依据：xgboost 的 Python 代码完全不 import 它；同一个 xgboost 版本在本机 Windows 上
-#       根本没装这个包，导入与训练都正常（scripts/check_linux_wheels.py 会复核平台依赖）。
-# 卸载与安装放在同一层：被删掉的文件不会留在镜像的任何一层里，241MB 是真的省下来。
+#
+# ⚠️ 必须先单独用 `--no-deps` 装 xgboost，否则 pip 会把 Linux 上那个 240MB 的 CUDA 库下载下来。
+#   xgboost 3.4.1 的元数据在 Linux 上**无条件**依赖 nvidia-nccl-cu13
+#   （`nvidia-nccl-cu13; platform_system == "Linux"`，单个 wheel **240.7MB**），
+#   而它是 CUDA 的集合通信库，本项目纯 CPU 推理完全用不到。
+#   依据：xgboost 的 Python 代码根本不 import 它，同一个版本在本机 Windows 上没装它也一切正常。
+#
+#   用 `--no-deps` 先装好 xgboost 之后，下面那份锁定清单会认为 xgboost 已满足、
+#   不再去解析它的依赖 —— 于是 nccl **连下载都不会发生**。
+#   实测差别：先下载再卸载要多花 240MB 流量与好几分钟（国内拉 PyPI 大包很慢，
+#   首次云上构建就卡在这一步），而 xgboost 真正需要的 numpy / scipy 本来就在锁定清单里。
+RUN pip install --index-url ${PIP_INDEX} --no-deps xgboost==3.4.1
+
+# 锁定清单（88 个包）。
+# 兜底：万一将来 xgboost 的元数据变了、nccl 仍被装进来，就在同一层里卸掉它 ——
+# 安装与卸载放同一层，被删的文件不会留在镜像里。
 ARG STRIP_GPU_LIBS=1
 RUN pip install --index-url ${PIP_INDEX} -r /app/docker/requirements.lock.txt \
  && if [ "${STRIP_GPU_LIBS}" = "1" ] && pip show nvidia-nccl-cu13 > /dev/null 2>&1; then \
