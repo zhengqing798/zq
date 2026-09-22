@@ -1,0 +1,21 @@
+# ============================================================================
+# 任务12 · 换行符约定
+#
+# 背景：本项目有两类「必须在 Linux 上按 LF 执行」的文件 ——
+#   · shell 脚本（scripts/deploy.sh、docker/verify_deploy.sh）：带 CRLF 会报
+#     `/bin/bash^M: bad interpreter: No such file or directory`，或满屏 `$'\r'` 报错；
+#   · Dockerfile：CRLF 会污染 `RUN` 的 `\` 续行，构建时报出很难定位的语法错误。
+# 这两类文件一旦被 Windows 端以 CRLF 提交，到服务器上就直接坏掉。
+# 所以在仓库里钉死：无论谁在什么系统上编辑，进仓库一律 LF。
+#
+# 其它文件不加约束（保持现状），避免一次性翻转全仓库换行符、产生巨大的无意义 diff。
+# ============================================================================
+
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+*.Dockerfile    text eol=lf
+*.dockerfile    text eol=lf
+.dockerignore   text eol=lf
+docker/*.conf   text eol=lf
+docker-compose*.yml  text eol=lf
+docker-compose*.yaml text eol=lf
