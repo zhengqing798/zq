@@ -145,9 +145,19 @@ console.log('Vue3 无头渲染检查 ｜ ' + URL + ' ｜ Chrome: ' + CHROME)
 console.log('='.repeat(72))
 
 let failed = 0
+// 每个路由的等待上限：**等到期望文本出现就立刻继续**，不再固定 sleep。
+// 原实现是固定 `sleep(1600)`：本机够用，但对着 2 核云服务器就不够了 ——
+// 岗位详情页要走「加载页面 → 补灌已存简历 → POST /api/score → 渲染雷达图与匹配面板」，
+// 公网实测要 4.7s，固定 1.6s 会把"慢"误报成"缺内容"（2026-09-23 首次线上验收就踩到了）。
+// 现在超时不会误判：等不到就照常走下面的 missing 断言，把真正缺的文本列出来。
+const WAIT_MS = Number(process.env.WAIT_MS || 20000)
 for (const [route, expects] of ROUTES) {
   await page.goto(`${URL}/#/${route}`, { waitUntil: 'networkidle2', timeout: 60000 })
-  await new Promise((r) => setTimeout(r, 1600))
+  try {
+    await page.waitForFunction(
+      (list) => list.every((t) => document.body.innerText.includes(t)),
+      { timeout: WAIT_MS }, expects)
+  } catch { /* 超时就交给下面的断言报缺 */ }
   const info = await page.evaluate(() => ({
     text: document.body.innerText,
     // 全量 DOM 文本（含隐藏元素）：反向断言用它，隐藏页签里的被删字段也逃不掉
@@ -313,10 +323,26 @@ if (!b0) {
 
 // 点岗位 → 必须跳到独立详情页（每个岗位有自己的 URL），而不是弹右侧抽屉
 await page.goto(`${URL}/#/jobs`, { waitUntil: 'networkidle2', timeout: 60000 })
-await new Promise((r) => setTimeout(r, 1600))
 console.log(`\n--- 岗位列表点岗位 → 独立 URL ---`)
-await page.click('.jcard')
-await new Promise((r) => setTimeout(r, 1800))
+// 必须显式等卡片渲染：原来直接 click('.jcard')，在慢机器上会抢跑并抛
+// "No element found for selector: .jcard"（2026-09-23 线上验收踩到）。
+await page.waitForSelector('.jcard', { timeout: WAIT_MS })
+// 用 DOM click 而不是坐标 click：上面的拖动测试把「求职小助手」悬浮球挪到了页面中部，
+// 它可能正盖在第一张卡片上，坐标点击会被球接走（表现为"点了没反应、URL 还是 /#/jobs"）。
+// 先打印卡片中心的最上层元素留证，再触发 Vue 的 @click（路由行为不变，仍是真实事件）。
+const topEl = await page.evaluate(() => {
+  const c = document.querySelector('.jcard')
+  if (!c) return 'no-card'
+  const r = c.getBoundingClientRect()
+  const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+  return el ? String(el.className || el.tagName).slice(0, 70) : 'none'
+})
+console.log(`  卡片中心最上层元素：${topEl}`)
+await page.$eval('.jcard', (el) => el.click())
+try {
+  await page.waitForFunction(() => document.body.innerText.includes('职位描述'),
+    { timeout: WAIT_MS })
+} catch { /* 交给下面的断言报错 */ }
 const jobUrlOk = /#\/job\/J\d{4}$/.test(page.url())
 const drawerGone = !(await page.$('.el-drawer'))
 const detailText = await page.evaluate(() => document.body.innerText)
@@ -329,33 +355,57 @@ if (jobUrlOk && drawerGone && detailText.includes('职位描述')) {
 
 // 岗位列表「默认排序」= 打乱：每次进页面顺序不同，且翻页不重复（种子随机保证）
 console.log(`\n--- 岗位默认排序（随机） ---`)
-const firstNames = async () => {
-  await page.goto(`${URL}/#/jobs`, { waitUntil: 'networkidle2', timeout: 60000 })
-  await new Promise((r) => setTimeout(r, 1600))
-  return page.$$eval('.jcard .jname', (e) => e.map((x) => x.innerText.trim()))
+// ⚠️ 必须按**岗位ID**比较，不能按岗位名称比较：
+//   8,836 个岗位里只有 6,037 个不同名称，**41.2% 的岗位与别的岗位重名**
+//   （「测试工程师」67 个、「品质工程师」52 个）。原来比名称，于是"两个不同岗位恰好同名"
+//   被误报成"翻页重复岗位 1 条"，约 1/3 的运行会假失败（2026-09-23 排查结论）。
+//   为此在 JobsBrowseView 的卡片上加了 `data-id`。
+// 另外"读列表"要等**连续两次读取一致**：固定 sleep 在慢机器上会读到没渲染完的列表
+//   （线上出现过"默认排序没变化：undefined / ..."），只等"和上一页不同"又可能读到
+//   Vue 逐节点打补丁的中途状态。两次一致 + 条数够 + ID/名称非空 才算稳定。
+const readCards = async (min = 5) => {
+  let prev = ''
+  for (let i = 0; i < 48; i++) {
+    const now = await page.$$eval('.jcard', (els) => els.map((e) => ({
+      id: e.getAttribute('data-id') || '',
+      name: (e.querySelector('.jname') ? e.querySelector('.jname').innerText : '').trim(),
+    })))
+    const ok = now.length >= min && now.every((c) => c.id && c.name)
+    const sig = ok ? now.map((c) => c.id).join('|') : ''
+    if (ok && sig === prev) return now
+    prev = sig
+    await new Promise((r) => setTimeout(r, 250))
+  }
+  return []
 }
-const listA = await firstNames()
+const firstPage = async () => {
+  await page.goto(`${URL}/#/jobs`, { waitUntil: 'networkidle2', timeout: 60000 })
+  return readCards()
+}
+const listA = await firstPage()
 await page.goto(`${URL}/#/home`, { waitUntil: 'networkidle2', timeout: 60000 })
 await new Promise((r) => setTimeout(r, 800))
-const listB = await firstNames()
-if (listA.length && listB.length && listA[0] !== listB[0]) {
-  console.log(`  ✅ 两次进入顺序不同（「${listA[0]}」 vs 「${listB[0]}」）`)
+const listB = await firstPage()
+if (listA.length && listB.length && listA[0].id !== listB[0].id) {
+  console.log(`  ✅ 两次进入顺序不同（「${listA[0].name}」 vs 「${listB[0].name}」）`)
 } else {
   failed++
-  console.log(`  ❌ 默认排序没变化：${listA[0]} / ${listB[0]}`)
+  console.log(`  ❌ 默认排序没变化：${listA[0] && listA[0].name} / ${listB[0] && listB[0].name}`)
 }
 await page.evaluate(() => {
   const b = Array.from(document.querySelectorAll('.el-pager li')).find((x) => x.innerText.trim() === '2')
   if (b) b.click()
 })
-await new Promise((r) => setTimeout(r, 1600))
-const page2 = await page.$$eval('.jcard .jname', (e) => e.map((x) => x.innerText.trim()))
-const overlap = listB.filter((x) => page2.includes(x))
+// 翻页后等列表稳定再读
+const page2 = await readCards()
+const ids2 = new Set(page2.map((c) => c.id))
+const overlap = listB.filter((c) => ids2.has(c.id))
 if (page2.length && overlap.length === 0) {
-  console.log(`  ✅ 翻页不重复（第 1 页与第 2 页无交集，第 2 页首条「${page2[0]}」）`)
+  console.log(`  ✅ 翻页不重复（第 1 页与第 2 页按岗位ID 无交集，第 2 页首条「${page2[0].name}」）`)
 } else {
   failed++
-  console.log(`  ❌ 翻页出现重复岗位 ${overlap.length} 条`)
+  console.log(`  ❌ 翻页出现重复岗位 ${overlap.length} 条` +
+    (overlap.length ? '：' + JSON.stringify(overlap.slice(0, 3)) : ''))
 }
 
 // 游客态：必须用**独立无痕上下文**——同浏览器的普通新页面与本页同源、共享 localStorage，

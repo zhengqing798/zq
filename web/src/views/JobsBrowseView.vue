@@ -75,7 +75,11 @@
 
     <!-- ④ 职位列表（左：职位 / 右：公司 + 招聘者） -->
     <div v-loading="loading" class="joblist">
-      <div v-for="j in list.岗位" :key="j.岗位ID" class="jcard" @click="open(j)">
+      <!-- data-id：把岗位ID 暴露到 DOM 上，供渲染检查按**唯一ID**比较（而不是按岗位名称）——
+           8,836 个岗位里只有 6,037 个不同名称、41% 是重名（「测试工程师」有 67 个），
+           按名称比较会把"两个不同岗位恰好同名"误报成"翻页重复"。 -->
+      <div v-for="j in list.岗位" :key="j.岗位ID" class="jcard"
+           :data-id="j.岗位ID" @click="open(j)">
         <div class="left">
           <div class="t1">
             <span class="jname">{{ j.岗位名称 }}</span>
