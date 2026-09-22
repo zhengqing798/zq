@@ -115,12 +115,18 @@ t() { local name="$1" m="$2" path="$3" data="$4" want="${5:-200}"
       [ "$c" = "$want" ] && ok "$(printf '%-26s %s' "$name" "$c")" \
                          || bad "$(printf '%-26s %s（期望 %s）' "$name" "$c" "$want")"; }
 
+# 公司ID 是 C+8位序号，**不能硬编码** C0001（第一版就是栽在这，接口直接 400）——
+# 先从公司列表里取一个真实存在的 ID 再用。
+CID=$(curl -s --max-time 60 "${BASE}/api/companies?size=1" \
+      | python3 -c 'import sys,json;d=json.load(sys.stdin);r=d.get("公司") or d.get("items") or [];print((r[0].get("公司ID") if r else "") or "")' 2>/dev/null)
+[ -n "$CID" ] || CID="C00000001"
+
 t "前端首页"        GET  "/"                     ""
 t "健康检查"        GET  "/api/health"           ""
 t "岗位列表"        GET  "/api/jobs?size=5"      ""
 t "岗位详情"        GET  "/api/jobs/J0020"       ""
 t "公司列表"        GET  "/api/companies?size=5" ""
-t "公司详情"        GET  "/api/companies/C0001"  ""
+t "公司详情"        GET  "/api/companies/${CID}"  ""
 t "聚类列表"        GET  "/api/cluster/list"     ""
 t "首页聚合"        GET  "/api/home"             ""
 t "简历解析"        POST "/api/resume/parse_text" "$RESUME"
@@ -130,7 +136,10 @@ t "Swagger 文档"    GET  "/docs"                 ""
 
 # ---------------------------------------------------------------- 6 gzip
 head_ "6/10 Nginx gzip 压缩"
-js=$(ls web/dist/assets/index-*.js 2>/dev/null | head -1 | xargs -r basename)
+# 资源名要从**服务端返回的 index.html** 里取：web/dist 是 gitignore 的，
+# 服务器上（从 git clone 部署时）根本没有这个目录，第一版去 ls 本地文件必然找不到。
+js=$(curl -s --max-time 60 "${BASE}/" \
+     | grep -oE '/assets/index-[A-Za-z0-9_.-]+\.js' | head -1 | sed 's#^/assets/##')
 if [ -n "$js" ]; then
   raw=$(curl -s -o /dev/null -w '%{size_download}' -H 'Accept-Encoding: identity' "${BASE}/assets/${js}")
   gz=$(curl -s -o /dev/null -w '%{size_download}' -H 'Accept-Encoding: gzip' "${BASE}/assets/${js}")
@@ -145,12 +154,15 @@ fi
 
 # ---------------------------------------------------------------- 7 容器内 pytest
 head_ "7/10 镜像内跑完整测试套件"
-if docker exec zq-api python -m pytest -q > /tmp/zq_pytest.log 2>&1; then
+# -p no:cacheprovider：容器里以非 root 的 appuser 运行，/app 不可写，
+# 否则 pytest 会刷一屏 "could not create cache path /app/.pytest_cache" 的告警噪音。
+if docker exec zq-api python -m pytest -q -p no:cacheprovider > /tmp/zq_pytest.log 2>&1; then
   n=$(grep -oE '[0-9]+ passed' /tmp/zq_pytest.log | tail -1)
   ok "镜像内 pytest 全绿：${n:-通过}"
 else
   bad "镜像内 pytest 有失败，日志尾部："
-  tail -20 /tmp/zq_pytest.log | sed 's/^/        /'
+  grep -aE '^(FAILED|ERROR)' /tmp/zq_pytest.log | head -10 | sed 's/^/        /'
+  tail -15 /tmp/zq_pytest.log | sed 's/^/        /'
 fi
 
 # ---------------------------------------------------------------- 8 离线向量检索
@@ -181,8 +193,12 @@ if [ -n "$TOKEN" ]; then
   curl -s --max-time 30 -X POST "${BASE}/api/user/favorites" -H "Authorization: Bearer ${TOKEN}" \
     -H 'Content-Type: application/json' -d '{"job_id":"J0020"}' > /dev/null
   before=$(curl -s --max-time 30 "${BASE}/api/user/resumes" -H "Authorization: Bearer ${TOKEN}" \
-    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("items",[])))' 2>/dev/null)
-  ok "重建前：该用户已保存 ${before:-0} 份简历 + 1 个收藏"
+    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("简历",[])))' 2>/dev/null)
+  before_fav=$(curl -s --max-time 30 "${BASE}/api/user/favorites" -H "Authorization: Bearer ${TOKEN}" \
+    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("收藏",[])))' 2>/dev/null)
+  # 注意 JSON 键就是中文的「简历」「收藏」——第一版写成了通用的 "items"，于是永远数出 0，
+  # 把"其实已经保存成功"误报成"数据丢失"。
+  ok "重建前：该用户已保存 ${before:-0} 份简历 + ${before_fav:-0} 个收藏"
 
   echo "  … docker compose down（保留数据卷）→ up -d"
   $COMPOSE down > /dev/null 2>&1
@@ -192,9 +208,9 @@ if [ -n "$TOKEN" ]; then
     sleep 3
   done
   after=$(curl -s --max-time 30 "${BASE}/api/user/resumes" -H "Authorization: Bearer ${TOKEN}" \
-    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("items",[])))' 2>/dev/null)
+    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("简历",[])))' 2>/dev/null)
   favs=$(curl -s --max-time 30 "${BASE}/api/user/favorites" -H "Authorization: Bearer ${TOKEN}" \
-    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("items",[])))' 2>/dev/null)
+    | python3 -c 'import sys,json;print(len(json.load(sys.stdin).get("收藏",[])))' 2>/dev/null)
   if [ -n "$after" ] && [ "$after" != "0" ] && [ "${favs:-0}" != "0" ]; then
     ok "重建后：简历 ${after} 份、收藏 ${favs} 个、令牌仍有效 —— 数据卷持久化成功"
   else

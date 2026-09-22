@@ -663,22 +663,49 @@ def _resume_to_plain_text(raw):
 
 def _make_test_pdf(pages, path):
     """按"页"生成测试 PDF：pages 是每页的文本内容（本函数只负责排版，不做简历切分）。
-       优先 reportlab + 中文字体（文本层可提取）；reportlab 不可用时退化为 matplotlib
-       （注意：matplotlib 生成的 CJK PDF 常常没有正确的 ToUnicode 映射，提取出来是乱码，
-        这正是解析器需要"文本质量检测"的现实原因）"""
+
+    字体选择顺序（**不能只列 Windows 字体** —— 这正是容器里测试失败的原因）：
+      ① 系统里的中文 TTF/TTC（Windows 的 simhei/msyh，Linux 的 Noto / 文泉驿 / 文鼎）；
+      ② reportlab **内置的 CID 中文字体** `STSong-Light`：不需要任何字体文件，
+         生成的 PDF 带 ToUnicode 映射，文本层能被 pdfplumber 正常提取；
+      ③ 最后才退化为 matplotlib —— 它生成的 CJK PDF 常常没有正确的 ToUnicode 映射，
+         提取出来是乱码，只是"有总比没有好"的兜底。
+
+    ⚠️ 历史坑（《测试报告》缺陷 17）：原来只列了三个 **Windows** 字体路径，容器里一个都不存在，
+    于是退化到 matplotlib 并指定 `Microsoft YaHei`（Linux 也没有）→ 汉字全渲染成缺字框、
+    文本层提取不到内容 → 容器内那条"上传 PDF 能解析出正文"的测试必失败，
+    而本地（Windows）却一直是通过的。
+    修法不是往镜像里塞几十 MB 中文字体（那只是为了迁就一条测试），
+    而是让这个生成器**不再依赖系统字体**。
+    """
     try:
         from reportlab.lib.pagesizes import A4
         from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.cidfonts import UnicodeCIDFont
         from reportlab.pdfbase.ttfonts import TTFont
         from reportlab.pdfgen import canvas
+
         font = None
-        for name, cand, idx in (("CJK", r"C:\Windows\Fonts\simhei.ttf", None),
-                                ("CJK", r"C:\Windows\Fonts\msyh.ttc", 0),
-                                ("CJK", r"C:\Windows\Fonts\simsun.ttc", 0)):
+        for name, cand, idx in (
+                # Windows
+                ("CJK", r"C:\Windows\Fonts\simhei.ttf", None),
+                ("CJK", r"C:\Windows\Fonts\msyh.ttc", 0),
+                ("CJK", r"C:\Windows\Fonts\simsun.ttc", 0),
+                # Linux（精简镜像里通常没有；列出来是为了在有字体的机器上优先用真字体）
+                ("CJK", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 0),
+                ("CJK", "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc", 0),
+                ("CJK", "/usr/share/fonts/truetype/arphic/uming.ttc", 0)):
             if os.path.exists(cand):
                 pdfmetrics.registerFont(TTFont(name, cand, subfontIndex=idx) if idx is not None else TTFont(name, cand))
                 font = name
                 break
+        if font is None:
+            # ② 不依赖任何字体文件的方案
+            try:
+                pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+                font = "STSong-Light"
+            except Exception:
+                font = None
         if font:
             W, H = A4
             c = canvas.Canvas(path, pagesize=A4)
@@ -698,7 +725,8 @@ def _make_test_pdf(pages, path):
         pass
     from matplotlib.backends.backend_pdf import PdfPages
     import matplotlib.pyplot as plt
-    plt.rcParams["font.sans-serif"] = ["Microsoft YaHei"]
+    plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "Noto Sans CJK SC",
+                                       "WenQuanYi Zen Hei", "DejaVu Sans"]
     plt.rcParams["axes.unicode_minus"] = False
     with PdfPages(path) as pdf:
         for t in pages:
